@@ -60,14 +60,15 @@ select,input[type=text]{font:inherit;color:var(--ink);background:var(--panel);bo
 .ptxt{font-size:13px;overflow-wrap:anywhere}
 .hint{background:var(--soft);border-radius:4px;padding:8px 10px;font-size:13px}
 .res{display:flex;flex-direction:column;gap:8px}
-.card{border:1.5px solid var(--line);border-radius:5px;padding:10px 11px;display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:start}
+.card{border:1.5px solid var(--line);border-radius:5px;padding:10px 11px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:start}
 .card .sw{grid-row:1/span 3;width:16px;height:16px;border-radius:3px;border:2px solid currentColor;margin-top:3px;cursor:pointer;display:grid;place-items:center;background:none;padding:0}
 .card .sw{color:inherit}
 .card .sw.on{background:currentColor}
 .card .nm{font-weight:700}
 .card .nm em{font-style:normal;font-weight:400;color:var(--muted);font-size:12.5px}
 .card .val{font-family:var(--f-mono);font-size:13px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.card .det{grid-column:2/-1;font-size:12.5px;color:var(--muted)}
+.card .det{grid-column:2/-1;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere;min-width:0}
+.card .val.zeit{white-space:normal;max-width:10.5em;justify-self:end}
 .pill{display:inline-block;font:600 11.5px var(--f-body);padding:1px 7px;border-radius:999px;white-space:nowrap}
 .pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.n{background:var(--soft);color:var(--muted)}
 table.kv{border-collapse:collapse;width:100%;font-size:13px}
@@ -129,32 +130,57 @@ ul.lim{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;fon
 .scen .btn{text-align:left;font-size:12.5px;padding:6px 8px}
 .scen .btn small{display:block;font:500 10.5px var(--f-mono);color:var(--muted);letter-spacing:.05em}
 @media (max-width:820px){
-  .app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);--sheet:40vh}
-  .app[data-sheet="klein"]{--sheet:96px}
-  .app[data-sheet="gross"]{--sheet:78vh}
+  .app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);--sheet:44vh}
+  .app[data-sheet="klein"]{--sheet:calc(128px + env(safe-area-inset-bottom,0px))}
+  .app[data-sheet="gross"]{--sheet:82vh}
   .mapwrap{grid-row:2;grid-column:1}
   aside.pult{position:fixed;left:0;right:0;bottom:0;height:var(--sheet);z-index:6;border-right:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;
     box-shadow:0 -4px 18px rgba(0,0,0,.18);padding-left:0;padding-bottom:env(safe-area-inset-bottom,0px);transition:height .25s ease}
-  .grip{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;color:var(--muted);font:600 11.5px var(--f-body);padding:7px 0 2px;cursor:pointer;width:100%}
+  .grip{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;color:var(--muted);font:600 11.5px var(--f-body);padding:8px 0 4px;min-height:34px;cursor:pointer;width:100%;touch-action:none;flex:none}
   .grip::before{content:"";width:42px;height:5px;border-radius:3px;background:var(--line)}
   .tabbody{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-  .tabs button{padding:8px 4px}
+  .tabs button{padding:8px 4px;min-height:40px}
   .sub{display:none}
   .badge .lang{display:none}
   header.bar{flex-wrap:nowrap;justify-content:space-between}
   .logo{font-size:22px}
   header.bar{padding-block:6px}
-  .attr{bottom:var(--sheet);font-size:10px}
-  .mapctl .btn{width:36px;height:36px}
-  .seg button{padding:6px 8px;font-size:13px}
-  .seg.p button{padding:4px 8px}
-  .maphint{font-size:13px}
+  .attr{bottom:var(--sheet);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:bottom .25s ease}
+  .attr .lang{display:none}
+  .mapctl .btn{width:40px;height:40px}
+  .seg button{padding:6px 9px;font-size:13px;min-height:38px}
+  .seg.p button{padding:4px 10px;min-height:36px;min-width:36px;justify-content:center}
+  .maphint{font-size:13px;bottom:calc(26px + var(--sheet,0px));transition:bottom .25s ease}
 }
-@media (max-width:820px) and (prefers-reduced-motion:reduce){aside.pult{transition:none}}
+/* Querformat auf dem Handy: Pult links statt unten, damit die Karte genug Höhe hat */
+@media (orientation:landscape) and (max-height:520px){
+  .app{grid-template-columns:minmax(260px,34vw) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);--sheet:0px}
+  .app[data-sheet]{--sheet:0px}
+  .mapwrap{grid-row:2;grid-column:2}
+  aside.pult{position:static;height:auto;border-radius:0;box-shadow:none;border-top:0;border-right:1px solid var(--line);transition:none;padding-left:env(safe-area-inset-left,0px)}
+  .grip{display:none}
+  header.bar{padding-block:4px}
+  .logo{font-size:20px}
+  .sub{display:none}
+  .tabs button{padding:6px 2px;min-height:36px;font-size:13px}
+  .tabbody{padding:10px 12px 16px;gap:10px}
+  .attr{bottom:0}
+  .maphint{bottom:16px}
+}
+@media (max-width:820px) and (prefers-reduced-motion:reduce){aside.pult,.attr,.maphint{transition:none}}
+/* Touch-Geräte: grössere Tippflächen, unabhängig von der Breite */
+@media (pointer:coarse){
+  .seg button{min-height:38px}
+  .seg.p button{min-height:36px;min-width:36px;justify-content:center}
+  .mapctl .btn{width:40px;height:40px}
+  input[type=checkbox]{width:18px;height:18px}
+  .lay label{padding:8px 0}
+}
+.app[data-sheet="gross"] .maphint{display:none}
 </style>
 
 </head><body>
-<div class="app" data-sheet="mitte">
+<div class="app" data-sheet="klein">
   <header class="bar">
     <div class="logo">BORS <span>Bern</span></div>
     <div class="sub">Fahrzeugabhängiges Einsatzrouting · BFH BCS HS26 Gruppe 5</div>
@@ -278,7 +304,7 @@ ul.lim{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;fon
       <button class="btn" id="z-fit" aria-label="Ganzes Gebiet zeigen">⤢</button>
     </div>
     <div class="maphint" id="maphint">Tippe in die Karte, um den Start zu setzen</div>
-    <div class="attr" id="attr">Strassennetz © OpenStreetMap-Mitwirkende · Breiten: amtliche Vermessung Kanton Bern</div>
+    <div class="attr" id="attr">© OpenStreetMap-Mitwirkende · amtliche Vermessung Kanton Bern</div>
     <div class="toast" id="toast" hidden></div>
     <div class="load" id="load"><div><b>BORS lädt das Strassennetz</b><p class="muted small" id="load-txt">20 867 Abschnitte, rund 1 500 km</p><div class="bar2"><span></span></div></div></div>
   </div>
@@ -327,7 +353,12 @@ async function start(){
   if(!window.maplibregl){$('#load-txt').textContent='Die Kartenbibliothek konnte nicht geladen werden. Bitte Seite neu laden.';return;}
   let txt;
   const inl=document.getElementById('netz-data');
-  try{if(inl)txt=inl.textContent;else{const r=await fetch('netz.json');if(!r.ok)throw new Error(r.status);txt=await r.text();}}
+  try{if(inl)txt=inl.textContent;else{const r=await fetch('netz.json');if(!r.ok)throw new Error(r.status);
+      if(r.body&&window.TextDecoder){const rd=r.body.getReader(),dec=new TextDecoder();let n=0,teile=[],t0=Date.now();
+        for(;;){const {done,value}=await rd.read();if(done)break;n+=value.length;teile.push(dec.decode(value,{stream:true}));
+          if(Date.now()-t0>400)$('#load-txt').textContent=`Strassennetz wird geladen … ${(n/1e6).toFixed(1)} von rund 15 MB`;}
+        teile.push(dec.decode());txt=teile.join('');}
+      else txt=await r.text();}}
   catch(e){$('#load-txt').textContent='Netzdaten konnten nicht geladen werden ('+e.message+').';return;}
   $('#load-txt').textContent='Netz wird aufgebaut …';
   await new Promise(r=>setTimeout(r,20));
@@ -426,7 +457,7 @@ function baueKarte(){
     map.addSource('wachen',{type:'geojson',data:{type:'FeatureCollection',features:D.wachen.map(w=>({type:'Feature',properties:{n:w[0]},geometry:{type:'Point',coordinates:rel2wgs(w[1]/100,w[2]/100)}}))}});
     map.addLayer({id:'wachen',type:'circle',source:'wachen',paint:{'circle-radius':7,'circle-color':css('--accent'),'circle-stroke-color':css('--halo'),'circle-stroke-width':2}});
     setBasis('grau');
-    ebenenUI();netzStat();
+    ebenenUI();netzStat();if(istMobil())gebiet();
     $('#load').hidden=true;
     const h=(location.hash||'').slice(1).toUpperCase();const sz=SZEN.find(s=>s.id===h);if(sz)szenario(sz);
   });
@@ -443,10 +474,10 @@ async function setBasis(k){
   basis=k;$('#basis-note').textContent='';
   const raster=TILES[k];
   map.setLayoutProperty('tiles','visibility',raster?'visible':'none');
-  if(raster){tileFehler=0;map.getSource('tiles').setTiles([tileUrl(k)]);$('#attr').textContent='Karte © swisstopo · Strassennetz © OpenStreetMap-Mitwirkende · Breiten: amtliche Vermessung';}
+  if(raster){tileFehler=0;map.getSource('tiles').setTiles([tileUrl(k)]);$('#attr').innerHTML='Karte © swisstopo · <span class="lang">Strassennetz </span>© OpenStreetMap<span class="lang">-Mitwirkende</span> · <span class="lang">Breiten: </span>amtliche Vermessung';}
   const av=k==='av';
   ['wald','wasser','bef','bahn','geb'].forEach(x=>map.setLayoutProperty('av-'+x,'visibility',av?'visible':'none'));
-  if(av){$('#attr').textContent='Grundkarte: amtliche Vermessung Kanton Bern · Strassennetz © OpenStreetMap-Mitwirkende';
+  if(av){$('#attr').innerHTML='<span class="lang">Grundkarte: </span>amtliche Vermessung Kanton Bern · © OpenStreetMap<span class="lang">-Mitwirkende</span>';
     if(!basisGeladen){basisGeladen=true;toast('Grundkarte wird geladen …',2500);
       try{const bi=document.getElementById('basis-data');const B=bi?JSON.parse(bi.textContent):await (await fetch('basis.json')).json();
         for(const x of ['wald','wasser','bef','bahn','geb']){const F=(B[x]||[]).map(poly=>({type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:poly.map(fl=>{let px=0,py=0;const r=[];for(let i=0;i<fl.length;i+=2){px+=fl[i];py+=fl[i+1];r.push(rel2wgs(px/10,py/10));}r.push(r[0]);return r;})}}));
@@ -481,9 +512,19 @@ $('#prof-bar').onclick=e=>{const b=e.target.closest('button[data-p]');if(!b)retu
   document.querySelectorAll('#prof-bar button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.p===profil));
   if(map&&map.getLayer('netz'))map.setPaintProperty('netz','line-color',netzFarbe());
   toast('Strassennetz eingefärbt für '+profil+' · '+PN[profil],1800);};
-const istMobil=()=>matchMedia('(max-width:820px)').matches;
-function setSheet(s){$('.app').dataset.sheet=s;$('#grip-t').textContent=s==='gross'?'Karte zeigen':'Mehr anzeigen';setTimeout(()=>map&&map.resize(),280);}
-$('#grip').onclick=()=>{const s=$('.app').dataset.sheet||'mitte';setSheet(s==='gross'?'mitte':s==='mitte'?'gross':'mitte');};
+const istMobil=()=>matchMedia('(max-width:820px)').matches&&!matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+const STUFEN=['klein','mitte','gross'];
+function setSheet(s){$('.app').dataset.sheet=s;$('#grip-t').textContent=s==='gross'?'Karte zeigen':'Mehr anzeigen';$('#grip').setAttribute('aria-expanded',s!=='klein');}
+// Griff: antippen = eine Stufe weiter (ganz offen -> klein), ziehen = hoch/runter
+(function(){const g=$('#grip');let y0=null,moved=false;
+  g.addEventListener('pointerdown',e=>{y0=e.clientY;moved=false;try{g.setPointerCapture(e.pointerId);}catch(_){}});
+  g.addEventListener('pointermove',e=>{if(y0!==null&&Math.abs(e.clientY-y0)>8)moved=true;});
+  g.addEventListener('pointerup',e=>{if(y0===null)return;const dy=e.clientY-y0;y0=null;const i=STUFEN.indexOf($('.app').dataset.sheet||'klein');
+    if(!moved)setSheet(i===2?'klein':STUFEN[i+1]);
+    else if(dy<-30)setSheet(dy<-220?'gross':STUFEN[Math.min(2,i+1)]);
+    else if(dy>30)setSheet(dy>220?'klein':STUFEN[Math.max(0,i-1)]);});
+  g.addEventListener('pointercancel',()=>{y0=null;});
+  g.onclick=e=>{if(e.detail===0){const i=STUFEN.indexOf($('.app').dataset.sheet||'klein');setSheet(i===2?'klein':STUFEN[i+1]);}};})();
 function setModus(m){klickModus=m;
   document.querySelectorAll('#modebar button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
   $('#pb-start').setAttribute('aria-pressed',m==='start');$('#pb-ziel').setAttribute('aria-pressed',m==='ziel');
@@ -494,7 +535,8 @@ function hinweis(){const h=$('#maphint');
 document.querySelectorAll('#modebar button').forEach(b=>b.onclick=()=>setModus(b.dataset.m));
 $('#pb-start').onclick=()=>setModus('start');$('#pb-ziel').onclick=()=>setModus('ziel');
 $('#b-swap').onclick=()=>{if(!P1&&!P2)return;[P1,P2]=[P2,P1];[P1txt,P2txt]=[P2txt.replace(/^Ziel/,'Start'),P1txt.replace(/^Start/,'Ziel')];zeichnePunkte();if(P1&&P2)rechne();else uiRoute();};
-$('#z-in').onclick=()=>map.zoomIn();$('#z-out').onclick=()=>map.zoomOut();$('#z-fit').onclick=()=>map.fitBounds([[7.32,46.88],[7.56,47.02]]);
+$('#z-in').onclick=()=>map.zoomIn();$('#z-out').onclick=()=>map.zoomOut();$('#z-fit').onclick=()=>gebiet();
+function gebiet(){const unten=istMobil()?($('.app').dataset.sheet==='klein'?140:Math.round(innerHeight*0.44)):10;map.fitBounds([[7.32,46.88],[7.56,47.02]],{padding:{top:60,left:10,right:10,bottom:unten},duration:0});}
 
 function ortName(E,N){const p=[E-X0,N-Y0];let best=null;const G=100,cx=Math.floor(p[0]/G),cy=Math.floor(p[1]/G);
   // naechste benannte Strasse (nur fuer die Anzeige)
@@ -544,7 +586,7 @@ function fertig(res){rechnet=false;RES=res;zeichneRoute();uiRoute();hinweis();
   const rs=$('#res');if(rs){const pb=$('#p-route');setTimeout(()=>{pb.scrollTo({top:rs.offsetTop-pb.offsetTop-8,behavior:'smooth'});},50);}
   const b=new maplibregl.LngLatBounds();let n=0;for(const c of ['A','B','C','D'])if(show[c]&&res[c].ok)res[c].rows.forEach(r=>r.pts.forEach(p=>{b.extend(rel2wgs(p[0],p[1]));n++;}));
   if(P1)b.extend(lv2wgs(...P1));if(P2)b.extend(lv2wgs(...P2));
-  const unten=istMobil()?Math.round(innerHeight*0.40)+20:50;
+  const unten=istMobil()?Math.round(innerHeight*0.44)+16:50;
   if(n)setTimeout(()=>map.fitBounds(b,{padding:{top:110,left:40,right:60,bottom:unten},maxZoom:16,duration:600}),istMobil()?300:0);}
 function zeichneRoute(){
   const F=[],U=[],Z=[],W={REF:3,A:3.5,B:5.5,C:7.5,D:9.5};
@@ -593,7 +635,7 @@ function uiRoute(){
       <div class="nm" style="color:var(--ink)">${c==='REF'?'Auto':c} <em>${PN[c]}</em></div>
       <div class="val" style="color:var(--ink)">${r.ok?km(r.laenge_m):'–'}</div>
       <div><span class="pill ${m[0]}">${m[1]}</span></div>
-      <div class="val" style="color:var(--muted)">${r.ok?r.fahrzeit_min.toFixed(1)+' min':''}${d&&d>50?` · +${km(d)} Umweg`:''}</div>
+      <div class="val zeit" style="color:var(--muted)">${r.ok?r.fahrzeit_min.toFixed(1)+' min':''}${d&&d>50?`<br>+${km(d)} Umweg`:''}</div>
       ${c!=='REF'?`<div class="det">${detail(c,r)}</div>`:'<div class="det">Normales Auto ohne Fahrzeugregeln, zum Vergleich.</div>'}</div>`;}).join('');
   $('#res').querySelectorAll('.sw').forEach(b=>b.onclick=()=>{show[b.dataset.c]=!show[b.dataset.c];zeichneRoute();uiRoute();});
 }
