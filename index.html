@@ -177,6 +177,60 @@ ul.lim{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;fon
   .lay label{padding:8px 0}
 }
 .app[data-sheet="gross"] .maphint{display:none}
+/* Routenvergleich: beste vollständig validierte Route gegen experimentelle Vergleichsroute (gleiche Klasse) */
+:root{--vgl:#364fc7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--vgl:#748ffc}}
+:root[data-theme="dark"]{--vgl:#748ffc}
+.vgl{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.vgl .cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vk{border:1.5px solid var(--line);border-left-width:5px;border-radius:5px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0;font-size:12.5px}
+.vk.ok{border-left-color:var(--ok)}.vk.warn{border-left-color:var(--warn)}.vk.bad{border-left-color:var(--bad)}
+.vk .k{font:600 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.vk b{font-family:var(--f-display);font-size:22px;line-height:1.1}
+.vk span{color:var(--muted);overflow-wrap:anywhere}
+.vdiff{font-weight:600;font-size:13.5px}
+ol.eng{margin:0;padding-left:24px;display:flex;flex-direction:column;gap:5px;font-size:13px}
+ol.eng li{cursor:pointer;overflow-wrap:anywhere}
+ol.eng li::marker{font-weight:700;color:var(--warn)}
+.vleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px}
+.vleg span{display:inline-flex;align-items:center;gap:5px}
+.vleg i{display:inline-block;width:22px;height:0;border-top:5px solid}
+.engmk{width:24px;height:24px;border-radius:50%;background:var(--warn);color:#16201e;font:700 13px var(--f-body);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:pointer}
+.bans{white-space:nowrap}
+/* Einsatzansicht: stark vereinfacht, grosse Schrift und Tippflächen, nur eine Fahrzeugklasse */
+.app[data-ansicht="einsatz"] .tabs,.app[data-ansicht="einsatz"] #modebar,.app[data-ansicht="einsatz"] #prof-bar,.app[data-ansicht="einsatz"] .sub{display:none}
+@media (min-width:821px) and (min-height:521px){.app[data-ansicht="einsatz"]{grid-template-columns:440px minmax(0,1fr)}}
+#p-einsatz{font-size:17px;gap:12px}
+.e-warn{background:var(--warn-bg);border-left:6px solid var(--warn);padding:8px 12px;border-radius:4px;font-size:14.5px;font-weight:600;line-height:1.3}
+.e-kl{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.e-kl button{font:700 26px/1 var(--f-display);min-height:62px;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px}
+.e-kl button small{font:600 12.5px var(--f-body);color:var(--muted);margin-top:4px}
+.e-kl button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.e-kl button[aria-pressed="true"] small{color:inherit;opacity:.85}
+.e-card{border:2px solid var(--line);border-left-width:9px;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.e-card.ok{border-color:var(--ok);background:var(--ok-bg)}.e-card.warn{border-color:var(--warn);background:var(--warn-bg)}.e-card.bad{border-color:var(--bad);background:var(--bad-bg)}
+.e-lbl{font:700 14.5px var(--f-body);letter-spacing:.05em;text-transform:uppercase}
+.e-card.ok .e-lbl{color:var(--ok)}.e-card.warn .e-lbl{color:var(--ink)}.e-card.bad .e-lbl{color:var(--bad)}
+.e-big{font:700 40px/1.05 var(--f-display)}
+.e-big small{font-size:22px;font-weight:600}
+.e-sub{font-size:16.5px;overflow-wrap:anywhere}
+.e-note{font-size:15px;color:var(--muted)}
+#p-einsatz ol.eng{font-size:16px;gap:8px}
+.e-pts{display:flex;flex-direction:column;gap:8px}
+.e-pt{display:flex;align-items:center;gap:12px;text-align:left;font:600 17px var(--f-body);color:var(--ink);background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:10px 14px;min-height:58px;cursor:pointer;min-width:0}
+.e-pt span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.e-pt[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 5px 0 0 var(--ink)}
+#p-einsatz select,#p-einsatz input[type=text]{font-size:17px;min-height:54px;border-width:2px;border-radius:8px}
+#p-einsatz .btn{font-size:17px;min-height:54px;border-width:2px;border-radius:8px;padding:8px 16px}
+.e-row{display:flex;gap:8px}
+.e-row>*{flex:1;min-width:0}
+.e-row>.btn{flex:none}
+.app[data-ansicht="einsatz"] .maphint{font-size:16px;padding:10px 18px}
+@media (max-width:820px){
+  .app[data-ansicht="einsatz"][data-sheet="klein"]{--sheet:calc(150px + env(safe-area-inset-bottom,0px))}
+  .app[data-ansicht="einsatz"][data-sheet="mitte"]{--sheet:50vh}
+  .e-big{font-size:36px}
+}
 </style>
 
 </head><body>
@@ -184,6 +238,7 @@ ul.lim{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;fon
   <header class="bar">
     <div class="logo">BORS <span>Bern</span></div>
     <div class="sub">Fahrzeugabhängiges Einsatzrouting · BFH BCS HS26 Gruppe 5</div>
+    <button class="btn bans" id="b-ansicht" aria-pressed="false" title="Zwischen vereinfachter Einsatzansicht und voller GIS-Ansicht wechseln">Einsatzansicht</button>
     <div class="badge">Prototyp<span class="lang"> · keine Einsatzfreigabe</span></div>
   </header>
 
@@ -228,10 +283,25 @@ ul.lim{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;fon
       </details>
       <label class="row small" style="gap:8px;cursor:pointer"><input type="checkbox" id="cb-exp"> Experimentell: auch nicht validierte Strassen (Zeit ×2)</label>
       <div class="res" id="res"></div>
+      <div class="vgl" id="vgl" hidden></div>
       <div>
         <h3 style="margin-bottom:6px">Beispiele</h3>
         <div class="scen" id="scen"></div>
       </div>
+    </section>
+
+    <section class="tabbody" id="p-einsatz" hidden aria-label="Einsatzansicht">
+      <div class="e-warn">Forschungsprototyp – keine Einsatznavigation. Gelb markierte Stellen sind ungeklärt und nie als sicher zu behandeln.</div>
+      <div class="e-kl" id="e-kl" role="group" aria-label="Fahrzeugklasse"></div>
+      <div class="res" id="e-res"></div>
+      <div class="e-pts">
+        <button class="e-pt" id="e-start" aria-pressed="true"><span class="dot"></span><span id="e-txt-start">Start: Karte antippen</span></button>
+        <select id="e-wache" aria-label="Start an einer Wache"><option value="">… oder Start an einer Wache</option></select>
+        <button class="e-pt" id="e-ziel" aria-pressed="false"><span class="dot z"></span><span id="e-txt-ziel">Ziel: Karte antippen</span></button>
+        <div class="e-row"><input type="text" id="e-suche" placeholder="… oder Zieladresse" autocomplete="off" aria-label="Zieladresse"><button class="btn" id="e-b-suche">Suchen</button></div>
+        <div id="e-suche-res"></div>
+      </div>
+      <div class="e-row"><button class="btn" id="e-neu">Neu</button><button class="btn" id="e-gis">Volle GIS-Ansicht</button></div>
     </section>
 
     <section class="tabbody" id="p-seg" hidden>
@@ -267,6 +337,7 @@ ul.lim{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;fon
       </div>
       <p class="small">Breitenbedarf = max(Karosserie + 2 × Reserve, Spiegelbreite + 2 × 10 cm − Überhang über Trottoir). Messtoleranz nach den Erfassungsgrundsätzen der amtlichen Vermessung (σ je Rand 0.10–0.35 m, Faktor 1.645).</p>
       <p>Die Route nutzt nur validierte Strassen. Fehlt eine validierte Verbindung, zeigt BORS eine experimentelle Route mit doppelter Fahrzeit auf unvalidierten Abschnitten und kennzeichnet sie. Liegen nur die ersten oder letzten Meter auf unvalidierten Strassen, heisst das Ergebnis «validiert bis Zufahrt».</p>
+      <p><b>Routenvergleich:</b> Für eine Fahrzeugklasse stellt BORS die beste Route nur über validierte Strassen (grün) neben die Vergleichsroute (blau). Die Vergleichsroute ist die Route des Modus «experimentell»: Ungeklärte Abschnitte dürfen mitbenutzt werden, zählen bei der Wahl aber mit doppelter Zeit und sind gelb markiert und nummeriert. «Beste» heisst: geringste Routingkosten. Darin stecken Zuschläge, u. a. ungeklärt ×2, Abbiegen und Kurven, Baustellen, Sonderrecht und Durchfahrt von Zufahrten. Angezeigt wird dagegen die Modellfahrzeit ohne Zuschläge. Deshalb ist keine der beiden Routen zwingend die zeitlich schnellste. Nachweislich gesperrte Abschnitte und feste Poller sind in beiden Routen ausgeschlossen. Ob eine gelbe Stelle passierbar ist, weiss BORS nicht.</p>
       <p class="small muted">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2c) auf dieselben Netzdaten. Abgleich: 325 von 325 Testrouten (65 Start-Ziel-Paare × 5 Profile) liefern dieselbe Route wie in QGIS.</p>
       <h3>Datenquellen</h3>
       <ul class="lim">
@@ -339,13 +410,16 @@ function wgs2lv(lon,lat){const p=(lat*3600-169028.66)/10000,l=(lon*3600-26782.5)
 
 let D=null,X0,Y0,map=null,worker=null,profil='D',klickModus='start',mk={},basis='grau',tileFehler=0,basisGeladen=false;
 let P1=null,P2=null,P1txt='',P2txt='',RES=null,show={REF:false,A:true,B:true,C:true,D:true},rechnet=false;
+// BEIDE: beide Läufe des unveränderten Routers {V: Modus VALIDIERT, E: Modus EXPERIMENTELL}; RES zeigt einen davon (Häkchen)
+let BEIDE=null,ansicht='gis',kVgl=false,engMk=[];
+const vglAktiv=()=>ansicht==='einsatz'||kVgl;
 const rel2wgs=(x,y)=>lv2wgs(x+X0,y+Y0);
 
 function toast(t,ms){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,ms||3500);}
 
 // ------------------------------------------------ Tabs
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{tab(b.dataset.t);if(istMobil()&&$('.app').dataset.sheet==='klein')setSheet('mitte');});
-function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));
+function tab(t){if(ansicht==='einsatz')return;document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));
   ['route','seg','lay','info'].forEach(x=>$('#p-'+x).hidden=x!==t);}
 
 // ------------------------------------------------ Laden
@@ -375,7 +449,7 @@ async function startWorker(txt){
     const src=rs?rs.textContent:await (await fetch('bors_router.js')).text();
     const glue=`let R=null;onmessage=e=>{const m=e.data;if(m.typ==='init'){const D=JSON.parse(m.txt);R=new BORS.Router(new BORS.Netz(D));postMessage({typ:'bereit'});}
       else if(m.typ==='snap'){postMessage({typ:'snap',id:m.id,p:R.snap(m.p,m.d)});}
-      else if(m.typ==='route'){try{const r=R.berechne(m.p1,m.p2,m.modus);postMessage({typ:'res',id:m.id,res:r});}catch(err){postMessage({typ:'err',id:m.id,msg:String(err)});}}};`;
+      else if(m.typ==='route'){try{const r={V:R.berechne(m.p1,m.p2,'VALIDIERT'),E:R.berechne(m.p1,m.p2,'EXPERIMENTELL')};postMessage({typ:'res',id:m.id,res:r});}catch(err){postMessage({typ:'err',id:m.id,msg:String(err)});}}};`;
     worker=new Worker(URL.createObjectURL(new Blob([src+'\n'+glue],{type:'text/javascript'})));
     worker.onmessage=e=>{const m=e.data;if(m.typ==='snap'){const f=snapWarte.get(m.id);snapWarte.delete(m.id);if(f)f(m.p);return;}if(m.typ==='bereit'){worker.ok=true;}else if(m.typ==='res'&&m.id===rid)fertig(m.res);else if(m.typ==='err'){rechnet=false;toast('Fehler im Router: '+m.msg);}};
     worker.onerror=()=>{worker=null;};
@@ -452,6 +526,12 @@ function baueKarte(){
     map.addLayer({id:'route-casing',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':css('--halo'),'line-width':['+',['get','w'],4]}});
     map.addLayer({id:'route',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','col'],'line-width':['get','w']}});
     map.addLayer({id:'route-unval',type:'line',source:'route-unval',paint:{'line-color':css('--warn'),'line-width':['get','w'],'line-dasharray':[1.2,1]}});
+    // Vergleich: validiert (grün) und Vergleichsroute (blau, ungeklärte Teile gelb gestrichelt) nebeneinander versetzt
+    for(const [id,col] of [['vgl-v','--ok'],['vgl-e','--vgl']]){map.addSource(id,{type:'geojson',data:leer});
+      map.addLayer({id:id+'-casing',type:'line',source:id,layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':css('--halo'),'line-width':['+',['get','w'],4],'line-offset':['get','o']}});
+      map.addLayer({id,type:'line',source:id,layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':css(col),'line-width':['get','w'],'line-offset':['get','o']}});}
+    map.addSource('vgl-u',{type:'geojson',data:leer});
+    map.addLayer({id:'vgl-u',type:'line',source:'vgl-u',paint:{'line-color':css('--warn'),'line-width':['+',['get','w'],3],'line-offset':['get','o'],'line-dasharray':[1.4,0.8]}});
     map.addSource('zufahrt',{type:'geojson',data:leer});
     map.addLayer({id:'zufahrt',type:'line',source:'zufahrt',paint:{'line-color':css('--muted'),'line-width':2.5,'line-dasharray':[2,2]}});
     map.addSource('wachen',{type:'geojson',data:{type:'FeatureCollection',features:D.wachen.map(w=>({type:'Feature',properties:{n:w[0]},geometry:{type:'Point',coordinates:rel2wgs(w[1]/100,w[2]/100)}}))}});
@@ -460,6 +540,10 @@ function baueKarte(){
     ebenenUI();netzStat();if(istMobil())gebiet();
     $('#load').hidden=true;
     const h=(location.hash||'').slice(1).toUpperCase();const sz=SZEN.find(s=>s.id===h);if(sz)szenario(sz);
+    // Direktlink ?start=E,N&ziel=E,N (LV95), z.B. zum Teilen einer Route
+    else{let q=null;try{q=new URLSearchParams(location.search);}catch(_){}
+      const a=q&&(q.get('start')||'').split(',').map(Number),b=q&&(q.get('ziel')||'').split(',').map(Number);
+      if(a&&b&&a.length===2&&b.length===2&&[...a,...b].every(Number.isFinite)){P1=a;P2=b;P1txt='Start: '+ortName(...a);P2txt='Ziel: '+ortName(...b);zeichnePunkte();setModus('ziel');rechne();}}
   });
   map.on('error',e=>{if(e&&e.sourceId==='tiles'){tileFehler++;if(tileFehler===3&&basis!=='av'&&basis!=='keine'){$('#sel-basis').value='av';setBasis('av');
       $('#basis-note').textContent='swisstopo-Kacheln sind hier nicht erreichbar (diese Vorschauseite erlaubt keine externen Kartenbilder). Ersatz: Gebäude, Wald und Gewässer aus der amtlichen Vermessung.';}}});
@@ -508,10 +592,14 @@ function netzStat(){
 
 // ------------------------------------------------ Profil-Leiste und Klickmodus
 $('#prof-bar').insertAdjacentHTML('beforeend',['A','B','C','D'].map(c=>`<button data-p="${c}" aria-pressed="${c===profil}" title="Netz für ${PN[c]}">${c}</button>`).join(''));
-$('#prof-bar').onclick=e=>{const b=e.target.closest('button[data-p]');if(!b)return;profil=b.dataset.p;
+$('#prof-bar').onclick=e=>{const b=e.target.closest('button[data-p]');if(!b)return;setProfil(b.dataset.p);
+  toast('Strassennetz eingefärbt für '+profil+' · '+PN[profil],1800);};
+// Eine Klasse für Netzfarbe, Routenvergleich und Einsatzansicht
+function setProfil(c){profil=c;
   document.querySelectorAll('#prof-bar button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.p===profil));
   if(map&&map.getLayer('netz'))map.setPaintProperty('netz','line-color',netzFarbe());
-  toast('Strassennetz eingefärbt für '+profil+' · '+PN[profil],1800);};
+  if(BEIDE&&vglAktiv()){zeichneRoute();einpassen();}
+  uiRoute();}
 const istMobil=()=>matchMedia('(max-width:820px)').matches&&!matchMedia('(orientation:landscape) and (max-height:520px)').matches;
 const STUFEN=['klein','mitte','gross'];
 function setSheet(s){$('.app').dataset.sheet=s;$('#grip-t').textContent=s==='gross'?'Karte zeigen':'Mehr anzeigen';$('#grip').setAttribute('aria-expanded',s!=='klein');}
@@ -528,6 +616,7 @@ function setSheet(s){$('.app').dataset.sheet=s;$('#grip-t').textContent=s==='gro
 function setModus(m){klickModus=m;
   document.querySelectorAll('#modebar button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
   $('#pb-start').setAttribute('aria-pressed',m==='start');$('#pb-ziel').setAttribute('aria-pressed',m==='ziel');
+  $('#e-start').setAttribute('aria-pressed',m==='start');$('#e-ziel').setAttribute('aria-pressed',m==='ziel');
   hinweis();}
 function hinweis(){const h=$('#maphint');
   const t=klickModus==='seg'?'Tippe auf eine Strasse, um ihre Messwerte zu sehen':klickModus==='start'?(P1?'Tippe in die Karte, um den Start zu verschieben':'Tippe in die Karte, um den Start zu setzen'):(P2?'Tippe in die Karte, um das Ziel zu verschieben':'Tippe in die Karte, um das Ziel zu setzen');
@@ -546,7 +635,7 @@ function ortName(E,N){const p=[E-X0,N-Y0];let best=null;const G=100,cx=Math.floo
 function setzePunkt(w,E,N){
   if(w==='start'){P1=[E,N];P1txt='Start: '+ortName(E,N);}else{P2=[E,N];P2txt='Ziel: '+ortName(E,N);}
   zeichnePunkte();
-  if(P1&&P2)rechne();else{RES=null;zeichneRoute();uiRoute();}
+  if(P1&&P2)rechne();else{RES=BEIDE=null;zeichneRoute();uiRoute();}
 }
 async function klick(e){
   if(!D)return;
@@ -574,34 +663,152 @@ function zeichnePunkte(){
 let rid=0;
 async function rechne(){
   if(!P1||!P2)return;
-  rechnet=true;RES=null;uiRoute();hinweis();
-  const p1=[P1[0]-X0,P1[1]-Y0],p2=[P2[0]-X0,P2[1]-Y0],modus=$('#cb-exp').checked?'EXPERIMENTELL':'VALIDIERT';
+  rechnet=true;RES=BEIDE=null;uiRoute();hinweis();
+  const p1=[P1[0]-X0,P1[1]-Y0],p2=[P2[0]-X0,P2[1]-Y0];
   rid++;
-  if(worker&&worker.ok){worker.postMessage({typ:'route',id:rid,p1,p2,modus});return;}
+  if(worker&&worker.ok){worker.postMessage({typ:'route',id:rid,p1,p2});return;}
   await new Promise(r=>setTimeout(r,30));
-  try{const R=await routerLokal();fertig(R.berechne(p1,p2,modus));}catch(e){rechnet=false;toast('Fehler im Router: '+e);uiRoute();}
+  try{const R=await routerLokal();fertig({V:R.berechne(p1,p2,'VALIDIERT'),E:R.berechne(p1,p2,'EXPERIMENTELL')});}catch(e){rechnet=false;toast('Fehler im Router: '+e);uiRoute();}
 }
-function fertig(res){rechnet=false;RES=res;zeichneRoute();uiRoute();hinweis();
+function fertig(res){rechnet=false;BEIDE=res;RES=res[$('#cb-exp').checked?'E':'V'];zeichneRoute();uiRoute();hinweis();
   if(istMobil())setSheet('mitte');
-  const rs=$('#res');if(rs){const pb=$('#p-route');setTimeout(()=>{pb.scrollTo({top:rs.offsetTop-pb.offsetTop-8,behavior:'smooth'});},50);}
-  const b=new maplibregl.LngLatBounds();let n=0;for(const c of ['A','B','C','D'])if(show[c]&&res[c].ok)res[c].rows.forEach(r=>r.pts.forEach(p=>{b.extend(rel2wgs(p[0],p[1]));n++;}));
+  const rs=$(ansicht==='einsatz'?'#e-res':'#res'),pb=$(ansicht==='einsatz'?'#p-einsatz':'#p-route');
+  if(rs)setTimeout(()=>{pb.scrollTo({top:rs.offsetTop-pb.offsetTop-8,behavior:'smooth'});},50);
+  einpassen();}
+// Karte auf die gezeichneten Routen einpassen
+function einpassen(){
+  if(!BEIDE||!map)return;
+  const b=new maplibregl.LngLatBounds();let n=0;const add=r=>r.rows.forEach(x=>x.pts.forEach(p=>{b.extend(rel2wgs(p[0],p[1]));n++;}));
+  if(vglAktiv()){const v=vgl(profil);if(v.val)add(v.val);if(v.zeigeE)add(v.exp);}
+  else for(const c of ['A','B','C','D'])if(show[c]&&RES[c].ok)add(RES[c]);
   if(P1)b.extend(lv2wgs(...P1));if(P2)b.extend(lv2wgs(...P2));
-  const unten=istMobil()?Math.round(innerHeight*0.44)+16:50;
-  if(n)setTimeout(()=>map.fitBounds(b,{padding:{top:110,left:40,right:60,bottom:unten},maxZoom:16,duration:600}),istMobil()?300:0);}
+  const unten=istMobil()?Math.round(innerHeight*(ansicht==='einsatz'?0.5:0.44))+16:50;
+  if(n)setTimeout(()=>map.fitBounds(b,{padding:{top:istMobil()?70:110,left:40,right:60,bottom:unten},maxZoom:16,duration:600}),istMobil()?300:0);}
+const linie=(x,p)=>({type:'Feature',properties:p,geometry:{type:'LineString',coordinates:x.pts.map(q=>rel2wgs(q[0],q[1]))}});
 function zeichneRoute(){
-  const F=[],U=[],Z=[],W={REF:3,A:3.5,B:5.5,C:7.5,D:9.5};
-  if(RES)for(const c of ['D','C','B','A','REF']){const r=RES[c];if(!show[c]||!r||!r.ok)continue;
+  const F=[],U=[],Z=[],W={REF:3,A:3.5,B:5.5,C:7.5,D:9.5},VV=[],VE=[],VU=[];
+  const zuf=r=>{const d=r.diag||{};for(const n of ['start','ziel'])if(d[n+'_alt']&&d[n+'_klick'])Z.push({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:[rel2wgs(...d[n+'_klick']),rel2wgs(...d[n+'_alt'])]}});};
+  engMk.forEach(m=>m.remove());engMk=[];
+  if(BEIDE&&vglAktiv()){
+    // nur die gewählte Klasse: validiert links, Vergleichsroute rechts versetzt (bei nur einer Route ohne Versatz)
+    const v=vgl(profil),gross=ansicht==='einsatz',o=v.val&&v.zeigeE?(gross?4:3):0;
+    if(v.val){v.val.rows.forEach(x=>VV.push(linie(x,{w:gross?7:5.5,o:-o})));zuf(v.val);}
+    if(v.zeigeE){v.exp.rows.forEach(x=>{VE.push(linie(x,{w:gross?5:4,o}));if(x.kat!==0)VU.push(linie(x,{w:gross?5:4,o}));});zuf(v.exp);
+      v.eng.forEach((g,i)=>{const el=document.createElement('div');el.className='engmk';el.textContent=i+1;el.title=`${g.name}: ${[...g.gr].join('; ')}`;
+        el.onclick=ev=>{ev.stopPropagation();toast(`${i+1} · ${g.name} · ${Math.round(g.L)} m ungeklärt: ${[...g.gr].join('; ')}`,6000);};
+        engMk.push(new maplibregl.Marker({element:el}).setLngLat(rel2wgs(...g.mitte)).addTo(map));});}
+  }
+  else if(RES)for(const c of ['D','C','B','A','REF']){const r=RES[c];if(!show[c]||!r||!r.ok)continue;
     const col=css('--r'+c);
     r.rows.forEach(x=>{const co=x.pts.map(p=>rel2wgs(p[0],p[1]));F.push({type:'Feature',properties:{col,w:W[c]},geometry:{type:'LineString',coordinates:co}});
       if(c!=='REF'&&x.kat!==0)U.push({type:'Feature',properties:{w:Math.max(2.5,W[c]-2)},geometry:{type:'LineString',coordinates:co}});});
-    const d=r.diag||{};
-    for(const n of ['start','ziel'])if(d[n+'_alt']&&d[n+'_klick'])Z.push({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:[rel2wgs(...d[n+'_klick']),rel2wgs(...d[n+'_alt'])]}});
+    zuf(r);
   }
-  map.getSource('route').setData({type:'FeatureCollection',features:F});
-  map.getSource('route-unval').setData({type:'FeatureCollection',features:U});
-  map.getSource('zufahrt').setData({type:'FeatureCollection',features:Z});
-  map.setPaintProperty('netz','line-opacity',RES?['case',['==',['get','o'],1],0.2,0.45]:['case',['==',['get','o'],1],0.35,1]);
+  const fc=a=>({type:'FeatureCollection',features:a});
+  map.getSource('route').setData(fc(F));map.getSource('route-unval').setData(fc(U));map.getSource('zufahrt').setData(fc(Z));
+  map.getSource('vgl-v').setData(fc(VV));map.getSource('vgl-e').setData(fc(VE));map.getSource('vgl-u').setData(fc(VU));
+  const dimm=ansicht==='einsatz'?0.15:0.45;
+  map.setPaintProperty('netz','line-opacity',RES?['case',['==',['get','o'],1],0.2,dimm]:['case',['==',['get','o'],1],0.35,1]);
 }
+
+// ------------------------------------------------ Routenvergleich (nur Darstellung; Routen aus den zwei Läufen des unveränderten Routers)
+const grundTxt=(c,f)=>{const t=de(D.texte[D.grund[c][f]]||'ungeklärt').replace(/^nicht validiert:\s*/,'').replace(/_/g,' ');return t.length>150?t.slice(0,149)+'…':t;};
+const mitte=p=>p.length===2?[(p[0][0]+p[1][0])/2,(p[0][1]+p[1][1])/2]:p[Math.floor(p.length/2)];
+function vgl(c){
+  const v=BEIDE.V[c],e=BEIDE.E[c],ni=D.attr_cols.indexOf('name');
+  const gesperrt=r=>r.ok&&r.rows.some(x=>x.kat===2);
+  // vollständig validiert: Modus VALIDIERT ohne Rückfall auf experimentell und kein Meter ausserhalb «validiert»
+  const valOk=v.ok&&!v.validiert_ergebnis&&v.modus!=='EXPERIMENTELL'&&v.rows.every(x=>x.kat===0);
+  // Schutz: eine Route über gesperrte Abschnitte wird nie gezeigt (darf nach Kosten 0 nicht vorkommen)
+  const expOk=e.ok&&!gesperrt(e);
+  const eng=[];let last=-2;
+  if(expOk)e.rows.forEach((x,i)=>{if(x.kat===0)return;const n=D.attr[x.f][ni]||'Strasse ohne Namen',g=grundTxt(c,x.f),k=eng[eng.length-1];
+    if(k&&last===i-1&&k.name===n){k.L+=x.L;k.gr.add(g);if(x.L>k.lmax){k.lmax=x.L;k.mitte=mitte(x.pts);}}
+    else eng.push({name:n,L:x.L,gr:new Set([g]),lmax:x.L,mitte:mitte(x.pts)});last=i;});
+  const unvM=eng.reduce((s,g)=>s+g.L,0);
+  return {c,v,e,val:valOk?v:null,exp:expOk?e:null,eng,unvM,zeigeE:expOk&&(!valOk||unvM>0),fehler:gesperrt(v)||gesperrt(e)};
+}
+function zufahrtTxt(r){const d=r.diag||{},t=[];
+  if(r.ursache==='ZIEL_ZU_FUSS')t.push(`Halt ${Math.round(d.ziel_rest_m)} m vor dem Ziel, Rest zu Fuss`);
+  else if(d.ziel_status==='ZIEL_NICHT_ANFAHRBAR')t.push(`Ziel nicht direkt anfahrbar, Halt ${Math.round(d.ziel_rest_m||0)} m entfernt (gestrichelt)`);
+  if(d.start_status==='START_NICHT_ANFAHRBAR')t.push(`Start nicht direkt anfahrbar, erste ${Math.round(d.start_rest_m||0)} m nicht nachgewiesen (gestrichelt)`);
+  const p=r.rows.reduce((s,x)=>s+(x.oeffnen||0),0);if(p)t.push(`${p} Poller/Tor${p>1?'e':''} öffnen (je +30 s)`);
+  return t;}
+// Inhalt beider Karten, gleich für GIS- und Einsatzansicht
+// Zwei getrennte Grössen: Fahrzeit = Länge / Modellgeschwindigkeit + Poller öffnen (ohne Zuschläge);
+// Routingkosten (modell_min) = Grösse, nach der der Router wählt (mit Zuschlägen, ungeklärt ×2, Abbiegen, Baustellen, Sonderrecht)
+function vglInhalt(v){
+  const min=r=>r.fahrzeit_min.toFixed(1)+' min',out={zeit:'Zeiten = Modellfahrzeit ohne Zuschläge und ohne Verkehr. Gewählt wird nach den Routingkosten mit Zuschlägen (ungeklärt ×2). Keine der Routen ist deshalb zwingend die schnellste.'};
+  const kost=(r,x)=>`Routingkosten ${r.modell_min.toFixed(1)} min${x}`;
+  if(v.fehler)out.fehler='Interner Widerspruch: Eine Route enthält einen gesperrten Abschnitt. Nicht verwenden, Daten prüfen.';
+  // bis Zufahrt: alle befahrenen Abschnitte validiert, aber Start/Ziel nur über eine nicht nachgewiesene Luftlinie erreicht
+  if(v.val)out.val=v.val.modus==='VALIDIERT_BIS_ZUFAHRT'
+    ?{cls:'ok',lbl:'Validiert bis Zufahrt',big:min(v.val),sub:km(v.val.laenge_m)+' · alle befahrenen Abschnitte nachgewiesen, Zufahrt nicht',notes:zufahrtTxt(v.val),kosten:kost(v.val,' (mit Zuschlägen)')}
+    :{cls:'ok',lbl:'Validiert',big:min(v.val),sub:km(v.val.laenge_m)+' · alle Abschnitte nachgewiesen',notes:zufahrtTxt(v.val),kosten:kost(v.val,' (mit Zuschlägen)')};
+  else{const r=v.v;let sub;
+    if(!r.ok)sub=de(r.text||r.ursache);
+    else{sub='Keine Verbindung nur über validierte Strassen'+(r.validiert_ergebnis?` (${de(r.validiert_ergebnis)})`:'')+'.';
+      if(r.modus==='VALIDIERT_BIS_ZUFAHRT'){const a=r.zufahrt_anfang_m||0,z=r.zufahrt_ende_m||0;sub+=` Nur bis zur Zufahrt validiert: ${a?'erste '+Math.round(a)+' m':''}${a&&z?' und ':''}${z?'letzte '+Math.round(z)+' m':''} ungeklärt.`;}}
+    out.val={cls:'bad',lbl:'Keine validierte Route',big:'–',sub,notes:[]};}
+  if(v.zeigeE){const e=v.exp,n=v.eng.length;
+    out.exp={cls:'warn',lbl:'Vergleich · nicht gesichert',big:min(e),sub:`${km(e.laenge_m)} · ${n} ungeklärte Stelle${n===1?'':'n'}, ${Math.round(v.unvM)} m`,notes:zufahrtTxt(e),kosten:kost(e,' (mit Zuschlägen, ungeklärt ×2)')};
+    if(v.val){const dt=e.fahrzeit_min-v.val.fahrzeit_min,dl=e.laenge_m-v.val.laenge_m;
+      out.diff='Vergleichsroute: Modellfahrzeit '+(Math.abs(dt)<0.05?'gleich':`${Math.abs(dt).toFixed(1)} min ${dt<0?'kürzer':'länger'}`)+`, Weg ${km(Math.abs(dl))} ${dl<0?'kürzer':'länger'} als die validierte Route – nur wenn die gelben Stellen passierbar sind.`+
+        (v.val.modus==='VALIDIERT_BIS_ZUFAHRT'?` Achtung: Die validierte Route ${[(v.val.zufahrt_anfang_m||0)>0?'beginnt':'',(v.val.zufahrt_ende_m||0)>0?'endet':''].filter(Boolean).join(' und ')||'endet'} an einem Ersatzpunkt, nicht am geklickten Ort.`:'');}
+    else out.diff='Nur die Vergleichsroute verbindet Start und Ziel. Sie ist nicht gesichert.';}
+  else if(!v.exp&&!v.val)out.exp={cls:'bad',lbl:'Auch keine Vergleichsroute',big:'–',sub:de(v.e.text||v.e.ursache||''),notes:[]};
+  else if(v.val)out.gleich='Auch mit ungeklärten Strassen findet BORS keine andere Route: Die validierte Route ist die Vergleichsroute.';
+  return out;}
+const engListe=(v,max)=>v.eng.length?`<ol class="eng">${v.eng.slice(0,max).map((g,i)=>`<li data-i="${i}"><b>${esc(g.name)}</b> · ${Math.round(g.L)} m – ${esc([...g.gr].slice(0,2).join('; '))}</li>`).join('')}</ol>${v.eng.length>max?`<p class="small muted">+ ${v.eng.length-max} weitere ungeklärte Stellen auf der Karte</p>`:''}`:'';
+function engKlick(el,v){el.querySelectorAll('ol.eng li').forEach(li=>li.onclick=()=>{const g=v.eng[+li.dataset.i];map.easeTo({center:rel2wgs(...g.mitte),zoom:Math.max(map.getZoom(),17),duration:500});if(istMobil())setSheet('klein');});}
+function uiVgl(){
+  const el=$('#vgl');if(!BEIDE||rechnet){el.hidden=true;el.innerHTML='';return;}
+  const v=vgl(profil),I=vglInhalt(v);
+  const karte=k=>`<div class="vk ${k.cls}"><span class="k">${k.lbl}</span><b>${k.big}</b><span>${esc(k.sub)}</span>${k.notes.map(t=>`<span>${esc(t)}</span>`).join('')}${k.kosten?`<span>${esc(k.kosten)}</span>`:''}</div>`;
+  el.hidden=false;
+  el.innerHTML=`<div class="row" style="justify-content:space-between"><h3>Routenvergleich</h3><div class="seg p" id="vgl-kl" role="group" aria-label="Klasse für den Vergleich"><b>Klasse</b>${['A','B','C','D'].map(c=>`<button data-p="${c}" aria-pressed="${c===profil}" title="${PN[c]}">${c}</button>`).join('')}</div></div>
+    <p class="small muted">${PN[profil]}: beste Route nur über validierte Strassen gegen die Vergleichsroute, die auch ungeklärte Strassen benutzen darf (Modus «experimentell»).</p>
+    ${I.fehler?`<div class="hint" style="color:var(--bad);font-weight:600">${I.fehler}</div>`:''}
+    <div class="cmp">${karte(I.val)}${I.exp?karte(I.exp):`<div class="vk n"><span class="k">Vergleich</span><span>${esc(I.gleich||'')}</span></div>`}</div>
+    ${I.diff?`<p class="vdiff">${esc(I.diff)}</p>`:''}
+    ${v.eng.length?`<h3>Ungeklärte Stellen der Vergleichsroute</h3>${engListe(v,12)}`:''}
+    <div class="vleg"><span><i style="border-color:var(--ok)"></i>validiert</span><span><i style="border-color:var(--vgl)"></i>Vergleichsroute</span><span><i style="border-color:var(--warn);border-top-style:dashed"></i>ungeklärt</span></div>
+    <button class="btn ${kVgl?'on':''}" id="b-kvgl">${kVgl?'Karte: wieder alle Klassen zeigen':'Vergleich auf der Karte zeigen'}</button>
+    <p class="small muted">${I.zeit} Die Vergleichsroute entspricht dem Modus «experimentell» (QGIS und Web gleich). Gesperrte Abschnitte und feste Poller sind in beiden Routen ausgeschlossen.</p>`;
+  el.querySelector('#vgl-kl').onclick=e=>{const b=e.target.closest('button[data-p]');if(b){setProfil(b.dataset.p);if(!kVgl){kVgl=true;zeichneRoute();einpassen();uiRoute();}}};
+  el.querySelector('#b-kvgl').onclick=()=>{kVgl=!kVgl;zeichneRoute();einpassen();uiRoute();};
+  engKlick(el,v);
+}
+
+// ------------------------------------------------ Einsatzansicht
+const PK={A:'NEF / PW',B:'RTW',C:'FW mittel',D:'FW gross'};
+$('#e-kl').innerHTML=['A','B','C','D'].map(c=>`<button data-p="${c}" aria-pressed="${c===profil}" aria-label="${c}: ${PN[c]}">${c}<small>${PK[c]}</small></button>`).join('');
+$('#e-kl').onclick=e=>{const b=e.target.closest('button[data-p]');if(b)setProfil(b.dataset.p);};
+function uiEinsatz(){
+  document.querySelectorAll('#e-kl button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===profil));
+  $('#e-txt-start').textContent=P1txt||'Start: Karte antippen';$('#e-txt-ziel').textContent=P2txt||'Ziel: Karte antippen';
+  const el=$('#e-res');
+  if(rechnet){el.innerHTML='<div class="e-card"><div class="e-sub">BORS rechnet …</div></div>';return;}
+  if(!BEIDE){el.innerHTML=`<div class="hint" style="font-size:16px">${!P1?'Start setzen: Karte antippen oder Wache wählen.':'Ziel setzen: Karte antippen oder Adresse suchen.'}</div>`;return;}
+  const v=vgl(profil),I=vglInhalt(v);
+  const karte=k=>`<div class="e-card ${k.cls}"><div class="e-lbl">${k.cls==='ok'?'✔ ':k.cls==='warn'?'⚠ ':'✖ '}${k.lbl}</div><div class="e-big">${k.big}</div><div class="e-sub">${esc(k.sub)}</div>${k.notes.map(t=>`<div class="e-note">${esc(t)}</div>`).join('')}</div>`;
+  el.innerHTML=(I.fehler?`<div class="e-card bad"><div class="e-lbl">✖ ${I.fehler}</div></div>`:'')+karte(I.val)+(I.exp?karte(I.exp):'')+
+    (I.diff?`<div class="e-sub" style="font-weight:600">${esc(I.diff)}</div>`:'')+(I.gleich?`<div class="e-note">${esc(I.gleich)}</div>`:'')+engListe(v,5)+
+    `<div class="e-note">${esc(I.zeit)}</div>`+
+    (v.zeigeE&&v.val?'<div class="vleg"><span><i style="border-color:var(--ok)"></i>validiert</span><span><i style="border-color:var(--vgl)"></i>Vergleich</span><span><i style="border-color:var(--warn);border-top-style:dashed"></i>ungeklärt</span></div>':'');
+  engKlick(el,v);
+}
+function setAnsicht(a){ansicht=a;const e=a==='einsatz';$('.app').dataset.ansicht=a;
+  $('#b-ansicht').textContent=e?'GIS-Ansicht':'Einsatzansicht';$('#b-ansicht').setAttribute('aria-pressed',e);
+  ['route','seg','lay','info'].forEach(x=>$('#p-'+x).hidden=true);$('#p-einsatz').hidden=!e;
+  if(!e)tab('route');else if(klickModus==='seg')setModus(P1&&!P2?'ziel':'start');
+  try{localStorage.setItem('bors-ansicht',a);}catch(_){}
+  if(map&&map.getLayer('netz')){zeichneRoute();einpassen();}
+  uiRoute();if(istMobil())setSheet(e&&BEIDE?'mitte':'klein');}
+$('#b-ansicht').onclick=()=>setAnsicht(ansicht==='einsatz'?'gis':'einsatz');
+$('#e-gis').onclick=()=>setAnsicht('gis');
+$('#e-start').onclick=()=>setModus('start');$('#e-ziel').onclick=()=>setModus('ziel');
+$('#e-neu').onclick=()=>$('#b-reset').onclick();
 function detail(c,r){
   if(!r.ok)return esc(de(r.text||r.ursache));
   const t=[];
@@ -624,6 +831,7 @@ function zusammenfassung(){
   return `<div class="sum"><b>${titel}</b>${txt}</div>`;
 }
 function uiRoute(){
+  uiVgl();uiEinsatz();
   $('#txt-start').textContent=P1txt||'Start: auf die Karte tippen';$('#txt-start').classList.toggle('leer',!P1);
   $('#txt-ziel').textContent=P2txt||'Ziel: auf die Karte tippen';$('#txt-ziel').classList.toggle('leer',!P2);
   if(rechnet){$('#res').innerHTML='<div class="hint">BORS berechnet die Routen für A–D …</div>';return;}
@@ -637,32 +845,36 @@ function uiRoute(){
       <div><span class="pill ${m[0]}">${m[1]}</span></div>
       <div class="val zeit" style="color:var(--muted)">${r.ok?r.fahrzeit_min.toFixed(1)+' min':''}${d&&d>50?`<br>+${km(d)} Umweg`:''}</div>
       ${c!=='REF'?`<div class="det">${detail(c,r)}</div>`:'<div class="det">Normales Auto ohne Fahrzeugregeln, zum Vergleich.</div>'}</div>`;}).join('');
-  $('#res').querySelectorAll('.sw').forEach(b=>b.onclick=()=>{show[b.dataset.c]=!show[b.dataset.c];zeichneRoute();uiRoute();});
+  $('#res').querySelectorAll('.sw').forEach(b=>b.onclick=()=>{show[b.dataset.c]=!show[b.dataset.c];kVgl=false;zeichneRoute();uiRoute();});
 }
-$('#b-reset').onclick=()=>{P1=P2=null;P1txt=P2txt='';RES=null;zeichnePunkte();zeichneRoute();uiRoute();setModus('start');$('#sel-wache').value='';};
-$('#cb-exp').onchange=()=>{if(P1&&P2)rechne();};
+$('#b-reset').onclick=()=>{P1=P2=null;P1txt=P2txt='';RES=BEIDE=null;zeichnePunkte();zeichneRoute();uiRoute();setModus('start');$('#sel-wache').value='';$('#e-wache').value='';};
+// beide Modi liegen schon vor: Umschalten ohne Neuberechnung
+$('#cb-exp').onchange=()=>{if(BEIDE){RES=BEIDE[$('#cb-exp').checked?'E':'V'];zeichneRoute();uiRoute();}else if(P1&&P2)rechne();};
 function szenario(s){P1=s.s;P2=s.z;P1txt=`Start: Beispiel ${s.id}`;P2txt=`Ziel: ${s.t} (${s.k})`;zeichnePunkte();tab('route');setModus('ziel');rechne();try{history.replaceState(null,'','#'+s.id.toLowerCase());}catch(e){}}
 $('#scen').innerHTML=SZEN.map((s,i)=>`<button class="btn" data-i="${i}"><small>${s.id} · ${s.k}</small>${s.t}</button>`).join('');
 $('#scen').onclick=e=>{const b=e.target.closest('button');if(b&&D)szenario(SZEN[+b.dataset.i]);};
 
 // Wachen
-function wachenUI(){$('#sel-wache').innerHTML='<option value="">Wache wählen …</option>'+D.wachen.map((w,i)=>`<option value="${i}">${esc(w[0])}</option>`).join('');}
-$('#sel-wache').onchange=e=>{if(e.target.value==='')return;const w=D.wachen[+e.target.value];P1=[w[1]/100+X0,w[2]/100+Y0];P1txt='Start: '+w[0];
-  zeichnePunkte();if(P2)rechne();else{RES=null;zeichneRoute();uiRoute();setModus('ziel');}};
+function wachenUI(){const o=D.wachen.map((w,i)=>`<option value="${i}">${esc(w[0])}</option>`).join('');
+  $('#sel-wache').innerHTML='<option value="">Wache wählen …</option>'+o;$('#e-wache').innerHTML='<option value="">… oder Start an einer Wache</option>'+o;}
+const wacheWahl=e=>{if(e.target.value==='')return;const w=D.wachen[+e.target.value];P1=[w[1]/100+X0,w[2]/100+Y0];P1txt='Start: '+w[0];
+  zeichnePunkte();if(P2)rechne();else{RES=BEIDE=null;zeichneRoute();uiRoute();setModus('ziel');}};
+$('#sel-wache').onchange=wacheWahl;$('#e-wache').onchange=wacheWahl;
 
-// Adresssuche (swisstopo SearchServer; in der Vorschau eventuell gesperrt)
-async function suche(){
-  const q=$('#in-suche').value.trim();if(!q)return;$('#suche-res').textContent='Suche …';
+// Adresssuche (swisstopo SearchServer; in der Vorschau eventuell gesperrt). Für GIS- und Einsatzansicht.
+async function suche(inp,out){
+  const q=$(inp).value.trim();if(!q)return;$(out).textContent='Suche …';
   try{const r=await fetch('https://api3.geo.admin.ch/rest/services/api/SearchServer?type=locations&origins=address&limit=5&sr=2056&searchText='+encodeURIComponent(q));
     const j=await r.json();const a=(j.results||[]);
-    if(!a.length){$('#suche-res').textContent='Keine Adresse gefunden.';return;}
-    $('#suche-res').innerHTML=a.map((x,i)=>`<div><button class="btn" style="margin-top:4px;text-align:left" data-i="${i}">${x.attrs.label.replace(/<[^>]+>/g,'')}</button></div>`).join('');
-    $('#suche-res').querySelectorAll('button').forEach(b=>b.onclick=()=>{const x=a[+b.dataset.i].attrs;P2=[x.y,x.x];P2txt='Ziel: '+x.label.replace(/<[^>]+>/g,'');$('#suche-res').textContent='';
+    if(!a.length){$(out).textContent='Keine Adresse gefunden.';return;}
+    $(out).innerHTML=a.map((x,i)=>`<div><button class="btn" style="margin-top:4px;text-align:left" data-i="${i}">${esc(x.attrs.label.replace(/<[^>]+>/g,''))}</button></div>`).join('');
+    $(out).querySelectorAll('button').forEach(b=>b.onclick=()=>{const x=a[+b.dataset.i].attrs;P2=[x.y,x.x];P2txt='Ziel: '+x.label.replace(/<[^>]+>/g,'');$(out).textContent='';
       if(!P1){P1=[D.wachen[0][1]/100+X0,D.wachen[0][2]/100+Y0];P1txt='Start: '+D.wachen[0][0];}
       zeichnePunkte();setModus('ziel');rechne();});
-  }catch(e){$('#suche-res').textContent='Die Adresssuche ist hier nicht erreichbar. Setze das Ziel mit einem Klick in die Karte.';}
+  }catch(e){$(out).textContent='Die Adresssuche ist hier nicht erreichbar. Setze das Ziel mit einem Klick in die Karte.';}
 }
-$('#b-suche').onclick=suche;$('#in-suche').onkeydown=e=>{if(e.key==='Enter')suche();};
+$('#b-suche').onclick=()=>suche('#in-suche','#suche-res');$('#in-suche').onkeydown=e=>{if(e.key==='Enter')suche('#in-suche','#suche-res');};
+$('#e-b-suche').onclick=()=>suche('#e-suche','#e-suche-res');$('#e-suche').onkeydown=e=>{if(e.key==='Enter')suche('#e-suche','#e-suche-res');};
 
 // ------------------------------------------------ Strassen-Befund
 function zeigeSeg(i){
@@ -702,12 +914,18 @@ function profTab(){$('#tab-prof').innerHTML='<tr><td></td><td>Klasse</td><td>Kar
 // Theme-Wechsel: Kartenfarben nachführen
 function themeNeu(){if(!map||!map.getLayer('netz'))return;map.setPaintProperty('bg','background-color',css('--map-bg'));map.setPaintProperty('netz','line-color',netzFarbe());
   map.setPaintProperty('netz-casing','line-color',css('--halo'));map.setPaintProperty('route-casing','line-color',css('--halo'));map.setPaintProperty('route-unval','line-color',css('--warn'));
+  map.setPaintProperty('vgl-v','line-color',css('--ok'));map.setPaintProperty('vgl-e','line-color',css('--vgl'));map.setPaintProperty('vgl-u','line-color',css('--warn'));
+  map.setPaintProperty('vgl-v-casing','line-color',css('--halo'));map.setPaintProperty('vgl-e-casing','line-color',css('--halo'));
   ['wald','wasser','bef','bahn','geb'].forEach(k=>map.setPaintProperty('av-'+k,'fill-color',css('--'+k)));zeichneRoute();
   for(const k of ['s','z'])if(mk[k]){mk[k].remove();mk[k]=null;}zeichnePunkte();}
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',themeNeu);
 new MutationObserver(themeNeu).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
-start().then(()=>{if(D){wachenUI();profTab();uiRoute();hinweis();}});
+// Ansicht: ?ansicht=einsatz|gis in der Adresse, sonst die zuletzt gewählte (nur in diesem Browser gemerkt)
+(function(){let a=null;try{a=new URLSearchParams(location.search).get('ansicht');}catch(_){}
+  if(a!=='einsatz'&&a!=='gis'){try{a=localStorage.getItem('bors-ansicht');}catch(_){}}
+  if(a==='einsatz'){ansicht='einsatz';$('.app').dataset.ansicht='einsatz';}})();
+start().then(()=>{if(D){wachenUI();profTab();setAnsicht(ansicht);hinweis();}});
 })();
 </script>
 
