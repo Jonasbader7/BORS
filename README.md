@@ -4,10 +4,21 @@ Fahrzeugabhängiges Einsatzrouting für Bern und zehn Nachbargemeinden. BFH, Mod
 
 **Forschungsprototyp – keine Einsatzfreigabe.** Schilder und Poller stammen aus OpenStreetMap und sind nicht vor Ort bestätigt.
 
-- `index.html` – Web-App (Karte, Routing für die Fahrzeugklassen A–D, Routenvergleich, Einsatzansicht, Strassenbefund, Ebenen)
+- `index.html` – Web-App (Karte, Routing für die Fahrzeugklassen A–D, Routenvergleich, Einsatzablauf Zentrale/Fahrzeug, Strassenbefund, Ebenen)
 - `bors_router.js` – Routing-Kern, direkte Übertragung des QGIS-Routers V9.2c (Abgleich: 325/325 Testrouten identisch), unverändert
 - `netz.json` – Strassennetz V9.2b mit Bewertung je Fahrzeugklasse
 - `basis.json` – Ersatz-Grundkarte aus der amtlichen Vermessung (Gebäude, Wald, Gewässer)
+
+## Neu in Version 6 (1.11.2026): simulierter Einsatzablauf
+
+- **Umschalter «Zentrale | Fahrzeug | Beides»** oben in der Kopfzeile (ersetzt den Knopf «Einsatzansicht»). «Beides» erscheint nur auf breiten Bildschirmen (ab 1100 × 600 px). Es zeigt rechts neben der Zentrale das Fahrzeug im Tablet-Rahmen (dieselbe Seite eingebettet, `?ansicht=fahrzeug&eingebettet=1`), gedacht für Präsentationen. Das Tablet folgt dem jeweils neuesten Auftrag. Adressen: `?ansicht=zentrale`, `?ansicht=fahrzeug`, `?ansicht=beides`.
+- **Handy:** dieselbe Seite, Wechsel über den Umschalter oder den Knopf «Fahrzeug ansehen» nach dem Senden. Der Statusknopf des Fahrzeugs ist ohne Scrollen sichtbar.
+- **Einstieg:** Der Tab «Einsatz» erklärt den Ablauf in drei Schritten und ist beim ersten Besuch offen.
+- **Zentrale, Tab «Einsatz»:** «Notruf simulieren» setzt einen zufälligen Einsatzort auf einer benannten Strasse im Gebiet, mit erfundenem Stichwort und Priorität. Alternativ tippt die Zentrale selbst auf den Einsatzort. Als Start der Fahrzeuge dient die Hauptwache, ein zufälliger Patrouillen-Standort oder ein Punkt auf der Karte. BORS rechnet die Routen für A–D. Die Disposition zeigt je Klasse die validierte Route und die Vergleichsroute. Die Zentrale sendet einem Fahrzeug die validierte Route oder, nach einer Rückfrage, die Vergleichsroute. Gesperrte Abschnitte sind nie dabei. Die Fahrzeugliste zeigt den Status.
+- **Fahrzeug:** zeigt nur den eigenen Auftrag: Stichwort, Einsatzort, die eine zugewiesene Route (grün validiert oder blau mit nummerierten gelben Stellen), Zeit und Distanz, dazu einen grossen Knopf für den nächsten Status (quittiert → vor Ort → abgeschlossen). Die Karte lässt sich ansehen, aber nicht verändern. Ohne Auftrag ist die bisherige vereinfachte Planung unter «Ohne Auftrag: Route selbst planen» erreichbar.
+- **Senden** heisst im Prototyp: im Browser speichern (localStorage). Stellt man in derselben Seite auf «Fahrzeug» um, ist der Auftrag da. Ein zweites Fenster im selben Browser erhält Aufträge, Rückzüge und Statusmeldungen sofort. Ein anderes Gerät erhält nichts, dafür bräuchte es einen Server.
+- Ein zweites Fenster rechnet die Route mit demselben Router selbst nach und vergleicht eine Kennung der Abschnittsfolge mit der Route der Zentrale. Bei einer Abweichung erscheint ein Hinweis.
+- `bors_router.js`, `netz.json`, `basis.json` unverändert. Notrufe, Stichworte und Einsatznummern sind erfunden, Personendaten gibt es keine.
 
 ## Neu in Version 5 (1.11.2026)
 
@@ -18,6 +29,6 @@ Fahrzeugabhängiges Einsatzrouting für Bern und zehn Nachbargemeinden. BFH, Mod
 
 Geprüft am 31.10.2026: gesperrte Abschnitte in beiden Modi ausgeschlossen (Code), 32 Testrouten Segment für Segment ohne Fehler, Abgleich mit swissTLM3D und KSVB ohne Konflikt. Nicht geprüft: Befahrbarkeit vor Ort.
 
-Lokal starten: `python -m http.server 8771` in diesem Ordner, dann http://localhost:8771 öffnen.
+Lokal starten: `python -m http.server 8772` in diesem Ordner, dann http://localhost:8772 öffnen.
 
 Grundkarte: © swisstopo. Strassennetz: © OpenStreetMap-Mitwirkende. Fahrbahnbreiten: amtliche Vermessung Kanton Bern.
