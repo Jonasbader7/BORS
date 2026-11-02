@@ -5,9 +5,30 @@ Fahrzeugabhängiges Einsatzrouting für Bern und zehn Nachbargemeinden. BFH, Mod
 **Forschungsprototyp – keine Einsatzfreigabe.** Schilder und Poller stammen aus OpenStreetMap und sind nicht vor Ort bestätigt.
 
 - `index.html` – Web-App (Karte, Routing für die Fahrzeugklassen A–D, Routenvergleich, Einsatzablauf Zentrale/Fahrzeug, Strassenbefund, Ebenen)
-- `bors_router.js` – Routing-Kern, direkte Übertragung des QGIS-Routers V9.2c (Abgleich: 325/325 Testrouten identisch), unverändert
-- `netz.json` – Strassennetz V9.2b mit Bewertung je Fahrzeugklasse
+- `bors_router.js` – Routing-Kern, direkte Übertragung des QGIS-Routers V9.2e (Ersatzanschluss nach Gesamtkosten)
+- `netz.json` – Strassennetz V9.2f mit Bewertung je Fahrzeugklasse (Netzmaster `BORS_Netzmaster_V9_20261101_2206`)
+- `netz_aenderungen.csv` – die 52 Statuswechsel gegenüber V7 (Abschnitt × Klasse)
 - `basis.json` – Ersatz-Grundkarte aus der amtlichen Vermessung (Gebäude, Wald, Gewässer)
+
+## Neu in Version 8 (1.11.2026): Netz V9.2f und Router V9.2e
+
+Oberfläche wie V7 (nur zwei Texte im Tab «Methode» angepasst). Neu sind die Daten und der Router:
+- **Gesperrt nach Hinderniskartei Kanton Bern** (signalisiertes Gewicht an Brücken): Nydeggbrücke, Brunngasshalde, Fährstrasse, Postgasshalde für D, Reichenbachstrasse für C und D. V7 bot sie noch als validiert an.
+- **Unvalidiert** (Höhe unbekannt, OSM `maxheight=below_default`): 2 Abschnitte für B–D.
+- **Validiert nach geprüften Befunden** (Orthofoto, nicht vor Ort): 10 Engstellen für A–D, u. a. Viktoriarain und Nordring vor der Hauptwache, Bolligenstrasse, Papiermühlestrasse, Freiburgstrasse.
+- **Router V9.2e:** Ist Start oder Ziel nicht anfahrbar, wählt er den Ersatzanschluss nach Gesamtkosten statt nach Abstand (in QGIS am 1.11.2026 geprüft, 29 PASS / 0 FAIL).
+- `netz.json` erzeugt mit `01_Skripte/Aktuell/29_Web_Netz_V9_2f_BORS.py` aus der V7-Datei und dem Netzmaster; Graph, Hindernisse, Abbiegen, Baustellen und Autoreferenz unverändert.
+- **Baustellen:** weiterhin Stand 28.10.2026 (keine Live-Daten, keine Aktualisierung).
+
+Geprüft am 1.11.2026 (Browser, Handy 375 × 812 und Beamer 1440 × 900): Notruf → Senden → Quittieren → vor Ort → abgeschlossen, Fahrerwahl mit Alternative, Route über die Nydeggbrücke (A–C darüber, D umfährt). Abgleich Web gegen QGIS auf diesem Stand: ausstehend.
+
+## Neu in Version 7 (1.11.2026): Fahrer wählt die Route
+
+- **Zentrale:** pro Fahrzeugklasse ein Knopf. Gibt es neben der validierten Route eine Alternative mit ungeklärten Stellen, heisst er «Senden: beide Routen, Fahrer wählt». Gibt es nur die validierte Route, wird nur sie gesendet. Gibt es keine validierte Route, fragt die Zentrale nach, bevor sie nur die Vergleichsroute sendet.
+- **Fahrzeug:** Vor dem Quittieren zeigt es zwei grosse Karten nebeneinander («Validiert» und «Alternative»: Zeit, Distanz, gesichert oder Anzahl ungeklärter Stellen). Auf der Karte sind beide Routen zu sehen, die gewählte breiter. Die validierte Route ist vorgewählt. Der Knopf heisst «Mit validierter Route quittieren» bzw. «Mit Alternative quittieren». Danach zeigt das Fahrzeug nur noch die gewählte Route; bei der Alternative mit der Liste der ungeklärten Stellen.
+- **Rückmeldung:** Die Zentrale sieht «vorgewählt: …» und nach dem Quittieren «gewählt: …» und erhält eine Meldung, wenn der Fahrer umwählt.
+- Aufträge, die V6 im Browser gespeichert hat, werden weiter gelesen (eine Route, keine Wahl).
+- Grundlage ist Anjas Vorschlag (beide Routen je Klasse vergleichen), hier mit der Entscheidung beim Fahrer. Router, Netz und Grundkarte unverändert.
 
 ## Neu in Version 6 (1.11.2026): simulierter Einsatzablauf
 
@@ -29,6 +50,6 @@ Fahrzeugabhängiges Einsatzrouting für Bern und zehn Nachbargemeinden. BFH, Mod
 
 Geprüft am 31.10.2026: gesperrte Abschnitte in beiden Modi ausgeschlossen (Code), 32 Testrouten Segment für Segment ohne Fehler, Abgleich mit swissTLM3D und KSVB ohne Konflikt. Nicht geprüft: Befahrbarkeit vor Ort.
 
-Lokal starten: `python -m http.server 8772` in diesem Ordner, dann http://localhost:8772 öffnen.
+Lokal starten: `python -m http.server 8774` in diesem Ordner, dann http://localhost:8774 öffnen.
 
 Grundkarte: © swisstopo. Strassennetz: © OpenStreetMap-Mitwirkende. Fahrbahnbreiten: amtliche Vermessung Kanton Bern.

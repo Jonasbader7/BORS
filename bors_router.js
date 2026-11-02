@@ -1,9 +1,14 @@
-/* BORS Router (Web) - 1:1-Portierung des Routing-Kerns und der Routenlogik aus 7_Router_V9_2c.py (QGIS).
+/* BORS Router (Web) - 1:1-Portierung des Routing-Kerns und der Routenlogik aus 7_Router_V9_2e_BORS.py (QGIS).
    Eingabe: netz.json (Export aus dem echten Router: Graph, Kosten je Profil und Modus, Hindernisse, Abbiegen).
    Gleiche Regeln: validiert zuerst, sonst experimentell (Risikofaktor x2), Alternativpunkt bei gesperrtem Start/Ziel,
-   F4-Kandidaten, Halt <= 60 m vor dem Ziel, Dominanz (leichteres Fahrzeug nie langsamer als schwereres). */
+   F4-Kandidaten, Halt <= 60 m vor dem Ziel, Dominanz (leichteres Fahrzeug nie langsamer als schwereres).
+   V9.2e (29.10.2026): Ersatzanschluss (Start/Ziel nicht anfahrbar, F4) nach Gesamtkosten statt nach Abstand: eine Suche
+   ueber alle zulaessigen Anschluesse bis F4_MAX_M, Restweg mit RESTWEG_SEK_PRO_M bewertet; weiter als F4_MAX_M kein Ersatz
+   (dann Rueckfall auf experimentell wie bei jeder fehlenden validierten Route). Routen ohne Ersatz und REF unveraendert. */
 (function (root) {
   'use strict';
+
+  const F4_ANZAHL = 400;   // V9.2e: hoechstens so viele Anschlussabschnitte im Umkreis F4_MAX_M (wie QGIS nearestNeighbor)
 
   class Heap {
     constructor() { this.a = []; }
@@ -149,6 +154,66 @@
     return [dist.get(key(ziel[0], ziel[1])), weg];
   };
 
+  // V9.2e: Dijkstra wie route, aber mit mehreren Start- und Zielanschluessen gleichzeitig. starts/ziele: [[f, snap, zuschlag_s]].
+  // Der Zuschlag (Restweg zu Fuss) zaehlt in der Suche mit -> exakt das guenstigste Paar.
+  // -> [kosten ohne Zuschlaege, weg, iStart, iZiel] oder null
+  Netz.prototype.routeMehrfach = function (starts, ziele, kosten, punkte, abb) {
+    const S = -1, T = -2, M = 30000;
+    const key = (u, fin) => (u + 2) * M + (fin + 1);
+    const turn = abb ? abb.turn : new Map(), kurve = abb ? abb.kurve : new Map();
+    this.letzte_abbiegen = [];
+    const startEdges = [], intoT = new Map();
+    starts.forEach(([f, sn, z], i) => { for (const e of this._anbindung(f, sn, true)) startEdges.push([...e, z, i]); });
+    ziele.forEach(([f, sn, z], j) => { for (const [node, [tf, pi, a, b, L]] of this._anbindung(f, sn, false)) { if (!intoT.has(node)) intoT.set(node, []); intoT.get(node).push([T, tf, pi, a, b, L, z, j]); } });
+    starts.forEach(([sf, ss, zs], i) => ziele.forEach(([tf, ts, zt], j) => {
+      if (sf === tf && ss[1] === ts[1]) { const F = this.feat[sf], a = ss[3], b = ts[3]; if ((b >= a && F.fw) || (b <= a && F.bw)) startEdges.push([T, sf, ss[1], a, b, Math.abs(b - a), zs + zt, i, j]); }
+    }));
+    const dist = new Map(), prev = new Map(), pq = new Heap();
+    const k0 = key(S, -1); dist.set(k0, 0); pq.push([0, S, -1]);
+    let ziel = null;
+    while (pq.size) {
+      const [d, u, fin] = pq.pop();
+      if (u === T) { ziel = [u, fin]; break; }
+      const dk = dist.get(key(u, fin)); if (dk !== undefined && d > dk) continue;
+      const lists = [u === S ? startEdges : this.out[u], intoT.get(u) || []];
+      for (let li = 0; li < 2; li++) {
+        const virt = li === 1 || u === S;
+        for (const e of lists[li]) {
+          const c = kosten[e[1]];
+          if (!c) continue;
+          let extra = virt ? e[6] : 0;
+          if (fin !== -1 && e[1] !== fin && turn.size) extra += turn.get(TK(u, fin, e[1])) || 0;
+          if (e[1] !== fin && kurve.size) extra += kurve.get(e[1] * 2 + (e[4] >= e[3] ? 1 : 0)) || 0;
+          const pl = punkte.get(e[1]);
+          if (pl) {
+            const lo = Math.min(e[3], e[4]), hi = Math.max(e[3], e[4]); let sperre = false;
+            for (const [ppi, pos, sek] of pl) {
+              if (ppi !== e[2]) continue;
+              if (sek === null) { if (lo - 0.01 <= pos && pos <= hi + 0.01) { sperre = true; break; } }
+              else if ((lo + 0.01 < pos && pos < hi - 0.01) || Math.abs(pos - e[4]) <= 0.01) extra += sek;
+            }
+            if (sperre) continue;
+          }
+          const nd = d + e[5] * c + extra, kk = key(e[0], e[1]);
+          const ok_ = dist.get(kk); if (ok_ === undefined || nd < ok_ - 1e-12) { dist.set(kk, nd); prev.set(kk, [u, fin, e]); pq.push([nd, e[0], e[1]]); }
+        }
+      }
+    }
+    if (!ziel) { const reached = new Set(); dist.forEach((_, k) => reached.add(Math.floor(k / M) - 2)); this.letzte_erreicht = reached; return null; }
+    this.letzte_erreicht = null;
+    const weg = []; let v = ziel, iS = -1, iZ = -1;
+    while (key(v[0], v[1]) !== k0) {
+      const [u, fin, e] = prev.get(key(v[0], v[1]));
+      if (e[0] === T) { if (u === S) { iS = e[7]; iZ = e[8]; } else iZ = e[7]; }
+      else if (u === S) iS = e[7];
+      weg.push([e[1], e[2], e[3], e[4], e[5]]);
+      if (fin !== -1 && e[1] !== fin && turn.has(TK(u, fin, e[1]))) this.letzte_abbiegen.push(TK(u, fin, e[1]));
+      v = [u, fin];
+    }
+    weg.reverse(); this.letzte_abbiegen.reverse();
+    return [dist.get(key(ziel[0], ziel[1])) - starts[iS][2] - ziele[iZ][2], weg, iS, iZ];
+  };
+
   Netz.prototype.zusammenfassen = function (weg) {
     const rows = [];
     for (const [f, pi, a, b, L] of weg) {
@@ -204,11 +269,12 @@
     }
     return [any, ok];
   };
-  Router.prototype.kandidaten = function (pt, kosten) {
-    const o = [];
-    for (const [d, f, sn] of this.N.nearest(pt[0], pt[1], 80, this.N.K.F4_MAX_M)) if (kosten[f]) o.push([d + this.N.attr(f, 'klick_malus'), d, f, sn]);
-    o.sort((a, b) => a[0] - b[0]);
-    return o.slice(0, this.N.K.F4_KANDIDATEN).map(q => [q[1], q[2], q[3]]);
+  // V9.2e: alle zulaessigen Anschluesse bis F4_MAX_M um den Bezugspunkt; Zuschlag = (Luftlinie + Klickmalus) x RESTWEG_SEK_PRO_M.
+  // Weiter weg gibt es keinen Ersatzanschluss mehr (vorher galt beim nicht anfahrbaren Start/Ziel der naechste bis DIAG_SUCHE_M).
+  Router.prototype.anschluesse = function (pt, kosten) {
+    const N = this.N, K = N.K, o = [];
+    for (const [d, f, sn] of N.nearest(pt[0], pt[1], F4_ANZAHL, K.F4_MAX_M)) if (kosten[f]) o.push([f, sn, (d + N.attr(f, 'klick_malus')) * K.RESTWEG_SEK_PRO_M]);
+    return o;
   };
   // Web: Klickpunkt auf die naechste Strasse ziehen (wie ein genauer Klick in QGIS); Tunnel/Autobahn mit Malus
   Router.prototype.snap = function (pt, maxd) {
@@ -219,7 +285,7 @@
   Router.prototype.ausgrund = function (modus, c, f) { return this.D.texte[this.D.aus[modus[0]][c][f]] || '?'; };
 
   Router.prototype.routeProfil = function (c, p1, p2, modus) {
-    const N = this.N, K = N.K, kosten = this.kosten(modus, c), diag = {}, snaps = [];
+    const N = this.N, K = N.K, kosten = this.kosten(modus, c), diag = {}, snaps = [], ersatz = [], bezug = [];
     for (const [name, p] of [['start', p1], ['ziel', p2]]) {
       const [any, ok] = this.naechste(p, kosten);
       const gesperrtNaeher = any && ok && !kosten[any[1]] && ok[0] - any[0] > 5;
@@ -228,44 +294,49 @@
         diag[name + '_gesperrt_f'] = any[1]; diag[name + '_gesperrt_grund'] = this.ausgrund(modus, c, any[1]);
         diag[name + '_alt'] = [ok[2][4], ok[2][5]]; diag[name + '_klick'] = [any[2][4], any[2][5]];
         diag[name + '_rest_m'] = Math.hypot(ok[2][4] - any[2][4], ok[2][5] - any[2][5]);
-        snaps.push(ok); continue;
+        snaps.push(ok); ersatz.push(true); bezug.push([any[2][4], any[2][5]]); continue;
       }
       if (!ok || ok[0] > K.MAX_SNAP_M) {
         if (!any || any[0] > K.MAX_SNAP_M) return { code: c, ok: false, ursache: 'KEIN_NETZ_IN_ZIELNAEHE', text: (name === 'start' ? 'Start' : 'Ziel') + ': nächste Strasse ' + (any ? Math.round(any[0]) + ' m' : '> 500 m') + ' entfernt (max. 30 m)', diag };
         return { code: c, ok: false, ursache: 'NETZ_VORHANDEN_ABER_FUER_FAHRZEUG_AUSGESCHLOSSEN', text: (name === 'start' ? 'Start' : 'Ziel') + ': nächste Strasse ist für ' + c + ' gesperrt: ' + this.ausgrund(modus, c, any[1]), diag };
       }
-      snaps.push(ok);
+      snaps.push(ok); ersatz.push(false); bezug.push(p);
     }
-    let [[d1, f1, s1], [d2, f2, s2]] = snaps;
+    let [[, f1, s1], [, f2, s2]] = snaps;
     const pkt = this.punkteFuer(c, kosten), abb = N.abb[c];
-    let r = N.route(f1, s1, f2, s2, kosten, pkt, abb);
+    const direkt = !ersatz[0] && !ersatz[1];
+    let r = direkt || c === 'REF' ? N.route(f1, s1, f2, s2, kosten, pkt, abb) : null;
     if (!r && c !== 'REF') {
-      const ks = this.kandidaten(p1, kosten), kz = this.kandidaten(p2, kosten), vs = [];
-      ks.forEach((a, i) => kz.forEach((b, j) => vs.push([a[0] + b[0], i, j])));
-      vs.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
-      // Beschleunigung ohne Ergebnisaenderung: eine fehlgeschlagene Suche hat alle von diesem Start erreichbaren Knoten
-      // besucht. Liegt kein Zugangsknoten des Zielkandidaten darin, kann es keine Route geben -> Suche ueberspringen.
-      const erreicht = new Map();
-      erreicht.set(f1 + ':' + s1[1] + ':' + s1[2] + ':' + s1[3], N.letzte_erreicht);
-      for (const [, i, j] of vs.slice(0, 24)) {
-        const a = ks[i], b = kz[j];
-        if (a[1] === f1 && b[1] === f2) continue;
-        const sk = a[1] + ':' + a[2][1] + ':' + a[2][2] + ':' + a[2][3], er = erreicht.get(sk);
-        if (er && a[1] !== b[1]) { const zi = N._anbindung(b[1], b[2], false).map(q => q[0]); if (!zi.some(n => er.has(n))) continue; }
-        const rr = N.route(a[1], a[2], b[1], b[2], kosten, pkt, abb);
-        if (!rr) erreicht.set(sk, N.letzte_erreicht);
+      // V9.2e: Ersatzanschluss nach Gesamtkosten (Fahrzeit + Restweg x RESTWEG_SEK_PRO_M) statt nach Abstand, eine Suche ueber
+      // alle Anschluesse. Zuerst nur die nicht anfahrbare Seite; findet das nichts (oder war alles direkt): beide Seiten (F4).
+      const versuche = direkt ? [[true, true]] : [[ersatz[0], ersatz[1]], [true, true]], leer = [false, false];
+      for (const [vs, vz] of versuche) {
+        const ks = vs ? this.anschluesse(bezug[0], kosten) : [[f1, s1, 0]];
+        const kz = vz ? this.anschluesse(bezug[1], kosten) : [[f2, s2, 0]];
+        if (ersatz[0] && !ks.length) leer[0] = true;
+        if (ersatz[1] && !kz.length) leer[1] = true;
+        const rr = N.routeMehrfach(ks, kz, kosten, pkt, abb);
         if (!rr) continue;
-        r = rr; diag.f4 = true;
-        for (const [name, alt, neu, pt] of [['start', [d1, f1, s1], a, p1], ['ziel', [d2, f2, s2], b, p2]]) {
-          if (neu[1] !== alt[1]) {
+        r = [rr[0], rr[1]];
+        if (vs && vz) diag.f4 = true;
+        const a = ks[rr[2]], b = kz[rr[3]];
+        for (const [name, i, fAlt, neu, pt] of [['start', 0, f1, a, p1], ['ziel', 1, f2, b, p2]]) {
+          if (!ersatz[i] && neu[0] === fAlt) continue;
+          if (!ersatz[i]) {
             diag[name + '_status'] = (name === 'ziel' ? 'ZIEL' : 'START') + '_NICHT_ANFAHRBAR';
-            diag[name + '_gesperrt_f'] = alt[1];
-            diag[name + '_gesperrt_grund'] = diag[name + '_gesperrt_grund'] || 'nächster zulässiger Abschnitt ist vom übrigen zulässigen Netz abgeschnitten';
-            diag[name + '_alt'] = [neu[2][4], neu[2][5]]; diag[name + '_klick'] = diag[name + '_klick'] || pt;
-            diag[name + '_rest_m'] = Math.hypot(neu[2][4] - pt[0], neu[2][5] - pt[1]);
+            diag[name + '_gesperrt_f'] = fAlt;
+            diag[name + '_gesperrt_grund'] = 'nächster zulässiger Abschnitt ist vom übrigen zulässigen Netz abgeschnitten';
+            diag[name + '_klick'] = pt;
           }
+          diag[name + '_alt'] = [neu[1][4], neu[1][5]];
+          diag[name + '_rest_m'] = Math.hypot(neu[1][4] - bezug[i][0], neu[1][5] - bezug[i][1]);
         }
-        [d1, f1, s1] = a; [d2, f2, s2] = b; break;
+        [f1, s1] = a; [f2, s2] = b; break;
+      }
+      const i = leer.indexOf(true);
+      if (!r && i >= 0) {
+        const name = i ? 'Ziel' : 'Start';
+        return { code: c, ok: false, ursache: 'NETZ_VORHANDEN_ABER_FUER_FAHRZEUG_AUSGESCHLOSSEN', text: name + ': nächste Strasse ist für ' + c + ' gesperrt: ' + diag[(i ? 'ziel' : 'start') + '_gesperrt_grund'] + '; nächster zulässiger Anschluss ' + Math.round(snaps[i][0]) + ' m entfernt (max. ' + K.F4_MAX_M + ' m)', diag };
       }
     }
     let abbGenutzt = (N.letzte_abbiegen || []).slice();
