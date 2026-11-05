@@ -195,6 +195,10 @@ ol.eng li::marker{font-weight:700;color:var(--warn)}
 .vleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px}
 .vleg span{display:inline-flex;align-items:center;gap:5px}
 .vleg i{display:inline-block;width:22px;height:0;border-top:5px solid}
+.sperrmk{width:24px;height:24px;border-radius:50%;background:var(--bad);color:#fff;font:700 13px var(--f-body);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:pointer}
+.demomk{font-size:22px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.demo{border:2px dashed var(--bad);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--bad-bg)}
+ol.sperr li{cursor:pointer}
 .engmk{width:24px;height:24px;border-radius:50%;background:var(--warn);color:#16201e;font:700 13px var(--f-body);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:pointer}
 .bans{white-space:nowrap}
 /* Umschalter Zentrale | Fahrzeug im Kopf */
@@ -352,6 +356,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
       </div>
       </details>
       <label class="row small" style="gap:8px;cursor:pointer"><input type="checkbox" id="cb-exp"> Experimentell: auch nicht validierte Strassen (Zeit ×2)</label>
+      <div class="demo" id="demo" hidden></div>
       <div class="res" id="res"></div>
       <div class="vgl" id="vgl" hidden></div>
       <div>
@@ -414,8 +419,9 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
       <p class="small">Breitenbedarf = max(Karosserie + 2 × Reserve, Spiegelbreite + 2 × 10 cm − Überhang über Trottoir). Messtoleranz nach den Erfassungsgrundsätzen der amtlichen Vermessung (σ je Rand 0.10–0.35 m, Faktor 1.645).</p>
       <p>Die Route nutzt nur validierte Strassen. Fehlt eine validierte Verbindung, zeigt BORS eine experimentelle Route mit doppelter Fahrzeit auf unvalidierten Abschnitten und kennzeichnet sie. Liegen nur die ersten oder letzten Meter auf unvalidierten Strassen, heisst das Ergebnis «validiert bis Zufahrt».</p>
       <p><b>Routenvergleich:</b> Für eine Fahrzeugklasse stellt BORS die beste Route nur über validierte Strassen (grün) neben die Vergleichsroute (blau). Die Vergleichsroute ist die Route des Modus «experimentell»: Ungeklärte Abschnitte dürfen mitbenutzt werden, zählen bei der Wahl aber mit doppelter Zeit und sind gelb markiert und nummeriert. «Beste» heisst: geringste Routingkosten. Darin stecken Zuschläge, u. a. ungeklärt ×2, Abbiegen und Kurven, Baustellen, Sonderrecht und Durchfahrt von Zufahrten. Angezeigt wird dagegen die Modellfahrzeit ohne Zuschläge. Deshalb ist keine der beiden Routen zwingend die zeitlich schnellste. Nachweislich gesperrte Abschnitte und feste Poller sind in beiden Routen ausgeschlossen. Ob eine gelbe Stelle passierbar ist, weiss BORS nicht.</p>
+      <p><b>Normales Navi:</b> Unter dem Routenvergleich zeigt BORS die Auto-Route (Profil REF: Personenwagen nach Verkehrsregeln, ohne Höhe, Breite und Gewicht) und listet die Abschnitte, die für die gewählte Klasse gesperrt sind. So wird sichtbar, wo ein Navi ohne Fahrzeugdaten ein grosses Fahrzeug hinführen könnte. Die Auto-Route ist ein Modell und nicht Google Maps.</p>
       <p><b>Einsatzablauf (Simulation):</b> Oben lässt sich zwischen «Zentrale» und «Fahrzeug» umstellen. Die Zentrale nimmt im Tab «Einsatz» einen simulierten Notruf entgegen oder setzt den Einsatzort selbst, sieht die Routen für A–D und sendet einem Fahrzeug die validierte Route oder, bewusst, die Vergleichsroute. Das Fahrzeug erhält die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Vor dem Quittieren wählt der Fahrer eine davon (validiert ist vorgewählt), danach sieht er nur noch diese Route, das Ziel und einen Knopf für den nächsten Status (quittiert, vor Ort, abgeschlossen). Die Zentrale sieht Wahl und Status. «Senden» heisst im Prototyp: im Browser speichern. Ein zweites Fenster im selben Browser erhält den Auftrag sofort, ein anderes Gerät nicht. Auf breiten Bildschirmen zeigt «Beides» Zentrale und Fahrzeug nebeneinander, etwa für eine Präsentation mit dem Beamer. Notrufe, Stichworte und Einsatznummern sind erfunden.</p>
-      <p class="small muted">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2g vom 5.11.2026). Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
+      <p class="small muted">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2g vom 5.11.2026, Baustellen Stand 5.11.2026). Der QGIS-Router 9.2f behebt nur eine Fehlermeldung, die Routen sind gleich. Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
       <h3>Datenquellen</h3>
       <ul class="lim">
         <li>Fahrbahnbreite: amtliche Vermessung Kanton Bern (MOPUBE), 1.5 Mio. Querprofile</li>
@@ -424,7 +430,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
         <li>Gewichtsgrenzen Stadt Bern: Plan «Höchstgewicht» von Tiefbau Stadt Bern (Stand 4.5.2026, erhalten 4.11.2026), den Strassen zugeordnet. Laut Tiefbau gelten die Grenzen auch für Einsatzfahrzeuge. Ohne Höhensignal gilt auf öffentlichen Strassen eine lichte Höhe von mindestens 4.00 m (Verkehrsregelnverordnung, bestätigt vom Tiefbau). Lehnenviadukt / Kleine Westtangente: 3.20 m laut Tiefbau.</li>
         <li>Geprüfte Befunde: 10 Engstellen am Luftbild (SWISSIMAGE) nachgemessen, 1.11.2026, nicht vor Ort</li>
         <li>Parkfelder und Bäume: Stadt Bern</li>
-        <li>Baustellen: Stadt Bern und ASTRA Verkehrsinfo (Stand 28.10.2026)</li>
+        <li>Baustellen: Stadt Bern (Geoportal map.bern.ch) und ASTRA Verkehrsinfo (Abruf 27.10.2026), <span id="bau-stand">Stand 5.11.2026</span>. Nur Baustellen, die an diesem Tag gelten.</li>
         <li>Fahrzeuge: Hülle der realen Fahrzeuge von Schutz und Rettung Bern je Klasse</li>
       </ul>
       <h3>Was der Prototyp noch nicht kann</h3>
@@ -432,7 +438,8 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
         <li>Schilder und Poller aus OpenStreetMap sind nicht vor Ort bestätigt.</li>
         <li>Kirchenfeldbrücke: Laut Tiefbau gibt es eine Nutzungsvereinbarung für Notfalldienste. Ihr Inhalt ist offen, BORS sperrt die Brücke deshalb weiter für C und D.</li>
         <li>Durchfahrten unter Gebäuden auf Hof- und Garagenzufahrten: Höhe meist unbekannt, bleibt ungeklärt.</li>
-        <li>Baustellen verlängern die Fahrzeit, sperren aber nie. Die Sperrung der Aarstrasse ist so nicht abgebildet.</li>
+        <li>Baustellen verlängern die Fahrzeit, sperren aber nie. Die Sperrung der Aarstrasse ist so nicht abgebildet. Der Stand ist fest in der App und wird nicht live nachgeführt.</li>
+        <li>Demo-Sperrungen (Tab «Strasse») gelten nur in diesem Fenster. Sie sind nicht in QGIS und werden nicht an andere Fenster oder Fahrzeuge übertragen.</li>
         <li>Signale, Kandelaber, falsch parkierte Autos und Schnee fehlen in den Daten.</li>
         <li>Kurven und Abbiegen sind ein Modell (Schleppkurven), keine Fahrversuche.</li>
         <li>Fahrzeiten sind Modellzeiten ohne Verkehr.</li>
@@ -533,13 +540,54 @@ async function start(){
   baueKarte();
 }
 
+// Demo-Sperrung (V10): Abschnitt f in allen Modi und Klassen (auch REF) auf Kosten 0 setzen bzw. zuruecksetzen.
+// Nur Laufzeit, nur dieses Fenster; netz.json und Router bleiben unveraendert. Gleiche Funktion im Hauptthread und im Worker.
+function demoSP(D,f,an,O){
+  if(an){if(!O.has(f))O.set(f,JSON.stringify(['V','E'].map(mm=>Object.keys(D.kosten[mm]).map(c=>[c,D.kosten[mm][c][f]]))));
+    for(const mm of ['V','E'])for(const c of Object.keys(D.kosten[mm]))D.kosten[mm][c][f]=0;}
+  else if(O.has(f)){JSON.parse(O.get(f)).forEach((l,j)=>l.forEach(([c,k])=>{D.kosten[['V','E'][j]][c][f]=k;}));O.delete(f);}
+}
+const DEMO=new Map(),DEMO_ORIG=new Map();let demoMk=[],refZeig=false;
+function segMitte(f){const ids=D.segs[f][0][0],i=Math.floor((ids.length-1)/2),a=ids[i],b=ids[Math.min(i+1,ids.length-1)];
+  return [(D.nodes[2*a]+D.nodes[2*b])/200,(D.nodes[2*a+1]+D.nodes[2*b+1])/200];}
+function demoUmschalten(f){
+  const an=!DEMO.has(f),ni=D.attr_cols.indexOf('name');
+  demoSP(D,f,an,DEMO_ORIG);if(worker)worker.postMessage({typ:'sperre',f,an});
+  if(an)DEMO.set(f,D.attr[f][ni]||'Strasse ohne Namen');else DEMO.delete(f);
+  toast(an?'Demo-Sperrung gesetzt: '+DEMO.get(f)+'. BORS rechnet neu.':'Demo-Sperrung aufgehoben.');
+  zeichneDemo();uiDemo();if(P1&&P2)rechne();
+}
+function zeichneDemo(){if(!map)return;demoMk.forEach(m=>m.remove());demoMk=[];
+  DEMO.forEach((name,f)=>{const el=document.createElement('div');el.className='demomk';el.textContent='⛔';el.title='Demo-Sperrung: '+name;
+    el.onclick=ev=>{ev.stopPropagation();zeigeSeg(f);};demoMk.push(new maplibregl.Marker({element:el}).setLngLat(rel2wgs(...segMitte(f))).addTo(map));});}
+function uiDemo(){const el=$('#demo');if(!el)return;if(!DEMO.size){el.hidden=true;el.innerHTML='';return;}
+  el.hidden=false;
+  el.innerHTML=`<b>Demo-Sperrung aktiv (${DEMO.size})</b><p class="small" style="margin:4px 0">${[...DEMO.values()].map(esc).join(', ')} – für alle Fahrzeuge und das Auto gesperrt. Nur in diesem Fenster, nicht in QGIS; andere Fenster und Fahrzeuge rechnen ohne diese Sperrung.</p><button class="btn" id="b-demo-alle">Alle Demo-Sperrungen aufheben</button>`;
+  el.querySelector('#b-demo-alle').onclick=()=>{[...DEMO.keys()].forEach(f=>{demoSP(D,f,false,DEMO_ORIG);if(worker)worker.postMessage({typ:'sperre',f,an:false});});DEMO.clear();zeichneDemo();uiDemo();toast('Alle Demo-Sperrungen aufgehoben.');if(P1&&P2)rechne();};}
+// Normales Navi (V10): Auto-Route REF und die Abschnitte darauf, die fuer Klasse c gesperrt sind (Darstellung, Router unveraendert)
+function refKonflikte(c){const r=BEIDE&&BEIDE.V.REF;if(!r||!r.ok)return null;const ni=D.attr_cols.indexOf('name'),g=new Map();let unv=0;
+  r.rows.forEach(x=>{const k=D.kat[c][x.f];if(k===1)unv+=x.L;if(k!==2)return;const e=g.get(x.f);
+    if(e)e.L+=x.L;else g.set(x.f,{f:x.f,name:D.attr[x.f][ni]||'Strasse ohne Namen',L:x.L,gr:sperrGrund(c,x.f),mitte:mitte(x.pts)});});
+  return {r,sperr:[...g.values()],unv};}
+// Der entscheidende Teil des Sperrgrunds: harte Teile (Gewicht:/Hoehe:/Breite:/Hindernis:), amtliche Quelle zuerst
+function sperrGrund(c,f){const t=String(D.texte[D.grund[c][f]]||'').replace(/^Kat\. 3:\s*/,'').split(' | ');
+  const hart=t.filter(p=>/^(Gewicht|Hoehe|Breite|Hindernis):/.test(p));
+  const amtl=hart.filter(p=>/Tiefbau Stadt Bern|Hinderniskartei/.test(p));
+  const p=(amtl[0]||hart[0]||t[0]||'gesperrt').replace(/\s*\(Antwo\)?\)?\s*$/,')').replace(/_/g,' ');
+  return de(p).slice(0,170);}
+function refBlock(c){const k=refKonflikte(c);if(!k)return '';const n=k.sperr.length;
+  return `<h3>Normales Navi (Auto-Route)</h3><p class="small">${n?`Die Auto-Route führt für ${PN[c]} über <b>${n} gesperrte${n===1?'n':''} Abschnitt${n===1?'':'e'}</b>. BORS meidet ${n===1?'ihn':'sie'}.`:`Die Auto-Route enthält keinen für ${PN[c]} gesperrten Abschnitt.`}${k.unv>0?` Dazu ${Math.round(k.unv)} m ungeklärt.`:''} Auto-Route: ${k.r.fahrzeit_min.toFixed(1)} min, ${km(k.r.laenge_m)}.</p>
+    ${n?`<ol class="sperr eng">${k.sperr.slice(0,8).map((s,i)=>`<li data-i="${i}"><b>${esc(s.name)}</b> – ${esc(s.gr)}</li>`).join('')}</ol>${n>8?`<p class="small muted">+ ${n-8} weitere</p>`:''}`:''}
+    <button class="btn ${refZeig?'on':''}" id="b-ref">${refZeig?'Auto-Route ausblenden':'Auto-Route auf der Karte zeigen'}</button>
+    <p class="small muted">Auto-Route = Profil REF: schnellster Weg für einen Personenwagen nach Verkehrsregeln, ohne Höhe, Breite und Gewicht. Sie zeigt, wohin ein Navi ohne Fahrzeugdaten führen könnte. Sie ist nicht Google Maps.</p>`;}
 // Router im Hintergrund (Web Worker); Fallback im Hauptthread
 let routerMain=null;
 async function startWorker(txt){
   try{
     const rs=document.getElementById('router-src');
     const src=rs?rs.textContent:await (await fetch('bors_router.js')).text();
-    const glue=`let R=null;onmessage=e=>{const m=e.data;if(m.typ==='init'){const D=JSON.parse(m.txt);R=new BORS.Router(new BORS.Netz(D));postMessage({typ:'bereit'});}
+    const glue=`let R=null,DW=null;const ORIG=new Map(),SP=${demoSP.toString()};onmessage=e=>{const m=e.data;if(m.typ==='init'){DW=JSON.parse(m.txt);R=new BORS.Router(new BORS.Netz(DW));postMessage({typ:'bereit'});}
+      else if(m.typ==='sperre'){SP(DW,m.f,m.an,ORIG);}
       else if(m.typ==='snap'){postMessage({typ:'snap',id:m.id,p:R.snap(m.p,m.d)});}
       else if(m.typ==='route'){try{const r={V:R.berechne(m.p1,m.p2,'VALIDIERT'),E:R.berechne(m.p1,m.p2,'EXPERIMENTELL')};postMessage({typ:'res',id:m.id,res:r});}catch(err){postMessage({typ:'err',id:m.id,msg:String(err)});}}};`;
     worker=new Worker(URL.createObjectURL(new Blob([src+'\n'+glue],{type:'text/javascript'})));
@@ -802,7 +850,7 @@ function einpassen(){
   // Fahrzeug mit Auftrag: nur die zugewiesene Route; sonst wie bisher
   if(fz){if(fz.r)for(const k of fzWaehlt(fz)?['val','exp']:[fz.wahl])if(fz.r[k])add(fz.r[k]);b.extend(lv2wgs(...fz.a.s));b.extend(lv2wgs(...fz.a.z));n++;}
   else{if(!BEIDE||(ansicht==='einsatz'&&!vglAktiv()))return;
-    if(vglAktiv()){const v=vgl(profil);if(v.val)add(v.val);if(v.zeigeE)add(v.exp);}
+    if(vglAktiv()){const v=vgl(profil);if(v.val)add(v.val);if(v.zeigeE)add(v.exp);if(refZeig&&ansicht!=='einsatz'&&BEIDE.V.REF.ok)add(BEIDE.V.REF);}
     else for(const c of ['A','B','C','D'])if(show[c]&&RES[c].ok)add(RES[c]);
     if(P1)b.extend(lv2wgs(...P1));if(P2)b.extend(lv2wgs(...P2));}
   const unten=istMobil()?Math.round(innerHeight*(ansicht==='einsatz'?0.56:0.44))+16:50;
@@ -829,6 +877,9 @@ function zeichneRoute(){
     const v=vgl(profil),gross=ansicht==='einsatz',o=v.val&&v.zeigeE?(gross?4:3):0;
     if(v.val){v.val.rows.forEach(x=>VV.push(linie(x,{w:gross?7:5.5,o:-o})));zuf(v.val);}
     if(v.zeigeE){v.exp.rows.forEach(x=>{VE.push(linie(x,{w:gross?5:4,o}));if(x.kat!==0)VU.push(linie(x,{w:gross?5:4,o}));});zuf(v.exp);engMarken(v.eng);}
+    if(refZeig&&!gross){const k=refKonflikte(profil);if(k){const col=css('--rREF');k.r.rows.forEach(x=>F.push(linie(x,{col,w:4.5})));
+      k.sperr.forEach(s=>{const el=document.createElement('div');el.className='sperrmk';el.textContent='✕';el.title=s.name+': '+s.gr;
+        el.onclick=ev=>{ev.stopPropagation();toast(s.name+' – für '+profil+' gesperrt: '+s.gr,6000);};engMk.push(new maplibregl.Marker({element:el}).setLngLat(rel2wgs(...s.mitte)).addTo(map));});}}
   }
   else if(RES&&ansicht!=='einsatz')for(const c of ['D','C','B','A','REF']){const r=RES[c];if(!show[c]||!r||!r.ok)continue;
     const col=css('--r'+c);
@@ -904,12 +955,15 @@ function uiVgl(){
     <div class="cmp">${karte(I.val)}${I.exp?karte(I.exp):`<div class="vk n"><span class="k">Vergleich</span><span>${esc(I.gleich||'')}</span></div>`}</div>
     ${I.diff?`<p class="vdiff">${esc(I.diff)}</p>`:''}
     ${v.eng.length?`<h3>Ungeklärte Stellen der Vergleichsroute</h3>${engListe(v,12)}`:''}
+    ${refBlock(profil)}
     <div class="vleg"><span><i style="border-color:var(--ok)"></i>validiert</span><span><i style="border-color:var(--vgl)"></i>Vergleichsroute</span><span><i style="border-color:var(--warn);border-top-style:dashed"></i>ungeklärt</span></div>
     <button class="btn ${kVgl?'on':''}" id="b-kvgl">${kVgl?'Karte: wieder alle Klassen zeigen':'Vergleich auf der Karte zeigen'}</button>
     <p class="small muted">${I.zeit} Die Vergleichsroute entspricht dem Modus «experimentell» (QGIS und Web gleich). Gesperrte Abschnitte und feste Poller sind in beiden Routen ausgeschlossen.</p>`;
   el.querySelector('#vgl-kl').onclick=e=>{const b=e.target.closest('button[data-p]');if(b){setProfil(b.dataset.p);if(!kVgl){kVgl=true;zeichneRoute();einpassen();uiRoute();}}};
   el.querySelector('#b-kvgl').onclick=()=>{kVgl=!kVgl;zeichneRoute();einpassen();uiRoute();};
   engKlick(el,v);
+  const br=el.querySelector('#b-ref');if(br)br.onclick=()=>{refZeig=!refZeig;if(refZeig)kVgl=true;zeichneRoute();einpassen();uiRoute();};
+  const rk=refKonflikte(profil);el.querySelectorAll('ol.sperr li').forEach(li=>li.onclick=()=>{const s=rk.sperr[+li.dataset.i];map.easeTo({center:rel2wgs(...s.mitte),zoom:Math.max(map.getZoom(),17),duration:500});if(istMobil())setSheet('klein');});
 }
 
 // ------------------------------------------------ Einsatzablauf (Simulation): Zentrale disponiert und sendet, Fahrzeug sieht nur seinen Auftrag
@@ -1174,7 +1228,7 @@ function zusammenfassung(){
   return `<div class="sum"><b>${titel}</b>${txt}</div>`;
 }
 function uiRoute(){
-  uiVgl();uiEinsatz();uiZentrale();
+  uiDemo();uiVgl();uiEinsatz();uiZentrale();
   $('#txt-start').textContent=P1txt||'Start: auf die Karte tippen';$('#txt-start').classList.toggle('leer',!P1);
   $('#txt-ziel').textContent=P2txt||'Ziel: auf die Karte tippen';$('#txt-ziel').classList.toggle('leer',!P2);
   if(rechnet){$('#res').innerHTML='<div class="hint">BORS berechnet die Routen für A–D …</div>';return;}
@@ -1247,7 +1301,9 @@ function zeigeSeg(i){
       <tr><td>Höchstbreite</td><td>${esc(n(a('maxwidth')))}</td></tr><tr><td>Brücke/Tunnel</td><td>${esc(n(a('bruecke_tunnel_layer')))}</td></tr>
       <tr><td>KSVB</td><td>${esc(n(a('ksvb')))}</td></tr><tr><td>Hindernisse</td><td>${pk||esc(n(a('v9_hindernisse')))}</td></tr>
       ${bau?`<tr><td>Baustelle</td><td>${bau}</td></tr>`:''}</table>
-    <p class="small muted" style="margin-top:10px">Quellen: Breite aus der amtlichen Vermessung, Schilder aus OpenStreetMap und KSVB (nicht vor Ort bestätigt).</p>`;
+    <p class="small muted" style="margin-top:10px">Quellen: Breite aus der amtlichen Vermessung, Schilder aus OpenStreetMap und KSVB (nicht vor Ort bestätigt).</p>
+    ${ansicht!=='einsatz'?`<h3 style="margin-top:14px;margin-bottom:4px">Demo</h3><button class="btn ${DEMO.has(i)?'on':''}" id="b-demo">${DEMO.has(i)?'Demo-Sperrung aufheben':'Demo: Abschnitt sperren (Vollsperrung)'}</button><p class="small muted">Für Präsentationen: Der Abschnitt gilt für alle Fahrzeuge und das Auto als gesperrt, BORS rechnet die Route sofort neu. Nur in diesem Fenster, nicht in QGIS.</p>`:''}`;
+  {const bd=$('#b-demo');if(bd)bd.onclick=()=>{demoUmschalten(i);zeigeSeg(i);};}
   tab('seg');if(istMobil())setSheet('gross');$('#p-seg').scrollTop=0;
 }
 
@@ -1274,7 +1330,7 @@ let splitStart=false;
   else if(a!=='einsatz'&&a!=='gis'&&a!=='beides'){try{a=localStorage.getItem('bors-ansicht');}catch(_){}}
   if(a==='beides'){a='gis';splitStart=true;}
   if(a==='einsatz'){ansicht='einsatz';$('.app').dataset.ansicht='einsatz';}})();
-start().then(()=>{if(D){wachenUI();profTab();laden();setAnsicht(ansicht);if(splitStart)setSplit(true);hinweis();}});
+start().then(()=>{if(D){if(D.baustellen_stand){const t=D.baustellen_stand.slice(0,10).split('-');$('#bau-stand').textContent='Stand '+(+t[2])+'.'+(+t[1])+'.'+t[0];}wachenUI();profTab();laden();setAnsicht(ansicht);if(splitStart)setSplit(true);hinweis();}});
 })();
 </script>
 

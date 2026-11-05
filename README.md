@@ -10,6 +10,16 @@ Fahrzeugabhängiges Einsatzrouting für Bern und zehn Nachbargemeinden. BFH, Mod
 - `netz_aenderungen.csv` – die 129 Statuswechsel gegenüber V8 (Abschnitt × Klasse)
 - `basis.json` – Ersatz-Grundkarte aus der amtlichen Vermessung (Gebäude, Wald, Gewässer)
 
+## Neu in Version 10 (5.11.2026): Baustellen Stand 5.11., Vergleich mit dem normalen Navi, Demo-Sperrung
+
+Router und Strassennetz wie V9 (Router V9.2e, Netz V9.2g). Neu:
+- **Baustellen Stand 5.11.2026** statt 28.10.: Baustellen und Installationsplätze der Stadt Bern aus dem Geoportal (`01_Skripte/Aktuell/16_Stadt_Bern_Live_V3_BORS.py`, Datei `baustellen_20261105_1622_stadt.gpkg`), ASTRA-Meldungen vom 27.10. nach Datum gefiltert. 369 statt 404 Abschnitte (52 beendet, 17 neu), dazu die neue Zuordnung eines Westside-Pollers (Riedbachstrasse w1148969056 für REF wieder frei, wie in QGIS). `netz.json` mit `01_Skripte/Aktuell/31_Web_Baustellen_BORS.py` erzeugt; Liste `netz_baustellen_aenderungen.csv`. Geprüft: Mit dem alten Stand ergibt das Skript die bisherige `netz.json` (0 Kostenabweichungen). QGIS liest dieselbe Baustellendatei automatisch.
+- **Normales Navi:** Unter dem Routenvergleich zeigt die App die Auto-Route (Profil REF, ohne Fahrzeugmasse) und die Abschnitte darauf, die für die gewählte Klasse gesperrt sind; auf Wunsch auf der Karte (grau, rote ✕). Nur Darstellung, Router unverändert.
+- **Demo-Sperrung** (Tab «Strasse»): einen Abschnitt für alle Fahrzeuge und das Auto sperren, BORS rechnet sofort neu (⛔ auf der Karte). Nur Laufzeit in diesem Fenster, nicht in `netz.json`, nicht in QGIS, nicht an andere Fenster übertragen.
+- **Datenstand** der Baustellen im Tab «Methode».
+
+Geprüft am 5.11.2026 lokal im Browser (Port 8776): Beamer 1440 × 900 «Beides» Notruf → Senden an C (beide Routen) → Fahrerwahl → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Notruf → Senden an B → Fahrzeug → quittiert → vor Ort → abgeschlossen; Vergleich mit normalem Navi für C (Kornhausbrücke, Kornhausplatz gesperrt, 2 ✕ auf der Karte); Demo-Sperrung Lorrainebrücke: C 1.70 → 2.47 km, nach dem Aufheben wieder 1.70 km. Keine Konsolenfehler. Nicht veröffentlicht, nicht vor Ort geprüft.
+
 ## Neu in Version 9 (5.11.2026): Netz V9.2g mit den Angaben von Tiefbau Stadt Bern
 
 Oberfläche und Router wie V8 (Router V9.2e). Neu sind die Daten aus der Antwort von Tiefbau Stadt Bern vom 4.11.2026:
