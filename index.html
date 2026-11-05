@@ -415,12 +415,13 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
       <p>Die Route nutzt nur validierte Strassen. Fehlt eine validierte Verbindung, zeigt BORS eine experimentelle Route mit doppelter Fahrzeit auf unvalidierten Abschnitten und kennzeichnet sie. Liegen nur die ersten oder letzten Meter auf unvalidierten Strassen, heisst das Ergebnis «validiert bis Zufahrt».</p>
       <p><b>Routenvergleich:</b> Für eine Fahrzeugklasse stellt BORS die beste Route nur über validierte Strassen (grün) neben die Vergleichsroute (blau). Die Vergleichsroute ist die Route des Modus «experimentell»: Ungeklärte Abschnitte dürfen mitbenutzt werden, zählen bei der Wahl aber mit doppelter Zeit und sind gelb markiert und nummeriert. «Beste» heisst: geringste Routingkosten. Darin stecken Zuschläge, u. a. ungeklärt ×2, Abbiegen und Kurven, Baustellen, Sonderrecht und Durchfahrt von Zufahrten. Angezeigt wird dagegen die Modellfahrzeit ohne Zuschläge. Deshalb ist keine der beiden Routen zwingend die zeitlich schnellste. Nachweislich gesperrte Abschnitte und feste Poller sind in beiden Routen ausgeschlossen. Ob eine gelbe Stelle passierbar ist, weiss BORS nicht.</p>
       <p><b>Einsatzablauf (Simulation):</b> Oben lässt sich zwischen «Zentrale» und «Fahrzeug» umstellen. Die Zentrale nimmt im Tab «Einsatz» einen simulierten Notruf entgegen oder setzt den Einsatzort selbst, sieht die Routen für A–D und sendet einem Fahrzeug die validierte Route oder, bewusst, die Vergleichsroute. Das Fahrzeug erhält die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Vor dem Quittieren wählt der Fahrer eine davon (validiert ist vorgewählt), danach sieht er nur noch diese Route, das Ziel und einen Knopf für den nächsten Status (quittiert, vor Ort, abgeschlossen). Die Zentrale sieht Wahl und Status. «Senden» heisst im Prototyp: im Browser speichern. Ein zweites Fenster im selben Browser erhält den Auftrag sofort, ein anderes Gerät nicht. Auf breiten Bildschirmen zeigt «Beides» Zentrale und Fahrzeug nebeneinander, etwa für eine Präsentation mit dem Beamer. Notrufe, Stichworte und Einsatznummern sind erfunden.</p>
-      <p class="small muted">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2f vom 1.11.2026). Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
+      <p class="small muted">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2g vom 5.11.2026). Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
       <h3>Datenquellen</h3>
       <ul class="lim">
         <li>Fahrbahnbreite: amtliche Vermessung Kanton Bern (MOPUBE), 1.5 Mio. Querprofile</li>
         <li>Strassennetz, Schilder, Poller: OpenStreetMap (nicht vor Ort bestätigt)</li>
         <li>Höhen- und Gewichtsbeschränkungen: kantonales Verzeichnis KSVB, Hinderniskartei Kanton Bern (signalisierte Höhen und Gewichte an Brücken und Unterführungen, Stand 24.8.2026) und OpenStreetMap</li>
+        <li>Gewichtsgrenzen Stadt Bern: Plan «Höchstgewicht» von Tiefbau Stadt Bern (Stand 4.5.2026, erhalten 4.11.2026), den Strassen zugeordnet. Laut Tiefbau gelten die Grenzen auch für Einsatzfahrzeuge. Ohne Höhensignal gilt auf öffentlichen Strassen eine lichte Höhe von mindestens 4.00 m (Verkehrsregelnverordnung, bestätigt vom Tiefbau). Lehnenviadukt / Kleine Westtangente: 3.20 m laut Tiefbau.</li>
         <li>Geprüfte Befunde: 10 Engstellen am Luftbild (SWISSIMAGE) nachgemessen, 1.11.2026, nicht vor Ort</li>
         <li>Parkfelder und Bäume: Stadt Bern</li>
         <li>Baustellen: Stadt Bern und ASTRA Verkehrsinfo (Stand 28.10.2026)</li>
@@ -429,6 +430,8 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
       <h3>Was der Prototyp noch nicht kann</h3>
       <ul class="lim">
         <li>Schilder und Poller aus OpenStreetMap sind nicht vor Ort bestätigt.</li>
+        <li>Kirchenfeldbrücke: Laut Tiefbau gibt es eine Nutzungsvereinbarung für Notfalldienste. Ihr Inhalt ist offen, BORS sperrt die Brücke deshalb weiter für C und D.</li>
+        <li>Durchfahrten unter Gebäuden auf Hof- und Garagenzufahrten: Höhe meist unbekannt, bleibt ungeklärt.</li>
         <li>Baustellen verlängern die Fahrzeit, sperren aber nie. Die Sperrung der Aarstrasse ist so nicht abgebildet.</li>
         <li>Signale, Kandelaber, falsch parkierte Autos und Schnee fehlen in den Daten.</li>
         <li>Kurven und Abbiegen sind ein Modell (Schleppkurven), keine Fahrversuche.</li>

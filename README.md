@@ -6,9 +6,23 @@ Fahrzeugabhängiges Einsatzrouting für Bern und zehn Nachbargemeinden. BFH, Mod
 
 - `index.html` – Web-App (Karte, Routing für die Fahrzeugklassen A–D, Routenvergleich, Einsatzablauf Zentrale/Fahrzeug, Strassenbefund, Ebenen)
 - `bors_router.js` – Routing-Kern, direkte Übertragung des QGIS-Routers V9.2e (Ersatzanschluss nach Gesamtkosten)
-- `netz.json` – Strassennetz V9.2f mit Bewertung je Fahrzeugklasse (Netzmaster `BORS_Netzmaster_V9_20261101_2206`)
-- `netz_aenderungen.csv` – die 52 Statuswechsel gegenüber V7 (Abschnitt × Klasse)
+- `netz.json` – Strassennetz V9.2g mit Bewertung je Fahrzeugklasse (Netzmaster `BORS_Netzmaster_V9_20261105_1118`)
+- `netz_aenderungen.csv` – die 129 Statuswechsel gegenüber V8 (Abschnitt × Klasse)
 - `basis.json` – Ersatz-Grundkarte aus der amtlichen Vermessung (Gebäude, Wald, Gewässer)
+
+## Neu in Version 9 (5.11.2026): Netz V9.2g mit den Angaben von Tiefbau Stadt Bern
+
+Oberfläche und Router wie V8 (Router V9.2e). Neu sind die Daten aus der Antwort von Tiefbau Stadt Bern vom 4.11.2026:
+- **Plan Höchstgewicht** (Stand 4.5.2026) georeferenziert und den Abschnitten zugeordnet (Rest im Median 0.8 m). Laut Tiefbau gelten die Grenzen für alle, auch für Einsatzfahrzeuge.
+  - 28 t: ganze Altstadt, Aarstrasse, Schüttestrasse, Strassen bei der Universität (u. a. Sidlerstrasse, Wildhainweg): **D gesperrt** (Wasserwerfer 28.4 t). C (17 t) und leichter unverändert.
+  - 16 t, Kleine Westtangente: **C und D gesperrt** (7 Abschnitte für C neu).
+  - 10 t, Zufahrt Kornhausbrücke (Kornhausplatz), Grabenpromenade und Schänzlistrasse: **C und D gesperrt** (6 Abschnitte).
+  - Zusammen für D 96 Abschnitte (6.8 km) neu gesperrt, für C 13 Abschnitte (0.6 km).
+  - Folge: Ein Einsatzort mitten in der Altstadt (z. B. Kramgasse) ist für D nicht mehr erreichbar («keine Route»). A–C fahren unverändert.
+- **Höhe ohne Signal mind. 4.00 m** (Verkehrsregelnverordnung, vom Tiefbau bestätigt) auf öffentlichen Strassen: 7 Abschnitte für B, 6 für C und D neu validiert (u. a. Wehrstrasse, Riedmoosstrasse, Freiburgstrasse). Auf Hof- und Garagenzufahrten (OSM `service`) bleibt die Höhe ungeklärt.
+- **Lehnenviadukt / Kleine Westtangente 3.20 m:** B (2.95 m) validiert, C knapp, D gesperrt.
+- **Kirchenfeldbrücke:** Hinweis auf die Nutzungsvereinbarung für Notfalldienste; die Sperre für C und D bleibt, bis SRB den Inhalt bestätigt.
+- `netz.json` erzeugt mit `01_Skripte/Aktuell/29_Web_Netz_V9_2f_BORS.py` aus der V8-Datei und dem Netzmaster V9.2g. Bericht: `05_Berichte/Abgleich_Tiefbauamt_20261105`.
 
 ## Neu in Version 8 (1.11.2026): Netz V9.2f und Router V9.2e
 
