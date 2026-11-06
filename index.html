@@ -308,7 +308,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
     <div class="logo">BORS <span>Bern</span></div>
     <div class="sub">Fahrzeugabhängiges Einsatzrouting · BFH BCS HS26 Gruppe 5</div>
     <div class="seg vsw" id="vsw" role="group" aria-label="Ansicht umstellen"><button data-a="gis" aria-pressed="true" title="Einsatzzentrale: volle Karte, Notruf, Routen A–D, Zuweisung">Zentrale</button><button data-a="einsatz" aria-pressed="false" title="Einsatzfahrzeug: nur die zugewiesene Route">Fahrzeug<span class="vsw-n" id="vsw-n" hidden></span></button><button data-a="beides" aria-pressed="false" class="nurbreit" title="Präsentation: Zentrale und Fahrzeug nebeneinander">Beides</button></div>
-    <div class="badge">Prototyp<span class="lang"> · keine Einsatzfreigabe</span></div>
+    <div class="badge">Prototyp</div>
   </header>
 
   <aside class="pult">
@@ -653,6 +653,11 @@ function baueKarte(){
     map.addSource('tiles',{type:'raster',tiles:[tileUrl('grau')],tileSize:256,maxzoom:18});
     map.addLayer({id:'tiles',type:'raster',source:'tiles',paint:{'raster-opacity':0.85}});
     ['wald','wasser','bef','bahn','geb'].forEach(k=>{map.addSource('av-'+k,{type:'geojson',data:leer});map.addLayer({id:'av-'+k,type:'fill',source:'av-'+k,layout:{visibility:'none'},paint:{'fill-color':css('--'+k)}});});
+    // V11: Parkfelder (dieselben Flächen, die von der Breite abgezogen werden), Farbe nach Art, ungenau verortete heller
+    map.addSource('park',{type:'geojson',data:leer});
+    map.addLayer({id:'park',type:'fill',source:'park',layout:{visibility:'none'},paint:{'fill-color':['match',['get','k'],0,PARK_FARBE[0],1,PARK_FARBE[1],2,PARK_FARBE[2],PARK_FARBE[3]],
+      'fill-opacity':['case',['==',['get','u'],1],0.45,0.75]}});
+    map.addLayer({id:'park-rand',type:'line',source:'park',minzoom:15,layout:{visibility:'none'},paint:{'line-color':['match',['get','k'],0,PARK_FARBE[0],1,PARK_FARBE[1],2,PARK_FARBE[2],PARK_FARBE[3]],'line-width':0.8}});
     map.addSource('breite',{type:'geojson',data:leer});
     map.addLayer({id:'breite',type:'line',source:'breite',layout:{visibility:'none','line-cap':'round'},paint:{'line-width':['interpolate',['linear'],['zoom'],11,1.5,16,6],
       'line-color':['interpolate',['linear'],['get','w'],2,'#b2182b',3,'#ef8a62',4,'#fddbc7',5,'#d1e5f0',6.5,'#67a9cf',9,'#2166ac']}});
@@ -662,6 +667,7 @@ function baueKarte(){
     map.addLayer({id:'netz',type:'line',source:'netz',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':netzFarbe(),
       'line-width':['interpolate',['linear'],['zoom'],10,0.8,14,2.4,17,6],'line-opacity':['case',['==',['get','o'],1],0.35,1]}});
     map.addLayer({id:'netz-sel',type:'line',source:'netz',filter:['==',['get','i'],-1],paint:{'line-color':css('--ink'),'line-width':['interpolate',['linear'],['zoom'],10,3,17,11],'line-opacity':0.35}});
+    map.moveLayer('park');map.moveLayer('park-rand');   // Parkfelder liegen am Fahrbahnrand: über dem Netz zeichnen, sonst verdeckt
     map.addSource('limit',{type:'geojson',data:limitGeo()});
     map.addLayer({id:'limit',type:'line',source:'limit',layout:{visibility:'none','line-cap':'round'},paint:{'line-color':css('--accent'),'line-width':['interpolate',['linear'],['zoom'],10,3,17,10],'line-opacity':0.55}});
     map.addSource('bau',{type:'geojson',data:bauGeo()});
@@ -719,15 +725,29 @@ async function setBasis(k){
 }
 
 // ------------------------------------------------ Ebenen
+const PARK_FARBE=['#1f5fd1','#6b7280','#8e44ad','#d6336c'];   // blaue Zone, weiss/gebührenpflichtig, Spezialfelder, OSM
 const EBENEN=[['netz','Strassennetz nach Befahrbarkeit',true,'var(--ok)'],['breite','Gemessene Fahrbahnbreite (untere Schranke)',false,'#67a9cf'],
+  ['park','Parkfelder (von der Breite abgezogen)',false,PARK_FARBE[0]],
   ['limit','Höhen- und Gewichtsbeschränkungen',false,'var(--accent)'],['bau','Baustellen (aktiv)',false,'#f08c00'],['punkte','Poller und Tore (rot = fest)',false,'var(--warn)'],['wachen','Wachen',true,'var(--accent)']];
+let parkKat=null;
+async function parkLaden(){
+  if(map.getSource('park')._loaded)return;map.getSource('park')._loaded=true;toast('Parkfelder werden geladen …',2000);
+  try{const P=await (await fetch('parkfelder.json')).json();parkKat=P.kat;
+    const F=P.f.map(([k,u,...ringe])=>({type:'Feature',properties:{k,u},geometry:{type:'Polygon',coordinates:ringe.map(fl=>{let px=0,py=0;const r=[];
+      for(let i=0;i<fl.length;i+=2){px+=fl[i];py+=fl[i+1];r.push(rel2wgs(px/10,py/10));}r.push(r[0]);return r;})}}));
+    map.getSource('park').setData({type:'FeatureCollection',features:F});
+    $('#park-leg').innerHTML=parkKat.map((t,i)=>`<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${PARK_FARBE[i]};margin-right:5px;vertical-align:-1px"></span>${esc(t)}`).join('<br>')+
+      `<br>Heller = Lage ungenau (${F.filter(f=>f.properties.u).length} von ${F.length} Flächen). Belegte Felder zählen nicht zur Fahrbahnbreite. Private Parkplätze und falsch parkierte Autos fehlen.`;
+  }catch(e){map.getSource('park')._loaded=false;toast('Parkfelder konnten nicht geladen werden.');}
+}
 function ebenenUI(){
   $('#lay').innerHTML=EBENEN.map(([id,t,on,c])=>`<label><input type="checkbox" id="ly-${id}" ${on?'checked':''}><i style="border-color:${c}"></i>${t}</label>`).join('')+
-    `<p class="small muted" id="breite-leg" hidden>Breite: rot unter 3 m · hell 4–5 m · blau über 6.5 m</p>`;
+    `<p class="small muted" id="breite-leg" hidden>Breite: rot unter 3 m · hell 4–5 m · blau über 6.5 m</p><p class="small muted" id="park-leg" hidden></p>`;
   EBENEN.forEach(([id])=>$('#ly-'+id).onchange=async e=>{const on=e.target.checked;
     if(id==='breite'&&on&&!map.getSource('breite')._loaded){map.getSource('breite').setData(breiteGeo());map.getSource('breite')._loaded=true;}
     if(id==='breite')$('#breite-leg').hidden=!on;
-    (id==='netz'?['netz','netz-casing']:[id]).forEach(l=>map.setLayoutProperty(l,'visibility',on?'visible':'none'));});
+    if(id==='park'){$('#park-leg').hidden=!on;if(on)await parkLaden();}
+    (id==='netz'?['netz','netz-casing']:id==='park'?['park','park-rand']:[id]).forEach(l=>map.setLayoutProperty(l,'visibility',on?'visible':'none'));});
   $('#sel-basis').onchange=e=>setBasis(e.target.value);
 }
 function netzStat(){

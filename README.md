@@ -9,6 +9,15 @@ Fahrzeugabhängiges Einsatzrouting für Bern und zehn Nachbargemeinden. BFH, Mod
 - `netz.json` – Strassennetz V9.2g mit Bewertung je Fahrzeugklasse (Netzmaster `BORS_Netzmaster_V9_20261105_1118`)
 - `netz_aenderungen.csv` – die 129 Statuswechsel gegenüber V8 (Abschnitt × Klasse)
 - `basis.json` – Ersatz-Grundkarte aus der amtlichen Vermessung (Gebäude, Wald, Gewässer)
+- `parkfelder.json` – Parkfeld-Flächen für die Ebene «Parkfelder» (dieselben, die von der Fahrbahnbreite abgezogen werden)
+
+## Neu in Version 11 (6.11.2026): Ebene Parkfelder, Badge nur «Prototyp»
+
+Router, Strassennetz und Baustellen wie V10. Neu:
+- **Ebene «Parkfelder (von der Breite abgezogen)»** im Tab «Ebenen»: 4631 Flächen aus `02_Daten/2_Aktuell_V9/Vorstufen/parkierung_v5_BORS_Netz_V2_20261027_1534.gpkg` (Stadt Bern 4245 Felder, OSM 381 Strassenränder), also genau die Daten, die `25_Breite_V9_1` von der Fahrbahnbreite abzieht und QGIS in der Gruppe *03 BELEGE* zeigt. Farbe nach Art: blaue Zone, weiss/gebührenpflichtig, Spezialfelder (Gehbehinderte, Taxi, Car, LKW …), OSM-Strassenrand; ungenau verortete Flächen (3885) heller. Wird erst beim Einschalten geladen, über dem Strassennetz gezeichnet. Export mit `01_Skripte/Aktuell/32_Web_Parkfelder_BORS.py` (normales Python). Nur Anzeige, Router und `netz.json` unverändert.
+- **Badge oben rechts** zeigt nur noch «Prototyp» (ohne «keine Einsatzfreigabe»). Die Hinweise «Forschungsprototyp – keine Einsatznavigation» in der Fahrzeugansicht und im Tab «Einsatz» bleiben.
+
+Geprüft am 6.11.2026 lokal im Browser (Port 8777): Ebene ein, Flächen entlang der Strassen sichtbar (Spitalacker, Altstadt), Legende mit Zahlen; «Beides» Notruf → A senden → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Badge und Ebene. Keine Konsolenfehler. Nicht veröffentlicht, nicht vor Ort geprüft.
 
 ## Neu in Version 10 (5.11.2026): Baustellen Stand 5.11., Vergleich mit dem normalen Navi, Demo-Sperrung
 
