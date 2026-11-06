@@ -45,6 +45,29 @@ Dieses Repository enthält die Web-App. Die Datenaufbereitung in Python/QGIS lie
 
 Was sich von Version zu Version geändert hat, neuste zuerst.
 
+### Neu in Version 13 (6.11.2026): Befunde aus dem Zweittest
+
+Router, Strassennetz, Baustellen und Parkfelder wie V12. Ein zweiter, unabhängiger Test der Live-Seite V12 fand weitere Fehler. Behoben, nur in `index.html`:
+- **Modus experimentell:** Die Routenkarte sagt nicht mehr «Keine validierte Route», wenn es eine gibt. Stattdessen: «Angezeigt: Route mit N m auf unvalidierten Strassen. Es gibt auch eine validierte Route: X km, Y min.» Die Überschrift zählt validierte Routen nach dem Modus validiert.
+- **Adresssuche:** Nur noch Treffer im Gebiet von BORS, und nur, wenn ein Wort der Eingabe (erste 4 Buchstaben) im Treffer vorkommt. Sonst «Keine passende Adresse im Gebiet von BORS gefunden». Geprüft: «zzzznichtvorhanden999», «Zürich Hauptbahnhof», «Bahnhofstrasse 1 Zürich» → keine Treffer; «Kramgase 49» (Tippfehler) → Kramgasse 49 Bern.
+- **Halt vor dem Ziel in der Kurzkarte:** «Ziel nicht direkt anfahrbar, Halt 122 m entfernt» und Poller stehen jetzt auch in den Routenkarten A–D im Tab Route (z. B. Hauptwache → Münsterplatz 1, D).
+- **Abgeschnittene Gründe:** Der Netzmaster kürzt Breitengründe. Die Oberfläche ergänzt die zwei bekannten Enden («>= K» → «>= Karosserie)», «ohne R» → «ohne Reserve zu schmal (Werte im Tab «Strasse»)») und kürzt selbst erst nach 240 statt 150 Zeichen.
+- **Zusammenfassung:** Sind Klassen deutlich kürzer als das Auto (z. B. Münsterplatz: Auto 4.14 km, A/B 2.16 km), steht das jetzt da, statt «ungefähr die Route eines normalen Autos».
+- **Methode-Text:** beschreibt den tatsächlichen Ablauf (Zentrale sendet validierte Route und Alternative, der Fahrer wählt; nur ohne validierte Route sendet die Zentrale nach Rückfrage bewusst die Vergleichsroute).
+- **Weitere Robustheit (eigene Prüfung danach):**
+  - «Validiert bis Zufahrt» mit mehr als 150 m ungeklärter Zufahrt heisst in der Routenkarte «teilweise validiert» (gefunden: bis 1.17 km ungeklärt am Anfang). In Disposition und Fahrzeug galt so eine Route schon vorher nicht als validiert.
+  - Zurückziehen eines quittierten oder vor Ort gemeldeten Auftrags fragt nach. Der Auftrag bleibt als «zurückgezogen» gespeichert, das Fahrzeug zeigt bleibend «⚠ Auftrag … wurde von der Zentrale zurückgezogen. Nicht mehr anfahren».
+  - Einsatznummern sind eindeutig, auch bei zwei Notrufen in derselben Sekunde (E-212541, E-212541-2).
+  - Gespeicherte Aufträge werden beim Laden geprüft. Unvollständige, fremde oder kaputte Einträge werden übersprungen statt die Oberfläche anzuhalten.
+  - «Neu» entfernt Start und Ziel auch aus der Adresszeile. Leere Suche: Hinweis statt nichts.
+  - Liegen Start und Ziel am selben Ort ausserhalb des Netzes, gilt die Meldung «ausserhalb».
+  - Quellenangabe bei Grundkarte «keine», Breitenlegende ohne Lücken, Parkfelder-Quelle (Stadt Bern + OSM) im Tab Methode.
+  - Barrierefreiheit: Statusmeldungen mit `role=status`/`aria-live`, Tabs mit `aria-controls`/`tabpanel`, Label für die Grundkarte, Kartenknöpfe 44 × 44 px.
+
+Router-Prüfung in node (Live-Router und Live-Netz, 300 Zufallspaare, Skripte in `05_Berichte/Realitaetstest_WebApp_20261106/skripte`): keine gesperrten Abschnitte in einer Route, keine «validiert»-Route über ungeklärte Abschnitte, ungeklärte Meter stimmen. Erklärbare Abweichungen: experimentell bindet näher an (dann teils leicht teurer), Dominanz vergleicht Fahrzeiten. Router unverändert.
+
+Geprüft am 6.11.2026 lokal im Browser (Port 8779): die Suchfälle oben, Fall 150 «teilweise validiert»; kaputte gespeicherte Aufträge (falsche Felder, `{kaputt`, `null`, Array) ohne Fehler; Zurückziehen mit Rückfrage und Hinweis im zweiten Fenster, danach erneut einsetzen bis abgeschlossen; zwei Notrufe in derselben Sekunde; unsinnige Adresszeile (`?ansicht=quatsch&start=abc,1&ziel=1,2#s9`); 15 Notrufe ohne «undefined»/«NaN»/«null» in den Texten; Münsterplatz normal und experimentell, Beispiel S1 experimentell (C/D zeigen die validierte Route 7.53 / 11.14 km als Hinweis), S2 Mühlestrasse und Kramgasse/Kornhausbrücke mit vollständigem Grund; Beamer 1440 × 900 «Beides» Notruf → B (beide Routen) → Alternative gewählt → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Notruf → B → abgeschlossen. Keine Konsolenfehler. Nicht veröffentlicht, nicht vor Ort geprüft.
+
 ### Neu in Version 12 (6.11.2026): Texte und Demo-Sperrung nach dem Realitätstest
 
 Router, Strassennetz, Baustellen und Parkfelder wie V11. Behoben sind die Probleme 2 und 7–11 aus `05_Berichte/Realitaetstest_WebApp_20261106/Testbericht_BORS_V11.md`, nur in `index.html`:
@@ -55,7 +78,7 @@ Router, Strassennetz, Baustellen und Parkfelder wie V11. Behoben sind die Proble
 - **Modus Experimentell (Problem 10):** Eine Route ohne ungeklärte Meter bleibt «validiert» (sie ist dann dieselbe wie im Modus validiert).
 - **Demo-Sperrung (Problem 11):** Der Tab «Strasse» wird nach jeder Änderung der Demo-Sperren neu gezeichnet. Während der Sperre steht «gesperrt (Demo)» mit dem Befund ohne Demo; «Alle aufheben» im Tab Route setzt den Tab Strasse zurück.
 
-Geprüft am 6.11.2026 lokal im Browser (Port 8778): Thun → «ausserhalb des Strassennetzes»; Zollikofen → «36 m neben der nächsten Strasse»; Start = Ziel; Wache → Gümligen: D «validiert · Kurve prüfen», im Modus Experimentell A/B «validiert»; Postgasse: Disposition D «Halt 98 m»; S5 Aarstrasse sperren → im Tab Route aufheben → Tab Strasse «validiert», erneut sperren/aufheben ok; Beamer 1440 × 900 «Beides» Notruf → C (beide Routen) → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Notruf → B → abgeschlossen. Keine Konsolenfehler. Den Kurvenhinweis in der Fahrzeugansicht habe ich nicht mit einem echten Auftrag ausgelöst. Nicht veröffentlicht, nicht vor Ort geprüft.
+Geprüft am 6.11.2026 lokal im Browser (Port 8778): Thun → «ausserhalb des Strassennetzes»; Zollikofen → «36 m neben der nächsten Strasse»; Start = Ziel; Wache → Gümligen: D «validiert · Kurve prüfen», im Modus Experimentell A/B «validiert»; Postgasse: Disposition D «Halt 98 m»; S5 Aarstrasse sperren → im Tab Route aufheben → Tab Strasse «validiert», erneut sperren/aufheben ok; Beamer 1440 × 900 «Beides» Notruf → C (beide Routen) → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Notruf → B → abgeschlossen. Keine Konsolenfehler. Den Kurvenhinweis in der Fahrzeugansicht habe ich nicht mit einem echten Auftrag ausgelöst. Live seit 6.11.2026 (Commit ab8afe4), nicht vor Ort geprüft.
 
 ### Neu in Version 11 (6.11.2026): Ebene Parkfelder, Badge nur «Prototyp»
 

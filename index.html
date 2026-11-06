@@ -90,7 +90,7 @@ table.pr td:first-child{font-weight:700;width:22px}
 .maplibregl-canvas-container.maplibregl-interactive{cursor:crosshair}
 .maplibregl-canvas:focus{outline:none}
 .mapctl{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:10px;display:flex;flex-direction:column;gap:6px;z-index:2}
-.mapctl .btn{width:38px;height:38px;padding:0;font-size:18px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mapctl .btn{width:44px;height:44px;padding:0;font-size:18px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .ctl{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:10px;z-index:2;display:flex;flex-direction:column;gap:6px;max-width:calc(100% - 70px)}
 .seg{display:flex;background:var(--panel);border:1.5px solid var(--line);border-radius:6px;padding:3px;gap:3px;box-shadow:0 1px 3px rgba(0,0,0,.12);width:max-content;max-width:100%}
 .seg button{font:600 13.5px var(--f-body);border:0;background:none;color:var(--muted);padding:6px 10px;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
@@ -147,7 +147,7 @@ ul.lim{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;fon
   header.bar{padding-block:6px}
   .attr{bottom:var(--sheet);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:bottom .25s ease}
   .attr .lang{display:none}
-  .mapctl .btn{width:40px;height:40px}
+  .mapctl .btn{width:44px;height:44px}
   .seg button{padding:6px 9px;font-size:13px;min-height:38px}
   .seg.p button{padding:4px 10px;min-height:36px;min-width:36px;justify-content:center}
   .maphint{font-size:13px;bottom:calc(26px + var(--sheet,0px));transition:bottom .25s ease}
@@ -172,7 +172,7 @@ ul.lim{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;fon
 @media (pointer:coarse){
   .seg button{min-height:38px}
   .seg.p button{min-height:36px;min-width:36px;justify-content:center}
-  .mapctl .btn{width:40px;height:40px}
+  .mapctl .btn{width:44px;height:44px}
   input[type=checkbox]{width:18px;height:18px}
   .lay label{padding:8px 0}
 }
@@ -315,18 +315,18 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
   <aside class="pult">
     <button class="grip" id="grip" aria-label="Bereich vergrössern oder verkleinern"><span id="grip-t">Mehr anzeigen</span></button>
     <div class="tabs" role="tablist">
-      <button role="tab" id="t-zen" aria-selected="true" data-t="zen">Einsatz</button>
-      <button role="tab" id="t-route" aria-selected="false" data-t="route">Route</button>
-      <button role="tab" id="t-seg" aria-selected="false" data-t="seg">Strasse</button>
-      <button role="tab" id="t-lay" aria-selected="false" data-t="lay">Ebenen</button>
-      <button role="tab" id="t-info" aria-selected="false" data-t="info">Methode</button>
+      <button role="tab" id="t-zen" aria-selected="true" aria-controls="p-zen" data-t="zen">Einsatz</button>
+      <button role="tab" id="t-route" aria-selected="false" aria-controls="p-route" data-t="route">Route</button>
+      <button role="tab" id="t-seg" aria-selected="false" aria-controls="p-seg" data-t="seg">Strasse</button>
+      <button role="tab" id="t-lay" aria-selected="false" aria-controls="p-lay" data-t="lay">Ebenen</button>
+      <button role="tab" id="t-info" aria-selected="false" aria-controls="p-info" data-t="info">Methode</button>
     </div>
 
-    <section class="tabbody" id="p-zen" aria-label="Einsatzzentrale">
+    <section class="tabbody" id="p-zen" role="tabpanel" aria-labelledby="t-zen">
       <div id="zen"></div>
     </section>
 
-    <section class="tabbody" id="p-route" hidden>
+    <section class="tabbody" id="p-route" role="tabpanel" aria-labelledby="t-route" hidden>
       <div class="row" style="justify-content:space-between">
         <h2>Route berechnen</h2>
         <button class="btn" id="b-reset">Neu</button>
@@ -386,15 +386,15 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
       <button class="btn" id="e-gis">Zur Zentrale umstellen</button>
     </section>
 
-    <section class="tabbody" id="p-seg" hidden>
+    <section class="tabbody" id="p-seg" role="tabpanel" aria-labelledby="t-seg" hidden>
       <div id="seg-body"><h2>Strasse prüfen</h2><p class="muted" style="margin-top:6px">Wähle oben auf der Karte «ⓘ Strasse» und tippe auf eine Strasse. Hier erscheinen dann die Messwerte und der Befund für alle vier Fahrzeugklassen.</p></div>
     </section>
 
-    <section class="tabbody" id="p-lay" hidden>
+    <section class="tabbody" id="p-lay" role="tabpanel" aria-labelledby="t-lay" hidden>
       <h2>Ebenen</h2>
       <div>
         <h3 style="margin-bottom:6px">Grundkarte</h3>
-        <select id="sel-basis">
+        <select id="sel-basis" aria-label="Grundkarte">
           <option value="grau">swisstopo Landeskarte grau</option>
           <option value="farbe">swisstopo Landeskarte farbig</option>
           <option value="luft">swisstopo Luftbild</option>
@@ -411,7 +411,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
       <div id="netz-stat" class="small"></div>
     </section>
 
-    <section class="tabbody" id="p-info" hidden>
+    <section class="tabbody" id="p-info" role="tabpanel" aria-labelledby="t-info" hidden>
       <h2>So entscheidet BORS</h2>
       <p>Jede Strasse erhält für jede Fahrzeugklasse einen von drei Zuständen. <span class="pill ok">validiert</span> heisst: Nach den Daten passt das Fahrzeug (nicht vor Ort geprüft). Die Fahrbahnbreite ist aus der amtlichen Vermessung nachgewiesen und es gibt keinen Hinweis auf Höhe, Gewicht oder Hindernis. <span class="pill warn">unvalidiert</span> heisst: Die Daten reichen für keinen Entscheid. <span class="pill bad">gesperrt</span> heisst: nachweislich zu eng, zu tief oder zu schwer.</p>
       <div style="overflow-x:auto">
@@ -421,7 +421,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
       <p>Die Route nutzt nur validierte Strassen. Fehlt eine validierte Verbindung, zeigt BORS eine experimentelle Route mit doppelter Fahrzeit auf unvalidierten Abschnitten und kennzeichnet sie. Liegen nur die ersten oder letzten Meter auf unvalidierten Strassen, heisst das Ergebnis «validiert bis Zufahrt».</p>
       <p><b>Routenvergleich:</b> Für eine Fahrzeugklasse stellt BORS die beste Route nur über validierte Strassen (grün) neben die Vergleichsroute (blau). Die Vergleichsroute ist die Route des Modus «experimentell»: Ungeklärte Abschnitte dürfen mitbenutzt werden, zählen bei der Wahl aber mit doppelter Zeit und sind gelb markiert und nummeriert. «Beste» heisst: geringste Routingkosten. Darin stecken Zuschläge, u. a. ungeklärt ×2, Abbiegen und Kurven, Baustellen, Sonderrecht und Durchfahrt von Zufahrten. Angezeigt wird dagegen die Modellfahrzeit ohne Zuschläge. Deshalb ist keine der beiden Routen zwingend die zeitlich schnellste. Nachweislich gesperrte Abschnitte und feste Poller sind in beiden Routen ausgeschlossen. Ob eine gelbe Stelle passierbar ist, weiss BORS nicht.</p>
       <p><b>Normales Navi:</b> Unter dem Routenvergleich zeigt BORS die Auto-Route (Profil REF: Personenwagen nach Verkehrsregeln, ohne Höhe, Breite und Gewicht) und listet die Abschnitte, die für die gewählte Klasse gesperrt sind. So wird sichtbar, wo ein Navi ohne Fahrzeugdaten ein grosses Fahrzeug hinführen könnte. Die Auto-Route ist ein Modell und nicht Google Maps.</p>
-      <p><b>Einsatzablauf (Simulation):</b> Oben lässt sich zwischen «Zentrale» und «Fahrzeug» umstellen. Die Zentrale nimmt im Tab «Einsatz» einen simulierten Notruf entgegen oder setzt den Einsatzort selbst, sieht die Routen für A–D und sendet einem Fahrzeug die validierte Route oder, bewusst, die Vergleichsroute. Das Fahrzeug erhält die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Vor dem Quittieren wählt der Fahrer eine davon (validiert ist vorgewählt), danach sieht er nur noch diese Route, das Ziel und einen Knopf für den nächsten Status (quittiert, vor Ort, abgeschlossen). Die Zentrale sieht Wahl und Status. «Senden» heisst im Prototyp: im Browser speichern. Ein zweites Fenster im selben Browser erhält den Auftrag sofort, ein anderes Gerät nicht. Auf breiten Bildschirmen zeigt «Beides» Zentrale und Fahrzeug nebeneinander, etwa für eine Präsentation mit dem Beamer. Notrufe, Stichworte und Einsatznummern sind erfunden.</p>
+      <p><b>Einsatzablauf (Simulation):</b> Oben lässt sich zwischen «Zentrale» und «Fahrzeug» umstellen. Die Zentrale nimmt im Tab «Einsatz» einen simulierten Notruf entgegen oder setzt den Einsatzort selbst, sieht die Routen für A–D und sendet einem Fahrzeug den Auftrag: die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Gibt es keine validierte Route, sendet die Zentrale nach einer Rückfrage bewusst nur die Vergleichsroute. Vor dem Quittieren wählt der Fahrer eine davon (validiert ist vorgewählt), danach sieht er nur noch diese Route, das Ziel und einen Knopf für den nächsten Status (quittiert, vor Ort, abgeschlossen). Die Zentrale sieht Wahl und Status. «Senden» heisst im Prototyp: im Browser speichern. Ein zweites Fenster im selben Browser erhält den Auftrag sofort, ein anderes Gerät nicht. Auf breiten Bildschirmen zeigt «Beides» Zentrale und Fahrzeug nebeneinander, etwa für eine Präsentation mit dem Beamer. Notrufe, Stichworte und Einsatznummern sind erfunden.</p>
       <p class="small muted">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2g vom 5.11.2026, Baustellen Stand 5.11.2026). Der QGIS-Router 9.2f behebt nur eine Fehlermeldung, die Routen sind gleich. Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
       <h3>Datenquellen</h3>
       <ul class="lim">
@@ -430,7 +430,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
         <li>Höhen- und Gewichtsbeschränkungen: kantonales Verzeichnis KSVB, Hinderniskartei Kanton Bern (signalisierte Höhen und Gewichte an Brücken und Unterführungen, Stand 24.8.2026) und OpenStreetMap</li>
         <li>Gewichtsgrenzen Stadt Bern: Plan «Höchstgewicht» von Tiefbau Stadt Bern (Stand 4.5.2026, erhalten 4.11.2026), den Strassen zugeordnet. Laut Tiefbau gelten die Grenzen auch für Einsatzfahrzeuge. Ohne Höhensignal gilt auf öffentlichen Strassen eine lichte Höhe von mindestens 4.00 m (Verkehrsregelnverordnung, bestätigt vom Tiefbau). Lehnenviadukt / Kleine Westtangente: 3.20 m laut Tiefbau.</li>
         <li>Geprüfte Befunde: 10 Engstellen am Luftbild (SWISSIMAGE) nachgemessen, 1.11.2026, nicht vor Ort</li>
-        <li>Parkfelder und Bäume: Stadt Bern</li>
+        <li>Parkfelder: Stadt Bern, in den Nachbargemeinden OpenStreetMap (Strassenrand); Bäume: Stadt Bern</li>
         <li>Baustellen: Stadt Bern (Geoportal map.bern.ch) und ASTRA Verkehrsinfo (Abruf 27.10.2026), <span id="bau-stand">Stand 5.11.2026</span>. Nur Baustellen, die an diesem Tag gelten.</li>
         <li>Fahrzeuge: Hülle der realen Fahrzeuge von Schutz und Rettung Bern je Klasse</li>
       </ul>
@@ -465,7 +465,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
     </div>
     <div class="maphint" id="maphint">Tippe in die Karte, um den Start zu setzen</div>
     <div class="attr" id="attr">© OpenStreetMap-Mitwirkende · amtliche Vermessung Kanton Bern</div>
-    <div class="toast" id="toast" hidden></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <div class="load" id="load"><div><b>BORS lädt das Strassennetz</b><p class="muted small" id="load-txt">20 867 Abschnitte, rund 1 500 km</p><div class="bar2"><span></span></div></div></div>
   </div>
 
@@ -482,7 +482,10 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
 const $=s=>document.querySelector(s);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const UML=[['Ueber','Über'],['ueber','über'],['Hoechst','Höchst'],['hoechst','höchst'],['Hoehe','Höhe'],['hoehe','höhe'],['moeglich','möglich'],['groesser','grösser'],['fuer','für'],['Gebaeude','Gebäude'],['oeffnen','öffnen'],['Oeffnen','Öffnen'],['Tragfaehig','Tragfähig'],['ungeklaert','ungeklärt'],['luecke','lücke'],['Luecke','Lücke'],['zulaessig','zulässig'],['naechst','nächst'],['Naechst','Nächst'],['Gefaelle','Gefälle'],['Baeume','Bäume'],['baeume','bäume'],['schraenk','schränk'],['Schraenk','Schränk'],['gemaess','gemäss'],['Flaeche','Fläche'],['flaeche','fläche'],['waere','wäre']];
-const de=s=>{s=String(s==null?'':s);for(const [a,b] of UML)s=s.split(a).join(b);return s;};
+// V13: Der Netzmaster kürzt Breitengründe auf ~120 Zeichen («… >= K», «… ohne R»). Die zwei bekannten Enden ergänzen
+// (Wortlaut aus bors_breite_v9_1.entscheide bzw. Netzmaster), keine neuen Zahlen erfinden.
+const ganz=s=>s.replace(/>= K(?=\s*$|\s*\|)/g,'>= Karosserie)').replace(/ohne R(?=\s*$|\s*\|)/g,'ohne Reserve zu schmal (Werte im Tab «Strasse»)');
+const de=s=>{s=String(s==null?'':s);for(const [a,b] of UML)s=s.split(a).join(b);return ganz(s);};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const km=m=>(m/1000).toLocaleString('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2})+' km';
 const PN={A:'Personenwagen / NEF',B:'Rettungswagen',C:'Feuerwehr mittel',D:'Feuerwehr gross',REF:'Normales Auto'};
@@ -510,7 +513,7 @@ let BEIDE=null,ansicht='gis',kVgl=false,engMk=[];
 // {a: Auftragsdaten, status, r: zugewiesene Route, v: Vergleich der Klasse}. ansicht 'gis' = Zentrale, 'einsatz' = Fahrzeug.
 let EINSATZ=null,ZUW={},ortWahl=null,mkF={},split=false;
 const EINGEBETTET=(()=>{try{return window.self!==window.top&&new URLSearchParams(location.search).has('eingebettet');}catch(_){return false;}})();
-const fzAuftrag=()=>{const z=ansicht==='einsatz'&&ZUW[profil];return z&&z.status!=='abgeschlossen'?z:null;};
+const fzAuftrag=()=>{const z=ansicht==='einsatz'&&ZUW[profil];return z&&z.status!=='abgeschlossen'&&z.status!=='zurückgezogen'?z:null;};
 const vglAktiv=()=>ansicht==='einsatz'?!fzAuftrag()&&$('#e-selbst').open:kVgl;
 const rel2wgs=(x,y)=>lv2wgs(x+X0,y+Y0);
 
@@ -719,6 +722,7 @@ async function setBasis(k){
   map.setLayoutProperty('tiles','visibility',raster?'visible':'none');
   if(raster){tileFehler=0;map.getSource('tiles').setTiles([tileUrl(k)]);$('#attr').innerHTML='Karte © swisstopo · <span class="lang">Strassennetz </span>© OpenStreetMap<span class="lang">-Mitwirkende</span> · <span class="lang">Breiten: </span>amtliche Vermessung';}
   const av=k==='av';
+  if(k==='keine')$('#attr').innerHTML='<span class="lang">Strassennetz </span>© OpenStreetMap<span class="lang">-Mitwirkende</span> · <span class="lang">Breiten: </span>amtliche Vermessung';   // V13
   ['wald','wasser','bef','bahn','geb'].forEach(x=>map.setLayoutProperty('av-'+x,'visibility',av?'visible':'none'));
   if(av){$('#attr').innerHTML='<span class="lang">Grundkarte: </span>amtliche Vermessung Kanton Bern · © OpenStreetMap<span class="lang">-Mitwirkende</span>';
     if(!basisGeladen){basisGeladen=true;toast('Grundkarte wird geladen …',2500);
@@ -746,7 +750,7 @@ async function parkLaden(){
 }
 function ebenenUI(){
   $('#lay').innerHTML=EBENEN.map(([id,t,on,c])=>`<label><input type="checkbox" id="ly-${id}" ${on?'checked':''}><i style="border-color:${c}"></i>${t}</label>`).join('')+
-    `<p class="small muted" id="breite-leg" hidden>Breite: rot unter 3 m · hell 4–5 m · blau über 6.5 m</p><p class="small muted" id="park-leg" hidden></p>`;
+    `<p class="small muted" id="breite-leg" hidden>Breite (untere Schranke): rot unter 3 m · orange 3–4 m · hell 4–6.5 m · blau über 6.5 m</p><p class="small muted" id="park-leg" hidden></p>`;
   EBENEN.forEach(([id])=>$('#ly-'+id).onchange=async e=>{const on=e.target.checked;
     if(id==='breite'&&on&&!map.getSource('breite')._loaded){map.getSource('breite').setData(breiteGeo());map.getSource('breite')._loaded=true;}
     if(id==='breite')$('#breite-leg').hidden=!on;
@@ -922,7 +926,7 @@ function zeichneRoute(){
 }
 
 // ------------------------------------------------ Routenvergleich (nur Darstellung; Routen aus den zwei Läufen des unveränderten Routers)
-const grundTxt=(c,f)=>{const t=de(D.texte[D.grund[c][f]]||'ungeklärt').replace(/^nicht validiert:\s*/,'').replace(/_/g,' ');return t.length>150?t.slice(0,149)+'…':t;};
+const grundTxt=(c,f)=>{const t=de(D.texte[D.grund[c][f]]||'ungeklärt').replace(/^nicht validiert:\s*/,'').replace(/_/g,' ');return t.length>240?t.slice(0,239)+'…':t;};   // V13: 240 statt 150, damit die ergänzten Gründe ganz lesbar sind
 const mitte=p=>p.length===2?[(p[0][0]+p[1][0])/2,(p[0][1]+p[1][1])/2]:p[Math.floor(p.length/2)];
 function vgl(c,B=BEIDE){
   const v=B.V[c],e=B.E[c],ni=D.attr_cols.indexOf('name');
@@ -1019,7 +1023,9 @@ const wahlTxt=z=>z.a.routen.length<2?(z.a.routen[0]==='val'?'validierte Route':'
 const norm=(a,w)=>{if(!a.routen){a.routen=[a.typ];a.sig={[a.typ]:a.sig};}return w&&a.routen.includes(w)?w:a.routen[0];};
 const rd=p=>[Math.round(p[0]*100)/100,Math.round(p[1]*100)/100];
 const zwei=n=>String(n).padStart(2,'0');
-const aktiv=z=>!!z&&z.status!=='abgeschlossen';
+// V13: «zurückgezogen» ist wie «abgeschlossen» ein Endzustand (bleibt gespeichert, damit das Fahrzeug es lesen kann)
+const ENDE=new Set(['abgeschlossen','zurückgezogen']);
+const aktiv=z=>!!z&&!ENDE.has(z.status);
 // Kennung der Route (Abschnittsfolge + Länge): Rechnet ein anderes Fenster neu, prüft es damit, dass es dieselbe Route ist
 const routeSig=r=>{let h=5381;for(const x of r.rows)h=(Math.imul(h,33)^(x.f*4+x.kat))>>>0;return h.toString(36)+'-'+Math.round(r.laenge_m);};
 function wacheStart(){const w=D.wachen[0];P1=[w[1]/100+X0,w[2]/100+Y0];P1txt='Start: '+w[0];}
@@ -1033,7 +1039,10 @@ function patrouille(){const q=zufallsPunkt();if(q){P1=q;P1txt='Start: Patrouille
 function fzStart(p,txt){P1=rd(p);P1txt='Start: '+txt;if(EINSATZ)EINSATZ.start='karte';zeichnePunkte();if(P2)rechne();else uiRoute();}
 function einsatzOrt(p,art){
   const d=new Date();
-  if(art||!EINSATZ)EINSATZ={nr:`E-${zwei(d.getHours())}${zwei(d.getMinutes())}${zwei(d.getSeconds())}`,zeit:`${zwei(d.getHours())}:${zwei(d.getMinutes())}`,
+  // V13: Nummer eindeutig, auch bei zwei Notrufen in derselben Sekunde (sonst greift die Rückfrage «ersetzen?» nicht)
+  let nr=`E-${zwei(d.getHours())}${zwei(d.getMinutes())}${zwei(d.getSeconds())}`;
+  if(art||!EINSATZ){const belegt=new Set(Object.values(ZUW).map(z=>z.a.nr).concat(EINSATZ?[EINSATZ.nr]:[]));let k=2;const b0=nr;while(belegt.has(nr))nr=b0+'-'+(k++);}
+  if(art||!EINSATZ)EINSATZ={nr,zeit:`${zwei(d.getHours())}:${zwei(d.getMinutes())}`,
     art:art||ARTEN[ARTEN.length-1],start:EINSATZ?EINSATZ.start:'wache'};
   P2=rd(p);P2txt='Einsatzort: '+ortName(...P2);
   if(EINSATZ.start==='zufall'&&(art||!P1))patrouille();else if(EINSATZ.start==='wache'||!P1)wacheStart();
@@ -1044,7 +1053,11 @@ function notruf(){const art=ARTEN[Math.floor(Math.random()*(ARTEN.length-1))],p=
 function speichern(){try{const o={};for(const c in ZUW)o[c]={a:ZUW[c].a,status:ZUW[c].status,wahl:ZUW[c].wahl};localStorage.setItem(ZKEY,JSON.stringify(o));}catch(_){}}
 function laden(){let o={};try{o=JSON.parse(localStorage.getItem(ZKEY)||'{}')||{};}catch(_){}
   const vorher=ZUW;ZUW={};
-  for(const c of ['A','B','C','D']){const n=o[c];if(!n||!n.a)continue;const alt=vorher[c],w=norm(n.a,n.wahl);
+  // V13: unvollständige oder fremde Einträge überspringen statt die Oberfläche anzuhalten
+  const pt=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite);
+  const gut=n=>n&&typeof n==='object'&&n.a&&typeof n.a==='object'&&n.a.c&&pt(n.a.s)&&pt(n.a.z)&&(Array.isArray(n.a.routen)&&n.a.routen.length&&n.a.routen.every(k=>k==='val'||k==='exp')||n.a.typ==='val'||n.a.typ==='exp')
+    &&typeof n.a.nr==='string'&&(WEITER[n.status]||ENDE.has(n.status));
+  for(const c of ['A','B','C','D']){const n=o&&typeof o==='object'?o[c]:null;if(!gut(n)||n.a.c!==c)continue;const alt=vorher[c],w=norm(n.a,n.wahl);
     if(alt&&alt.a.id===n.a.id&&alt.a.t===n.a.t){alt.status=n.status;alt.wahl=w;ZUW[c]=alt;}
     else ZUW[c]={a:n.a,status:n.status,wahl:w,r:null,v:null,pruef:null};}}
 // Route eines Auftrags, der aus einem anderen Fenster kommt: gleiche Punkte, gleicher Router, Kennung vergleichen
@@ -1067,7 +1080,10 @@ function zuweisen(c){
     st:P1txt.replace(/^Start:\s*/,''),ort:P2txt.replace(/^(Ziel|Einsatzort):\s*/,''),sig,t:Date.now()};
   ZUW[c]={a,status:'gesendet',wahl:routen[0],r,v,pruef:'ok'};speichern();uiRoute();
   toast(`Auftrag an Fahrzeug ${c} gesendet${routen.length>1?', mit validierter Route und Alternative: der Fahrer wählt':''}.`+(splitAn()?' Rechts in der Fahrzeugansicht.':' «Fahrzeug ansehen» oder oben «Fahrzeug» zeigt ihn.'),5000);}
-function zurueck(c){if(!ZUW[c])return;delete ZUW[c];speichern();uiRoute();toast(`Auftrag von Fahrzeug ${c} zurückgezogen.`,2500);}
+function zurueck(c){const z=ZUW[c];if(!aktiv(z))return;
+  // V13: Rückfrage, wenn das Fahrzeug schon unterwegs ist; der Auftrag bleibt als «zurückgezogen» gespeichert
+  if((z.status==='quittiert'||z.status==='vor Ort')&&!confirm(`Fahrzeug ${c} ist ${z.status==='vor Ort'?'schon vor Ort':'schon unterwegs'} (Auftrag ${z.a.nr}). Auftrag wirklich zurückziehen?`))return;
+  z.status='zurückgezogen';speichern();uiRoute();toast(`Auftrag von Fahrzeug ${c} zurückgezogen.`,2500);}
 
 function uiZentrale(){
   const el=$('#zen');if(!el||!D)return;
@@ -1105,7 +1121,7 @@ function uiZentrale(){
       h+='<p class="small muted">Senden schickt dem Fahrzeug die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Der Fahrer wählt vor dem Quittieren. Klasse antippen: validierte Route (grün) und Vergleichsroute (blau, ungeklärte Stellen gelb) auf der Karte. Zeiten = Modellfahrzeit ohne Verkehr. Gesperrte Abschnitte sind nie Teil einer Route. Details je Klasse im Tab «Route».</p>';}
     h+='</div>';}
   h+=`<div><h3 style="margin-bottom:6px">Fahrzeuge</h3><div class="fzl">${['A','B','C','D'].map(c=>{const z=ZUW[c];
-    return `<div><b style="color:var(--r${c})">${c}</b><span>${PN[c]}</span>${aktiv(z)?`<span class="st on">${esc(z.status)}</span><span class="muted">${esc(z.a.nr)} · ${esc(z.a.art)} · ${esc(wahlTxt(z))}</span><button class="btn" data-x="${c}">Zurückziehen</button>`:`<span class="st">frei</span>${z?`<span class="muted small">${esc(z.a.nr)} abgeschlossen</span>`:''}`}</div>`;}).join('')}</div></div>`;
+    return `<div><b style="color:var(--r${c})">${c}</b><span>${PN[c]}</span>${aktiv(z)?`<span class="st on">${esc(z.status)}</span><span class="muted">${esc(z.a.nr)} · ${esc(z.a.art)} · ${esc(wahlTxt(z))}</span><button class="btn" data-x="${c}">Zurückziehen</button>`:`<span class="st">frei</span>${z?`<span class="muted small">${esc(z.a.nr)} ${esc(z.status)}</span>`:''}`}</div>`;}).join('')}</div></div>`;
   el.innerHTML=h;
   const on=(s,f)=>{const x=el.querySelector(s);if(x)x.onclick=f;};
   on('#z-notruf',notruf);
@@ -1139,7 +1155,7 @@ function uiFahrzeug(){
   $('#e-selbst').hidden=!!z;
   if(ansicht!=='einsatz')return;
   if(!z){const l=ZUW[c];
-    el.innerHTML=`<div class="e-card"><div class="e-lbl">Kein Auftrag</div><div class="e-sub">Fahrzeug ${c} · ${PN[c]} wartet auf eine Route der Zentrale.</div>${l?`<div class="e-note">Letzter Auftrag ${esc(l.a.nr)} abgeschlossen.</div>`:''}<div class="e-note">Weist die Zentrale diesem Fahrzeug eine Route zu, erscheint sie hier sofort, auch in einem zweiten Fenster dieses Browsers.</div></div>`;return;}
+    el.innerHTML=`<div class="e-card"><div class="e-lbl">Kein Auftrag</div><div class="e-sub">Fahrzeug ${c} · ${PN[c]} wartet auf eine Route der Zentrale.</div>${l?(l.status==='zurückgezogen'?`<div class="e-note" style="color:var(--ink);font-weight:600">⚠ Auftrag ${esc(l.a.nr)} wurde von der Zentrale zurückgezogen. Nicht mehr anfahren, Rückfrage bei der Zentrale.</div>`:`<div class="e-note">Letzter Auftrag ${esc(l.a.nr)} abgeschlossen.</div>`):''}<div class="e-note">Weist die Zentrale diesem Fahrzeug eine Route zu, erscheint sie hier sofort, auch in einem zweiten Fenster dieses Browsers.</div></div>`;return;}
   if(z.status==='gesendet'){z.status='empfangen';speichern();}
   if(z.r===null)auftragRoute(z);
   const a=z.a,R=z.r,r=fzR(z),val=z.wahl==='val',w=WEITER[z.status],zw=fzWaehlt(z),n=z.v?z.v.eng.length:0;
@@ -1179,7 +1195,7 @@ addEventListener('storage',e=>{if(e.key!==ZKEY||!D)return;
   for(const c of ['A','B','C','D']){const a=alt[c],z=ZUW[c];
     if(ansicht==='einsatz'&&c===profil){
       if(z&&(!a||a[0]!==z.a.t)){toast('Neuer Auftrag von der Zentrale',4000);const f=$('#f-auftrag');f.classList.remove('e-flash');void f.offsetWidth;f.classList.add('e-flash');}
-      else if(!z&&a)toast('Auftrag von der Zentrale zurückgezogen',5000);}
+      else if((!z&&a)||(z&&a&&a[0]===z.a.t&&a[1]!==z.status&&z.status==='zurückgezogen'))toast('Auftrag von der Zentrale zurückgezogen',5000);}
     else if(ansicht==='gis'&&z&&a&&a[0]===z.a.t){
       if(a[1]!==z.status)toast(`Fahrzeug ${c}: ${z.status}${z.status==='quittiert'&&z.a.routen.length>1?' mit '+WAHL[z.wahl]:''}`,3000);
       else if(a[2]!==z.wahl)toast(`Fahrzeug ${c} wählt ${WAHL[z.wahl]}`,2500);}}
@@ -1246,8 +1262,13 @@ function detail(c,r){
   const t=[];
   if(r.modus==='VALIDIERT_BIS_ZUFAHRT'){const a=r.zufahrt_anfang_m||0,z=r.zufahrt_ende_m||0;
     t.push(`Nicht nachgewiesen: ${a?'erste '+Math.round(a)+' m':''}${a&&z?' und ':''}${z?'letzte '+Math.round(z)+' m':''}${r.zufahrt_luftlinie?' (Luftlinie, gestrichelt)':''}. Zufahrt vor Ort prüfen.`);}
-  if(r.modus==='EXPERIMENTELL')t.push(`Keine validierte Route. ${Math.round(r.unvalidiert_m||0)} m auf unvalidierten Strassen (gelb gestrichelt).`);
+  // V13: im Modus experimentell nicht «keine validierte Route» behaupten, wenn es eine gibt (sie steht im Modus validiert)
+  if(r.modus==='EXPERIMENTELL'){const v=BEIDE&&BEIDE.V&&BEIDE.V[c];
+    t.push(v&&v.ok&&v.modus!=='EXPERIMENTELL'?`Angezeigt: Route mit ${Math.round(r.unvalidiert_m||0)} m auf unvalidierten Strassen (gelb gestrichelt). Es gibt auch eine validierte Route: ${km(v.laenge_m)}, ${v.fahrzeit_min.toFixed(1)} min${v.modus==='VALIDIERT_BIS_ZUFAHRT'?' (bis Zufahrt)':''}.`
+      :`Keine validierte Route. ${Math.round(r.unvalidiert_m||0)} m auf unvalidierten Strassen (gelb gestrichelt).`);}
   if(r.ursache==='ZIEL_ZU_FUSS')t.push(`Halt an geeigneter Strasse, letzte ${Math.round(r.diag.ziel_rest_m)} m zu Fuss oder mit Schlauch.`);
+  // V13: Halt vor dem Ziel / nicht anfahrbarer Start und Poller auch in der Kurzkarte (bei «bis Zufahrt» steht es schon oben)
+  zufahrtTxt(r).filter(x=>/Poller/.test(x)||(r.modus!=='VALIDIERT_BIS_ZUFAHRT'&&!(r.ursache==='ZIEL_ZU_FUSS'&&/^Halt /.test(x)))).forEach(x=>t.push(esc(x)+'.'));
   if(r.dominanz_von)t.push(`Übernimmt die Route von ${r.dominanz_von} (dort zulässig und schneller).`);
   kurvenHinweis(r).forEach(x=>t.push('<b>'+esc(x)+'</b>'));
   const rest=((r.abbiegen)||[]).filter(x=>!/UNMOEGLICH/.test(x));
@@ -1257,9 +1278,11 @@ function detail(c,r){
 function zusammenfassung(){
   const kl=['A','B','C','D'],ref=RES.REF;
   // V12: Start = Ziel und «keine Route» klar benennen, statt eine Route «wie ein normales Auto» zu melden
-  if(P1&&P2&&Math.hypot(P1[0]-P2[0],P1[1]-P2[1])<15)
+  const gleicherOrt=P1&&P2&&Math.hypot(P1[0]-P2[0],P1[1]-P2[1])<15;
+  if(gleicherOrt&&kl.some(c=>RES[c].ok))   // V13: «ausserhalb» geht vor «selber Ort»
     return '<div class="sum"><b>Start und Ziel liegen am selben Ort</b>Setze das Ziel an einen anderen Ort, sonst gibt es keine sinnvolle Route.</div>';
-  const ok=kl.filter(c=>RES[c].ok&&RES[c].modus==='VALIDIERT'),mitRoute=kl.filter(c=>RES[c].ok);
+  // V13: «validiert» zählt nach dem Modus validiert, auch wenn gerade experimentell angezeigt wird
+  const V=(BEIDE&&BEIDE.V)||RES,ok=kl.filter(c=>V[c]&&V[c].ok&&V[c].modus==='VALIDIERT'),mitRoute=kl.filter(c=>RES[c].ok);
   if(!mitRoute.length){const rs=kl.map(c=>RES[c]),wer=t=>/^Start/.test(t||'')?'Der Start':'Das Ziel';let txt;
     const aus=rs.find(r=>r.ursache==='AUSSERHALB_UNTERSUCHUNGSGEBIET'),weit=rs.find(r=>r.ursache==='KEIN_NETZ_IN_ZIELNAEHE');
     if(aus)txt='Start oder Ziel liegt ausserhalb des Untersuchungsgebiets (Bern und zehn Nachbargemeinden). Dort macht BORS keine Aussage.';
@@ -1271,9 +1294,13 @@ function zusammenfassung(){
   if(ok.length===4)titel='Alle vier Fahrzeugklassen haben eine validierte Route';
   else if(ok.length===0)titel='Keine Fahrzeugklasse hat eine vollständig validierte Route';
   else titel=`Validierte Route für ${ok.join(', ')}`;
-  const um=mitRoute.filter(c=>ref.ok).map(c=>[c,RES[c].laenge_m-ref.laenge_m]).sort((a,b)=>b[1]-a[1])[0];
-  txt=um&&um[1]>200?`Grösster Umweg: ${um[0]} fährt ${km(um[1])} weiter als ein normales Auto.`
-    :ref.ok?(mitRoute.length===4?'Alle Klassen fahren ungefähr die Route eines normalen Autos.':`${mitRoute.join(', ')} fahren ungefähr die Route eines normalen Autos.`):'';
+  const df=ref.ok?mitRoute.map(c=>[c,RES[c].laenge_m-ref.laenge_m]).sort((a,b)=>b[1]-a[1]):[],um=df[0],kz=df[df.length-1];
+  // V13: auch kürzere Routen als das Auto benennen (das Auto hält sich an Fahrverbote und Einbahnen)
+  const kk=df.filter(x=>x[1]<-200).map(x=>x[0]).sort();
+  const kurz=kz&&kz[1]<-200?`${kk.join(', ')} ${kk.length>1?'fahren':'fährt'} bis ${km(-kz[1])} kürzer als ein normales Auto, das sich an Fahrverbote halten muss.`:'';
+  txt=um&&um[1]>200?`Grösster Umweg: ${um[0]} fährt ${km(um[1])} weiter als ein normales Auto.`+(kurz?' '+kurz:'')
+    :kurz?kurz:ref.ok?(mitRoute.length===4?'Alle Klassen fahren ungefähr die Route eines normalen Autos.':`${mitRoute.join(', ')} fahren ungefähr die Route eines normalen Autos.`):'';
+  if($('#cb-exp').checked)txt+=' Modus experimentell: Wo eine Route mit ungeklärten Stellen günstiger ist, wird sie angezeigt.';
   return `<div class="sum"><b>${titel}</b>${txt}</div>`;
 }
 function uiRoute(){
@@ -1285,6 +1312,8 @@ function uiRoute(){
   const ref=RES.REF;
   $('#res').innerHTML=zusammenfassung()+['A','B','C','D','REF'].map(c=>{const r=RES[c];let m=r.ok?(c==='REF'?['n','Referenz']:MOD[r.modus]):['bad','keine Route'];
     if(r.ok&&c!=='REF'&&r.modus!=='EXPERIMENTELL'&&kurvenHart(r).length)m=['warn',m[1]+' · Kurve prüfen'];
+    // V13: «bis Zufahrt» nur für die ersten/letzten Meter; bei mehr als 150 m ungeklärt ehrlich als «teilweise validiert»
+    if(r.ok&&r.modus==='VALIDIERT_BIS_ZUFAHRT'&&!r.zufahrt_luftlinie&&(r.zufahrt_m||0)>150)m=['warn','teilweise validiert'];
     const d=(r.ok&&ref.ok&&c!=='REF')?r.laenge_m-ref.laenge_m:null;
     return `<div class="card" style="color:var(--r${c})"><button class="sw ${show[c]?'on':''}" data-c="${c}" aria-label="${c} auf Karte zeigen"></button>
       <div class="nm" style="color:var(--ink)">${c==='REF'?'Auto':c} <em>${PN[c]}</em></div>
@@ -1295,7 +1324,9 @@ function uiRoute(){
   $('#res').querySelectorAll('.sw').forEach(b=>b.onclick=()=>{show[b.dataset.c]=!show[b.dataset.c];kVgl=false;zeichneRoute();uiRoute();});
 }
 // setzt auch den Einsatz der Zentrale zurück; gesendete Aufträge bleiben beim Fahrzeug
-$('#b-reset').onclick=()=>{P1=P2=null;P1txt=P2txt='';RES=BEIDE=null;EINSATZ=null;ortWahl=null;kVgl=false;zeichnePunkte();zeichneRoute();uiRoute();setModus('start');$('#sel-wache').value='';$('#e-wache').value='';};
+$('#b-reset').onclick=()=>{P1=P2=null;P1txt=P2txt='';RES=BEIDE=null;EINSATZ=null;ortWahl=null;kVgl=false;zeichnePunkte();zeichneRoute();uiRoute();setModus('start');$('#sel-wache').value='';$('#e-wache').value='';
+  // V13: alte Punkte auch aus der Adresszeile nehmen, sonst kommt die Route beim Neuladen zurück
+  try{const u=new URL(location.href);u.searchParams.delete('start');u.searchParams.delete('ziel');history.replaceState(null,'',u.pathname+u.search);}catch(_){}};
 // beide Modi liegen schon vor: Umschalten ohne Neuberechnung
 $('#cb-exp').onchange=()=>{if(BEIDE){RES=waehleRES();zeichneRoute();uiRoute();}else if(P1&&P2)rechne();};
 function szenario(s){P1=s.s;P2=s.z;P1txt=`Start: Beispiel ${s.id}`;P2txt=`Ziel: ${s.t} (${s.k})`;zeichnePunkte();tab('route');setModus('ziel');rechne();try{history.replaceState(null,'','#'+s.id.toLowerCase());}catch(e){}}
@@ -1310,11 +1341,21 @@ const wacheWahl=e=>{if(e.target.value==='')return;const w=D.wachen[+e.target.val
 $('#sel-wache').onchange=wacheWahl;$('#e-wache').onchange=wacheWahl;
 
 // Adresssuche (swisstopo SearchServer; in der Vorschau eventuell gesperrt). Für GIS- und Einsatzansicht.
+let _box=null;
+function gebietBox(){if(_box)return _box;const N=D.nodes;let a=Infinity,b=Infinity,c=-Infinity,d=-Infinity;
+  for(let i=0;i<N.length;i+=2){const x=N[i],y=N[i+1];if(x<a)a=x;if(x>c)c=x;if(y<b)b=y;if(y>d)d=y;}
+  return _box=[Math.floor(a/100+X0),Math.floor(b/100+Y0),Math.ceil(c/100+X0),Math.ceil(d/100+Y0)];}
 async function suche(inp,out){
-  const q=$(inp).value.trim();if(!q)return;$(out).textContent='Suche …';
-  try{const r=await fetch('https://api3.geo.admin.ch/rest/services/api/SearchServer?type=locations&origins=address&limit=5&sr=2056&searchText='+encodeURIComponent(q));
-    const j=await r.json();const a=(j.results||[]);
-    if(!a.length){$(out).textContent='Keine Adresse gefunden.';return;}
+  const q=$(inp).value.trim();if(!q){$(out).textContent='Bitte eine Adresse eingeben, z. B. «Kramgasse 49, Bern».';return;}$(out).textContent='Suche …';
+  // V13: nur Treffer im Gebiet von BORS (Ausdehnung des Netzes) und nur, wenn ein Wort der Eingabe im Treffer vorkommt
+  // (der Suchdienst liefert sonst auch zu Unsinn ähnlich klingende Adressen, z. B. im Tessin)
+  try{const B=gebietBox();
+    // ohne bbox suchen (sonst findet der Dienst Tippfehler schlechter) und erst danach auf das Gebiet filtern
+    const r=await fetch('https://api3.geo.admin.ch/rest/services/api/SearchServer?type=locations&origins=address&limit=20&sr=2056&searchText='+encodeURIComponent(q));
+    const j=await r.json();const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/<[^>]+>/g,'');
+    const w=norm(q).split(/[^a-z]+/).filter(x=>x.length>=4).map(x=>x.slice(0,4));
+    const a=(j.results||[]).filter(x=>{const e=x.attrs.y,n=x.attrs.x,l=norm(x.attrs.label);return e>=B[0]&&e<=B[2]&&n>=B[1]&&n<=B[3]&&(!w.length||w.some(t=>l.includes(t)));}).slice(0,5);
+    if(!a.length){$(out).textContent='Keine passende Adresse im Gebiet von BORS (Bern und zehn Nachbargemeinden) gefunden.';return;}
     $(out).innerHTML=a.map((x,i)=>`<div><button class="btn" style="margin-top:4px;text-align:left" data-i="${i}">${esc(x.attrs.label.replace(/<[^>]+>/g,''))}</button></div>`).join('');
     $(out).querySelectorAll('button').forEach(b=>b.onclick=()=>{const x=a[+b.dataset.i].attrs;P2=[x.y,x.x];P2txt='Ziel: '+x.label.replace(/<[^>]+>/g,'');$(out).textContent='';
       if(!P1){P1=[D.wachen[0][1]/100+X0,D.wachen[0][2]/100+Y0];P1txt='Start: '+D.wachen[0][0];}
