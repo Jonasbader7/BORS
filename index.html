@@ -247,6 +247,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
 .dz-r{font-size:13px;display:flex;flex-direction:column;gap:2px}
 .dz-r .l{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 .dz-r b{font-family:var(--f-mono);font-weight:500}
+.dz-n{font-size:12px;color:var(--warn-ink,var(--ink));border-left:3px solid var(--warn);padding-left:6px;margin-top:2px}
 .dz-b{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
 .dz-b .btn{font-size:13px}
 .btn.warnb{border-color:var(--warn)}
@@ -412,7 +413,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
 
     <section class="tabbody" id="p-info" hidden>
       <h2>So entscheidet BORS</h2>
-      <p>Jede Strasse erhält für jede Fahrzeugklasse einen von drei Zuständen. <span class="pill ok">validiert</span> heisst: Die Fahrbahnbreite ist aus der amtlichen Vermessung nachgewiesen und es gibt keinen Hinweis auf Höhe, Gewicht oder Hindernis. <span class="pill warn">unvalidiert</span> heisst: Die Daten reichen für keinen Entscheid. <span class="pill bad">gesperrt</span> heisst: nachweislich zu eng, zu tief oder zu schwer.</p>
+      <p>Jede Strasse erhält für jede Fahrzeugklasse einen von drei Zuständen. <span class="pill ok">validiert</span> heisst: Nach den Daten passt das Fahrzeug (nicht vor Ort geprüft). Die Fahrbahnbreite ist aus der amtlichen Vermessung nachgewiesen und es gibt keinen Hinweis auf Höhe, Gewicht oder Hindernis. <span class="pill warn">unvalidiert</span> heisst: Die Daten reichen für keinen Entscheid. <span class="pill bad">gesperrt</span> heisst: nachweislich zu eng, zu tief oder zu schwer.</p>
       <div style="overflow-x:auto">
         <table class="pr" id="tab-prof"></table>
       </div>
@@ -563,7 +564,10 @@ function zeichneDemo(){if(!map)return;demoMk.forEach(m=>m.remove());demoMk=[];
 function uiDemo(){const el=$('#demo');if(!el)return;if(!DEMO.size){el.hidden=true;el.innerHTML='';return;}
   el.hidden=false;
   el.innerHTML=`<b>Demo-Sperrung aktiv (${DEMO.size})</b><p class="small" style="margin:4px 0">${[...DEMO.values()].map(esc).join(', ')} – für alle Fahrzeuge und das Auto gesperrt. Nur in diesem Fenster, nicht in QGIS; andere Fenster und Fahrzeuge rechnen ohne diese Sperrung.</p><button class="btn" id="b-demo-alle">Alle Demo-Sperrungen aufheben</button>`;
-  el.querySelector('#b-demo-alle').onclick=()=>{[...DEMO.keys()].forEach(f=>{demoSP(D,f,false,DEMO_ORIG);if(worker)worker.postMessage({typ:'sperre',f,an:false});});DEMO.clear();zeichneDemo();uiDemo();toast('Alle Demo-Sperrungen aufgehoben.');if(P1&&P2)rechne();};}
+  el.querySelector('#b-demo-alle').onclick=()=>{[...DEMO.keys()].forEach(f=>{demoSP(D,f,false,DEMO_ORIG);if(worker)worker.postMessage({typ:'sperre',f,an:false});});DEMO.clear();zeichneDemo();uiDemo();segNeu();toast('Alle Demo-Sperrungen aufgehoben.');if(P1&&P2)rechne();};}
+// V12: Tab «Strasse» nach jeder Änderung der Demo-Sperren neu zeichnen (vorher blieb «gesperrt» stehen und der Knopf sperrte erneut)
+let segAkt=null;
+function segNeu(){if(segAkt!=null&&$('#seg-body').querySelector('#b-demo'))zeigeSeg(segAkt,true);}
 // Normales Navi (V10): Auto-Route REF und die Abschnitte darauf, die fuer Klasse c gesperrt sind (Darstellung, Router unveraendert)
 function refKonflikte(c){const r=BEIDE&&BEIDE.V.REF;if(!r||!r.ok)return null;const ni=D.attr_cols.indexOf('name'),g=new Map();let unv=0;
   r.rows.forEach(x=>{const k=D.kat[c][x.f];if(k===1)unv+=x.L;if(k!==2)return;const e=g.get(x.f);
@@ -856,7 +860,10 @@ async function rechne(){
   await new Promise(r=>setTimeout(r,30));
   try{const R=await routerLokal();fertig({V:R.berechne(p1,p2,'VALIDIERT'),E:R.berechne(p1,p2,'EXPERIMENTELL')});}catch(e){rechnet=false;toast('Fehler im Router: '+e);uiRoute();}
 }
-function fertig(res){rechnet=false;BEIDE=res;RES=res[$('#cb-exp').checked?'E':'V'];zeichneRoute();uiRoute();hinweis();
+// V12: Im Modus «experimentell» bleibt eine Route ohne ungeklärte Meter «validiert» (sie ist dann dieselbe wie im Modus validiert)
+function waehleRES(){if(!BEIDE)return null;if(!$('#cb-exp').checked)return BEIDE.V;const o=Object.assign({},BEIDE.E);
+  ['A','B','C','D'].forEach(c=>{const e=BEIDE.E[c],v=BEIDE.V[c];if(e&&e.ok&&e.modus==='EXPERIMENTELL'&&!((e.unvalidiert_m||0)>0.5)&&v&&v.ok)o[c]=v;});return o;}
+function fertig(res){rechnet=false;BEIDE=res;RES=waehleRES();zeichneRoute();uiRoute();hinweis();
   if(istMobil())setSheet('mitte');
   // Einsatz-Tab: nicht scrollen, Notruf und Disposition stehen oben
   const rs=zenOffen()?null:$(ansicht==='einsatz'?'#e-res':'#res'),pb=$(ansicht==='einsatz'?'#p-einsatz':'#p-route');
@@ -946,15 +953,15 @@ function vglInhalt(v){
   if(v.fehler)out.fehler='Interner Widerspruch: Eine Route enthält einen gesperrten Abschnitt. Nicht verwenden, Daten prüfen.';
   // bis Zufahrt: alle befahrenen Abschnitte validiert, aber Start/Ziel nur über eine nicht nachgewiesene Luftlinie erreicht
   if(v.val)out.val=v.val.modus==='VALIDIERT_BIS_ZUFAHRT'
-    ?{cls:'ok',lbl:'Validiert bis Zufahrt',big:min(v.val),sub:km(v.val.laenge_m)+' · alle befahrenen Abschnitte nachgewiesen, Zufahrt nicht',notes:zufahrtTxt(v.val),kosten:kost(v.val,' (mit Zuschlägen)')}
-    :{cls:'ok',lbl:'Validiert',big:min(v.val),sub:km(v.val.laenge_m)+' · alle Abschnitte nachgewiesen',notes:zufahrtTxt(v.val),kosten:kost(v.val,' (mit Zuschlägen)')};
+    ?{cls:'ok',lbl:'Validiert bis Zufahrt',big:min(v.val),sub:km(v.val.laenge_m)+' · alle befahrenen Abschnitte passen nach Daten, Zufahrt nicht nachgewiesen',notes:zufahrtTxt(v.val).concat(kurvenHinweis(v.val)),kosten:kost(v.val,' (mit Zuschlägen)')}
+    :{cls:'ok',lbl:'Validiert',big:min(v.val),sub:km(v.val.laenge_m)+' · alle Abschnitte passen nach Daten (nicht vor Ort geprüft)',notes:zufahrtTxt(v.val).concat(kurvenHinweis(v.val)),kosten:kost(v.val,' (mit Zuschlägen)')};
   else{const r=v.v;let sub;
     if(!r.ok)sub=de(r.text||r.ursache);
     else{sub='Keine Verbindung nur über validierte Strassen'+(r.validiert_ergebnis?` (${de(r.validiert_ergebnis)})`:'')+'.';
       if(r.modus==='VALIDIERT_BIS_ZUFAHRT'){const a=r.zufahrt_anfang_m||0,z=r.zufahrt_ende_m||0;sub+=` Nur bis zur Zufahrt validiert: ${a?'erste '+Math.round(a)+' m':''}${a&&z?' und ':''}${z?'letzte '+Math.round(z)+' m':''} ungeklärt.`;}}
     out.val={cls:'bad',lbl:'Keine validierte Route',big:'–',sub,notes:[]};}
   if(v.zeigeE){const e=v.exp,n=v.eng.length;
-    out.exp={cls:'warn',lbl:'Vergleich · nicht gesichert',big:min(e),sub:`${km(e.laenge_m)} · ${n} ungeklärte Stelle${n===1?'':'n'}, ${Math.round(v.unvM)} m`,notes:zufahrtTxt(e),kosten:kost(e,' (mit Zuschlägen, ungeklärt ×2)')};
+    out.exp={cls:'warn',lbl:'Vergleich · nicht gesichert',big:min(e),sub:`${km(e.laenge_m)} · ${n} ungeklärte Stelle${n===1?'':'n'}, ${Math.round(v.unvM)} m`,notes:zufahrtTxt(e).concat(kurvenHinweis(e)),kosten:kost(e,' (mit Zuschlägen, ungeklärt ×2)')};
     if(v.val){const dt=e.fahrzeit_min-v.val.fahrzeit_min,dl=e.laenge_m-v.val.laenge_m;
       out.diff='Vergleichsroute: Modellfahrzeit '+(Math.abs(dt)<0.05?'gleich':`${Math.abs(dt).toFixed(1)} min ${dt<0?'kürzer':'länger'}`)+`, Weg ${km(Math.abs(dl))} ${dl<0?'kürzer':'länger'} als die validierte Route – nur wenn die gelben Stellen passierbar sind.`+
         (v.val.modus==='VALIDIERT_BIS_ZUFAHRT'?` Achtung: Die validierte Route ${[(v.val.zufahrt_anfang_m||0)>0?'beginnt':'',(v.val.zufahrt_ende_m||0)>0?'endet':''].filter(Boolean).join(' und ')||'endet'} an einem Ersatzpunkt, nicht am geklickten Ort.`:'');}
@@ -1089,9 +1096,11 @@ function uiZentrale(){
         else{if(v.val||v.zeigeE)b+=`<button class="btn ${v.val?'prim':'warnb'}" data-z="${c}">${v.val&&v.zeigeE?'Senden: beide Routen, Fahrer wählt':v.val?'Validierte Route senden':'Nur Vergleichsroute senden'}</button>`;
           if(!b)b='<span class="muted">Keine Route, nicht zuweisbar.</span>';
           if(aktiv(z))b+=`<span class="small muted" style="align-self:center">noch im Auftrag ${esc(z.a.nr)}</span>`;}
+        // V12: Halt vor dem Ziel, Zufahrt, Poller und «Kurve nur mit Rangieren» auch in der Zentrale zeigen (bisher nur im Fahrzeug)
+        const dn=r=>{const t=r?zufahrtTxt(r).concat(kurvenHinweis(r)):[];return t.length?`<div class="dz-n">${t.map(esc).join('<br>')}</div>`:'';};
         h+=`<div class="dz ${hier?'zug':''}" style="--k:var(--r${c})"><button class="dz-k" data-k="${c}" aria-pressed="${kVgl&&profil===c}" title="Routen von ${c} auf der Karte vergleichen">${c}<small>${PK[c]}</small></button>
-          <div class="dz-r"><div class="l"><span class="pill ok">validiert</span>${vt}</div></div>
-          <div class="dz-r"><div class="l"><span class="pill warn">Vergleich</span>${et}</div></div>
+          <div class="dz-r"><div class="l"><span class="pill ok">validiert</span>${vt}</div>${dn(v.val)}</div>
+          <div class="dz-r"><div class="l"><span class="pill warn">Vergleich</span>${et}</div>${v.zeigeE?dn(v.exp):''}</div>
           <div class="dz-b">${b}</div></div>`;}
       h+='<p class="small muted">Senden schickt dem Fahrzeug die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Der Fahrer wählt vor dem Quittieren. Klasse antippen: validierte Route (grün) und Vergleichsroute (blau, ungeklärte Stellen gelb) auf der Karte. Zeiten = Modellfahrzeit ohne Verkehr. Gesperrte Abschnitte sind nie Teil einer Route. Details je Klasse im Tab «Route».</p>';}
     h+='</div>';}
@@ -1143,12 +1152,13 @@ function uiFahrzeug(){
       // Wahl vor dem Quittieren: zwei grosse Karten nebeneinander, validiert ist vorgewählt
       const kv=R.val,ke=R.exp,dt=ke.fahrzeit_min-kv.fahrzeit_min,dl=ke.laenge_m-kv.laenge_m;
       h+=`<div class="f-wahl" role="group" aria-label="Route wählen">
-        <button class="e-card ok" data-w="val" aria-pressed="${val}"><span class="e-lbl">✔ Validiert</span><span class="e-big">${kv.fahrzeit_min.toFixed(1)} <small>min</small></span><span class="e-sub">${km(kv.laenge_m)}</span><span class="e-note">${kv.modus==='VALIDIERT_BIS_ZUFAHRT'?'bis Zufahrt gesichert':'gesichert'}</span></button>
+        <button class="e-card ok" data-w="val" aria-pressed="${val}"><span class="e-lbl">✔ Validiert</span><span class="e-big">${kv.fahrzeit_min.toFixed(1)} <small>min</small></span><span class="e-sub">${km(kv.laenge_m)}</span><span class="e-note">${kv.modus==='VALIDIERT_BIS_ZUFAHRT'?'passt nach Daten bis zur Zufahrt':'passt nach Daten'}</span></button>
         <button class="e-card warn" data-w="exp" aria-pressed="${!val}"><span class="e-lbl">⚠ Alternative</span><span class="e-big">${ke.fahrzeit_min.toFixed(1)} <small>min</small></span><span class="e-sub">${km(ke.laenge_m)}</span><span class="e-note">${n} ungeklärt</span></button></div>`;
       nachKnopf=`<div class="e-sub" style="font-weight:600">Alternative: ${Math.abs(dt)<0.05?'gleich schnell':`${Math.abs(dt).toFixed(1)} min ${dt<0?'kürzer':'länger'}`}, ${km(Math.abs(dl))} ${dl<0?'kürzer':'länger'}, nicht gesichert. Nur wenn die gelben Stellen passierbar sind.</div>`;}
     else{const lbl=val?(r.modus==='VALIDIERT_BIS_ZUFAHRT'?'✔ Validiert bis Zufahrt':'✔ Validierte Route'):'⚠ '+(a.routen.length>1?'Alternative':'Vergleichsroute')+' · nicht gesichert';
       h+=`<div class="e-card ${val?'ok':'warn'}"><div class="e-lbl">${lbl}</div><div class="e-big">${r.fahrzeit_min.toFixed(1)} <small>min</small></div><div class="e-sub">${km(r.laenge_m)}${val?'':` · ${st(n+' ungeklärte')}`}</div></div>`;}
     h+=zufahrtTxt(r).map(t=>`<div class="e-note">${esc(t)}</div>`).join('')+
+      kurvenHinweis(r).map(t=>`<div class="e-note" style="color:var(--ink);font-weight:600">⚠ ${esc(t)}</div>`).join('')+
       (z.pruef==='abweichend'?'<div class="e-note" style="color:var(--bad);font-weight:600">Eine Route weicht von der Berechnung der Zentrale ab. Rückfrage.</div>':'');
     if(!val&&n)eng=`<h3>Ungeklärte Stellen – vor Ort beurteilen</h3>${engListe(z.v,6)}`;}
   if(w&&R!==null)h+=`<button class="btn f-go" id="f-weiter">${zw?(val?'Mit validierter Route quittieren':'Mit Alternative quittieren'):w[0]}</button>`;
@@ -1226,6 +1236,11 @@ $('#vsw').onclick=e=>{const b=e.target.closest('button[data-a]');if(!b)return;co
 $('#e-gis').onclick=()=>setAnsicht('gis',true);
 $('#e-start').onclick=()=>setModus('start');$('#e-ziel').onclick=()=>setModus('ziel');
 $('#e-neu').onclick=()=>$('#b-reset').onclick();
+// V12: Kurven aus dem Schleppkurven-Modell lesbar machen. UNMOEGLICH kostet im Router nur Zeit (keine Sperre) –
+// deshalb steht es bei einer validierten Route ausdrücklich daneben («Kurve prüfen»), statt nur als Code im Kleingedruckten.
+const kurvenHart=r=>((r&&r.abbiegen)||[]).filter(t=>/UNMOEGLICH/.test(t));
+const kurvenTxt=t=>t.replace(/:\s*UNMOEGLICH/g,': nur mit Rangieren').replace(/:\s*NUR_MIT_NEBENFLAECHE/g,': nur über Trottoir/Insel').replace(/:\s*ENG\b/g,': eng').replace(/ Grad\)/g,'°)');
+const kurvenHinweis=r=>{const h=kurvenHart(r).map(t=>t.replace(/:\s*UNMOEGLICH/g,'').replace(/ Grad\)/g,'°)'));return h.length?[`Kurve laut Schleppkurven-Modell nur mit Rangieren: ${h.slice(0,2).join('; ')}. BORS rechnet dafür nur einen Zeitzuschlag, keine Sperre – vor Ort prüfen.`]:[];};
 function detail(c,r){
   if(!r.ok)return esc(de(r.text||r.ursache));
   const t=[];
@@ -1234,17 +1249,31 @@ function detail(c,r){
   if(r.modus==='EXPERIMENTELL')t.push(`Keine validierte Route. ${Math.round(r.unvalidiert_m||0)} m auf unvalidierten Strassen (gelb gestrichelt).`);
   if(r.ursache==='ZIEL_ZU_FUSS')t.push(`Halt an geeigneter Strasse, letzte ${Math.round(r.diag.ziel_rest_m)} m zu Fuss oder mit Schlauch.`);
   if(r.dominanz_von)t.push(`Übernimmt die Route von ${r.dominanz_von} (dort zulässig und schneller).`);
-  if(r.abbiegen&&r.abbiegen.length)t.push('Enge Kurve oder Abbiegen (Schleppkurven-Modell, Zeitzuschlag): '+esc(r.abbiegen.slice(0,2).join('; ')));
+  kurvenHinweis(r).forEach(x=>t.push('<b>'+esc(x)+'</b>'));
+  const rest=((r.abbiegen)||[]).filter(x=>!/UNMOEGLICH/.test(x));
+  if(rest.length)t.push('Enge Kurve oder Abbiegen (Schleppkurven-Modell, Zeitzuschlag): '+esc(kurvenTxt(rest.slice(0,2).join('; '))));
   return t.join(' ');
 }
 function zusammenfassung(){
-  const ok=['A','B','C','D'].filter(c=>RES[c].ok&&RES[c].modus==='VALIDIERT'),ref=RES.REF;
+  const kl=['A','B','C','D'],ref=RES.REF;
+  // V12: Start = Ziel und «keine Route» klar benennen, statt eine Route «wie ein normales Auto» zu melden
+  if(P1&&P2&&Math.hypot(P1[0]-P2[0],P1[1]-P2[1])<15)
+    return '<div class="sum"><b>Start und Ziel liegen am selben Ort</b>Setze das Ziel an einen anderen Ort, sonst gibt es keine sinnvolle Route.</div>';
+  const ok=kl.filter(c=>RES[c].ok&&RES[c].modus==='VALIDIERT'),mitRoute=kl.filter(c=>RES[c].ok);
+  if(!mitRoute.length){const rs=kl.map(c=>RES[c]),wer=t=>/^Start/.test(t||'')?'Der Start':'Das Ziel';let txt;
+    const aus=rs.find(r=>r.ursache==='AUSSERHALB_UNTERSUCHUNGSGEBIET'),weit=rs.find(r=>r.ursache==='KEIN_NETZ_IN_ZIELNAEHE');
+    if(aus)txt='Start oder Ziel liegt ausserhalb des Untersuchungsgebiets (Bern und zehn Nachbargemeinden). Dort macht BORS keine Aussage.';
+    else if(weit&&/> 500 m/.test(weit.text||''))txt=`${wer(weit.text)} liegt ausserhalb des Strassennetzes von BORS (Bern und zehn Nachbargemeinden). Dort macht BORS keine Aussage.`;
+    else if(weit){const m=(weit.text||'').match(/(\d+) m entfernt/);txt=`${wer(weit.text)} liegt ${m?m[1]+' m':'zu weit'} neben der nächsten Strasse. BORS bindet einen Punkt höchstens 30 m weit an. Den Punkt näher an eine Strasse setzen.`;}
+    else txt='Für keine Klasse gibt es eine Verbindung. Gründe je Klasse unten.';
+    return `<div class="sum"><b>Keine Fahrzeugklasse hat eine Route</b>${txt}</div>`;}
   let titel,txt;
   if(ok.length===4)titel='Alle vier Fahrzeugklassen haben eine validierte Route';
   else if(ok.length===0)titel='Keine Fahrzeugklasse hat eine vollständig validierte Route';
   else titel=`Validierte Route für ${ok.join(', ')}`;
-  const um=['A','B','C','D'].filter(c=>RES[c].ok&&ref.ok).map(c=>[c,RES[c].laenge_m-ref.laenge_m]).sort((a,b)=>b[1]-a[1])[0];
-  txt=um&&um[1]>200?`Grösster Umweg: ${um[0]} fährt ${km(um[1])} weiter als ein normales Auto.`:'Alle Klassen fahren ungefähr die Route eines normalen Autos.';
+  const um=mitRoute.filter(c=>ref.ok).map(c=>[c,RES[c].laenge_m-ref.laenge_m]).sort((a,b)=>b[1]-a[1])[0];
+  txt=um&&um[1]>200?`Grösster Umweg: ${um[0]} fährt ${km(um[1])} weiter als ein normales Auto.`
+    :ref.ok?(mitRoute.length===4?'Alle Klassen fahren ungefähr die Route eines normalen Autos.':`${mitRoute.join(', ')} fahren ungefähr die Route eines normalen Autos.`):'';
   return `<div class="sum"><b>${titel}</b>${txt}</div>`;
 }
 function uiRoute(){
@@ -1254,7 +1283,8 @@ function uiRoute(){
   if(rechnet){$('#res').innerHTML='<div class="hint">BORS berechnet die Routen für A–D …</div>';return;}
   if(!RES){$('#res').innerHTML=P1?'':'<div class="hint">Setze Start und Ziel mit zwei Tipps auf die Karte oder wähle unten ein Beispiel. BORS rechnet dann die Routen für alle vier Fahrzeugklassen.</div>';return;}
   const ref=RES.REF;
-  $('#res').innerHTML=zusammenfassung()+['A','B','C','D','REF'].map(c=>{const r=RES[c];const m=r.ok?(c==='REF'?['n','Referenz']:MOD[r.modus]):['bad','keine Route'];
+  $('#res').innerHTML=zusammenfassung()+['A','B','C','D','REF'].map(c=>{const r=RES[c];let m=r.ok?(c==='REF'?['n','Referenz']:MOD[r.modus]):['bad','keine Route'];
+    if(r.ok&&c!=='REF'&&r.modus!=='EXPERIMENTELL'&&kurvenHart(r).length)m=['warn',m[1]+' · Kurve prüfen'];
     const d=(r.ok&&ref.ok&&c!=='REF')?r.laenge_m-ref.laenge_m:null;
     return `<div class="card" style="color:var(--r${c})"><button class="sw ${show[c]?'on':''}" data-c="${c}" aria-label="${c} auf Karte zeigen"></button>
       <div class="nm" style="color:var(--ink)">${c==='REF'?'Auto':c} <em>${PN[c]}</em></div>
@@ -1267,7 +1297,7 @@ function uiRoute(){
 // setzt auch den Einsatz der Zentrale zurück; gesendete Aufträge bleiben beim Fahrzeug
 $('#b-reset').onclick=()=>{P1=P2=null;P1txt=P2txt='';RES=BEIDE=null;EINSATZ=null;ortWahl=null;kVgl=false;zeichnePunkte();zeichneRoute();uiRoute();setModus('start');$('#sel-wache').value='';$('#e-wache').value='';};
 // beide Modi liegen schon vor: Umschalten ohne Neuberechnung
-$('#cb-exp').onchange=()=>{if(BEIDE){RES=BEIDE[$('#cb-exp').checked?'E':'V'];zeichneRoute();uiRoute();}else if(P1&&P2)rechne();};
+$('#cb-exp').onchange=()=>{if(BEIDE){RES=waehleRES();zeichneRoute();uiRoute();}else if(P1&&P2)rechne();};
 function szenario(s){P1=s.s;P2=s.z;P1txt=`Start: Beispiel ${s.id}`;P2txt=`Ziel: ${s.t} (${s.k})`;zeichnePunkte();tab('route');setModus('ziel');rechne();try{history.replaceState(null,'','#'+s.id.toLowerCase());}catch(e){}}
 $('#scen').innerHTML=SZEN.map((s,i)=>`<button class="btn" data-i="${i}"><small>${s.id} · ${s.k}</small>${s.t}</button>`).join('');
 $('#scen').onclick=e=>{const b=e.target.closest('button');if(b&&D)szenario(SZEN[+b.dataset.i]);};
@@ -1295,13 +1325,14 @@ $('#b-suche').onclick=()=>suche('#in-suche','#suche-res');$('#in-suche').onkeydo
 $('#e-b-suche').onclick=()=>suche('#e-suche','#e-suche-res');$('#e-suche').onkeydown=e=>{if(e.key==='Enter')suche('#e-suche','#e-suche-res');};
 
 // ------------------------------------------------ Strassen-Befund
-function zeigeSeg(i){
+function zeigeSeg(i,still){
+  segAkt=i;const demo=DEMO.has(i);
   const a=c=>D.attr[i][D.attr_cols.indexOf(c)],T=x=>D.texte[x]||'';
   map.setFilter('netz-sel',['==',['get','i'],i]);
   const n=v=>v==null||v===''?'–':v;
   const m=v=>v==null?'–':Number(v).toFixed(2)+' m';
   const rows=['A','B','C','D'].map(c=>{const st=D.kosten.V[c][i]>0?0:(D.kosten.E[c][i]>0?1:2);const g=T(D.grund[c][i]);
-    return `<tr><td style="color:var(--r${c})">${c}</td><td><span class="pill ${ST[st][0]}">${ST[st][1]}</span><div class="muted" style="margin-top:3px;overflow-wrap:anywhere">${esc(de(g).replace(/_/g,' ').slice(0,260))}</div></td></tr>`;}).join('');
+    return `<tr><td style="color:var(--r${c})">${c}</td><td><span class="pill ${ST[st][0]}">${demo?'gesperrt (Demo)':ST[st][1]}</span><div class="muted" style="margin-top:3px;overflow-wrap:anywhere">${demo?'Demo-Sperrung, nur in diesem Fenster. Befund ohne Demo: ':''}${esc(de(g).replace(/_/g,' ').slice(0,260))}</div></td></tr>`;}).join('');
   const bau=D.bau.filter(b=>b[0]===i).map(b=>`${esc(b[2])}${b[4]?' bis '+esc(b[4]):''}${b[1]!=null?', Restbreite '+b[1]+' m':''}${b[5]?' – '+esc(b[5]):''}`).join('<br>');
   const pk=(D.punkte[i]||[]).map(p=>esc(T(p[3]))+(p[2]?' (fest)':' (öffnen, +30 s)')).join(', ');
   let L=0;D.segs[i][0].forEach(ids=>{for(let k=0;k<ids.length-1;k++)L+=Math.hypot(D.nodes[2*ids[k+1]]-D.nodes[2*ids[k]],D.nodes[2*ids[k+1]+1]-D.nodes[2*ids[k]+1])/100;});
@@ -1324,6 +1355,7 @@ function zeigeSeg(i){
     <p class="small muted" style="margin-top:10px">Quellen: Breite aus der amtlichen Vermessung, Schilder aus OpenStreetMap und KSVB (nicht vor Ort bestätigt).</p>
     ${ansicht!=='einsatz'?`<h3 style="margin-top:14px;margin-bottom:4px">Demo</h3><button class="btn ${DEMO.has(i)?'on':''}" id="b-demo">${DEMO.has(i)?'Demo-Sperrung aufheben':'Demo: Abschnitt sperren (Vollsperrung)'}</button><p class="small muted">Für Präsentationen: Der Abschnitt gilt für alle Fahrzeuge und das Auto als gesperrt, BORS rechnet die Route sofort neu. Nur in diesem Fenster, nicht in QGIS.</p>`:''}`;
   {const bd=$('#b-demo');if(bd)bd.onclick=()=>{demoUmschalten(i);zeigeSeg(i);};}
+  if(still)return;
   tab('seg');if(istMobil())setSheet('gross');$('#p-seg').scrollTop=0;
 }
 

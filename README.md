@@ -11,13 +11,25 @@ Fahrzeugabhängiges Einsatzrouting für Bern und zehn Nachbargemeinden. BFH, Mod
 - `basis.json` – Ersatz-Grundkarte aus der amtlichen Vermessung (Gebäude, Wald, Gewässer)
 - `parkfelder.json` – Parkfeld-Flächen für die Ebene «Parkfelder» (dieselben, die von der Fahrbahnbreite abgezogen werden)
 
+## Neu in Version 12 (6.11.2026): Texte und Demo-Sperrung nach dem Realitätstest
+
+Router, Strassennetz, Baustellen und Parkfelder wie V11. Behoben sind die Probleme 2 und 7–11 aus `05_Berichte/Realitaetstest_WebApp_20261106/Testbericht_BORS_V11.md`, nur in `index.html`:
+- **Kurve «UNMOEGLICH» (Problem 2):** Enthält eine validierte Route eine Kurve, die das Schleppkurven-Modell nur mit Rangieren schafft, heisst sie «validiert · Kurve prüfen». Der Hinweis «Kurve laut Schleppkurven-Modell nur mit Rangieren … BORS rechnet dafür nur einen Zeitzuschlag, keine Sperre – vor Ort prüfen» steht im Tab Route, im Routenvergleich, in der Disposition und im Fahrzeug. Die Codes ENG / NUR_MIT_NEBENFLAECHE erscheinen als «eng» / «nur über Trottoir/Insel». Die Routenwahl ist unverändert (beide Router rechnen weiter nur einen Zuschlag).
+- **Disposition (Problem 7):** Halt vor dem Ziel, nicht nachgewiesene Zufahrt, Poller und Kurvenhinweis stehen jetzt auch in der Karte A–D der Zentrale (vorher nur im Fahrzeug).
+- **Wording (Problem 8):** «gesichert» heisst bei der validierten Route jetzt «passt nach Daten», «alle Abschnitte nachgewiesen» heisst «alle Abschnitte passen nach Daten (nicht vor Ort geprüft)». Methode-Tab: «Nach den Daten passt das Fahrzeug (nicht vor Ort geprüft)». Die Alternative bleibt «nicht gesichert».
+- **Meldungen ohne Route (Problem 9):** «Keine Fahrzeugklasse hat eine Route» mit Grund: ausserhalb des Strassennetzes / Untersuchungsgebiets oder «liegt 36 m neben der nächsten Strasse, BORS bindet höchstens 30 m an». Start = Ziel: «Start und Ziel liegen am selben Ort». «… fahren ungefähr die Route eines normalen Autos» nur noch für Klassen mit Route.
+- **Modus Experimentell (Problem 10):** Eine Route ohne ungeklärte Meter bleibt «validiert» (sie ist dann dieselbe wie im Modus validiert).
+- **Demo-Sperrung (Problem 11):** Der Tab «Strasse» wird nach jeder Änderung der Demo-Sperren neu gezeichnet. Während der Sperre steht «gesperrt (Demo)» mit dem Befund ohne Demo; «Alle aufheben» im Tab Route setzt den Tab Strasse zurück.
+
+Geprüft am 6.11.2026 lokal im Browser (Port 8778): Thun → «ausserhalb des Strassennetzes»; Zollikofen → «36 m neben der nächsten Strasse»; Start = Ziel; Wache → Gümligen: D «validiert · Kurve prüfen», im Modus Experimentell A/B «validiert»; Postgasse: Disposition D «Halt 98 m»; S5 Aarstrasse sperren → im Tab Route aufheben → Tab Strasse «validiert», erneut sperren/aufheben ok; Beamer 1440 × 900 «Beides» Notruf → C (beide Routen) → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Notruf → B → abgeschlossen. Keine Konsolenfehler. Den Kurvenhinweis in der Fahrzeugansicht habe ich nicht mit einem echten Auftrag ausgelöst. Nicht veröffentlicht, nicht vor Ort geprüft.
+
 ## Neu in Version 11 (6.11.2026): Ebene Parkfelder, Badge nur «Prototyp»
 
 Router, Strassennetz und Baustellen wie V10. Neu:
 - **Ebene «Parkfelder (von der Breite abgezogen)»** im Tab «Ebenen»: 4631 Flächen aus `02_Daten/2_Aktuell_V9/Vorstufen/parkierung_v5_BORS_Netz_V2_20261027_1534.gpkg` (Stadt Bern 4245 Felder, OSM 381 Strassenränder), also genau die Daten, die `25_Breite_V9_1` von der Fahrbahnbreite abzieht und QGIS in der Gruppe *03 BELEGE* zeigt. Farbe nach Art: blaue Zone, weiss/gebührenpflichtig, Spezialfelder (Gehbehinderte, Taxi, Car, LKW …), OSM-Strassenrand; ungenau verortete Flächen (3885) heller. Wird erst beim Einschalten geladen, über dem Strassennetz gezeichnet. Export mit `01_Skripte/Aktuell/32_Web_Parkfelder_BORS.py` (normales Python). Nur Anzeige, Router und `netz.json` unverändert.
 - **Badge oben rechts** zeigt nur noch «Prototyp» (ohne «keine Einsatzfreigabe»). Die Hinweise «Forschungsprototyp – keine Einsatznavigation» in der Fahrzeugansicht und im Tab «Einsatz» bleiben.
 
-Geprüft am 6.11.2026 lokal im Browser (Port 8777): Ebene ein, Flächen entlang der Strassen sichtbar (Spitalacker, Altstadt), Legende mit Zahlen; «Beides» Notruf → A senden → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Badge und Ebene. Keine Konsolenfehler. Nicht veröffentlicht, nicht vor Ort geprüft.
+Geprüft am 6.11.2026 lokal im Browser (Port 8777): Ebene ein, Flächen entlang der Strassen sichtbar (Spitalacker, Altstadt), Legende mit Zahlen; «Beides» Notruf → A senden → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Badge und Ebene. Keine Konsolenfehler. Live seit 6.11.2026 (Commit d97f8df), nicht vor Ort geprüft.
 
 ## Neu in Version 10 (5.11.2026): Baustellen Stand 5.11., Vergleich mit dem normalen Navi, Demo-Sperrung
 
