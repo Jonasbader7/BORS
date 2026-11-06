@@ -308,18 +308,18 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
   <header class="bar">
     <div class="logo">BORS <span>Bern</span></div>
     <div class="sub">Fahrzeugabhängiges Einsatzrouting · BFH BCS HS26 Gruppe 5</div>
-    <div class="seg vsw" id="vsw" role="group" aria-label="Ansicht umstellen"><button data-a="gis" aria-pressed="true" title="Einsatzzentrale: volle Karte, Notruf, Routen A–D, Zuweisung">Zentrale</button><button data-a="einsatz" aria-pressed="false" title="Einsatzfahrzeug: nur die zugewiesene Route">Fahrzeug<span class="vsw-n" id="vsw-n" hidden></span></button><button data-a="beides" aria-pressed="false" class="nurbreit" title="Präsentation: Zentrale und Fahrzeug nebeneinander">Beides</button></div>
+    <div class="seg vsw" id="vsw" role="group" aria-label="Ansicht umstellen"><button data-a="gis" data-analytics-event="view:zentrale" aria-pressed="true" title="Einsatzzentrale: volle Karte, Notruf, Routen A–D, Zuweisung">Zentrale</button><button data-a="einsatz" data-analytics-event="view:fahrzeug" aria-pressed="false" title="Einsatzfahrzeug: nur die zugewiesene Route">Fahrzeug<span class="vsw-n" id="vsw-n" hidden></span></button><button data-a="beides" data-analytics-event="view:beides" aria-pressed="false" class="nurbreit" title="Präsentation: Zentrale und Fahrzeug nebeneinander">Beides</button></div>
     <div class="badge">Prototyp</div>
   </header>
 
   <aside class="pult">
     <button class="grip" id="grip" aria-label="Bereich vergrössern oder verkleinern"><span id="grip-t">Mehr anzeigen</span></button>
     <div class="tabs" role="tablist">
-      <button role="tab" id="t-zen" aria-selected="true" aria-controls="p-zen" data-t="zen">Einsatz</button>
-      <button role="tab" id="t-route" aria-selected="false" aria-controls="p-route" data-t="route">Route</button>
-      <button role="tab" id="t-seg" aria-selected="false" aria-controls="p-seg" data-t="seg">Strasse</button>
-      <button role="tab" id="t-lay" aria-selected="false" aria-controls="p-lay" data-t="lay">Ebenen</button>
-      <button role="tab" id="t-info" aria-selected="false" aria-controls="p-info" data-t="info">Methode</button>
+      <button role="tab" id="t-zen" data-analytics-event="tab:einsatz" aria-selected="true" aria-controls="p-zen" data-t="zen">Einsatz</button>
+      <button role="tab" id="t-route" data-analytics-event="tab:route" aria-selected="false" aria-controls="p-route" data-t="route">Route</button>
+      <button role="tab" id="t-seg" data-analytics-event="tab:strasse" aria-selected="false" aria-controls="p-seg" data-t="seg">Strasse</button>
+      <button role="tab" id="t-lay" data-analytics-event="tab:ebenen" aria-selected="false" aria-controls="p-lay" data-t="lay">Ebenen</button>
+      <button role="tab" id="t-info" data-analytics-event="tab:methode" aria-selected="false" aria-controls="p-info" data-t="info">Methode</button>
     </div>
 
     <section class="tabbody" id="p-zen" role="tabpanel" aria-labelledby="t-zen">
@@ -413,6 +413,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
 
     <section class="tabbody" id="p-info" role="tabpanel" aria-labelledby="t-info" hidden>
       <h2>So entscheidet BORS</h2>
+      <p class="small"><a href="https://jonasbader7.github.io/Portfoliopage/analytics/datenschutz.html" target="_blank" rel="noopener noreferrer">Datenschutz &amp; Analytics</a></p>
       <p>Jede Strasse erhält für jede Fahrzeugklasse einen von drei Zuständen. <span class="pill ok">validiert</span> heisst: Nach den Daten passt das Fahrzeug (nicht vor Ort geprüft). Die Fahrbahnbreite ist aus der amtlichen Vermessung nachgewiesen und es gibt keinen Hinweis auf Höhe, Gewicht oder Hindernis. <span class="pill warn">unvalidiert</span> heisst: Die Daten reichen für keinen Entscheid. <span class="pill bad">gesperrt</span> heisst: nachweislich zu eng, zu tief oder zu schwer.</p>
       <div style="overflow-x:auto">
         <table class="pr" id="tab-prof"></table>
@@ -1427,4 +1428,8 @@ start().then(()=>{if(D){if(D.baustellen_stand){const t=D.baustellen_stand.slice(
 })();
 </script>
 
+<!-- Aggregierte Analytics ohne Cookies; Endpoint ist standardmässig leer.
+     Keine Routekoordinaten oder Sucheingaben werden erfasst. -->
+<script src="analytics-config.js"></script>
+<script src="analytics-client.js" data-analytics-site="bors"></script>
 </body></html>
