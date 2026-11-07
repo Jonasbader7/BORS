@@ -30,7 +30,7 @@ Beispiel: An der Felsenaubrücke fahren Notarzt und Rettungswagen direkt, die gr
 - **Geprüft:** Die Web-App ist eine Übertragung des QGIS-Routers; beim Abgleich der Version V9.2c waren 325 von 325 Testrouten identisch. Der QGIS-Testlauf meldet 29 bestandene und 0 fehlgeschlagene Prüfungen (5.11.2026).
 - **Nicht geprüft:** BORS wurde nicht im Einsatz und nicht systematisch vor Ort getestet. Höhenangaben und Poller aus OpenStreetMap sind nicht vor Ort bestätigt.
 
-Dieses Repository enthält die Web-App. Die Datenaufbereitung in Python/QGIS liegt nicht öffentlich.
+Dieses Repository enthält die Web-App und im Ordner [`pipeline/`](pipeline/) die Datenaufbereitung in Python/QGIS (Breitenmessung, Netzmaster, QGIS-Router, Export nach `netz.json`). Die Rohdaten selbst sind nicht enthalten.
 
 ## Dateien
 
@@ -40,6 +40,7 @@ Dieses Repository enthält die Web-App. Die Datenaufbereitung in Python/QGIS lie
 - `netz_aenderungen.csv` – die 129 Statuswechsel gegenüber V8 (Abschnitt × Klasse)
 - `basis.json` – Ersatz-Grundkarte aus der amtlichen Vermessung (Gebäude, Wald, Gewässer)
 - `parkfelder.json` – Parkfeld-Flächen für die Ebene «Parkfelder» (dieselben, die von der Fahrbahnbreite abgezogen werden)
+- `pipeline/` – Python-Skripte, die das Netz messen, bewerten und für die Web-App exportieren (Übersicht in `pipeline/README.md`)
 
 ## Versionsgeschichte
 

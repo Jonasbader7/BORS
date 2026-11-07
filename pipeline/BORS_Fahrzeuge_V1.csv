@@ -1,0 +1,16 @@
+id;kategorie;organisation;bezeichnung;basisfahrzeug;breite_karosserie_m;breite_spiegel_m;hoehe_m;laenge_m;gewicht_t;radstand_m;ueberhang_vorne_m;ueberhang_hinten_m;wendekreis_m;quelle_masse;quelle_fahrwerk;bemerkung
+NEF;A;Rettungsdienst SRB;NEF Notarzteinsatzfahrzeug;Skoda Enyaq;1.88;2.15;1.62;4.65;2.6;2.77;0.88;1.00;9.3;Fahrzeuguebersicht Gruppe 5 (Hersteller ca.);ANNAHME typische Herstellerwerte;
+PW_X1;A;Kantonspolizei;Patrouillenwagen;BMW X1 (2025);1.85;2.10;1.64;4.50;2.3;2.69;0.85;0.96;11.4;Fahrzeuguebersicht Gruppe 5 (ca.);ANNAHME typische Herstellerwerte;
+PW_ETRON;A;Kantonspolizei;Patrouillenwagen elektrisch;Audi e-tron 55;1.94;2.19;1.63;4.90;3.1;2.93;0.95;1.02;12.2;Fahrzeuguebersicht Gruppe 5 (ca.);ANNAHME typische Herstellerwerte;
+RTW;B;Rettungsdienst SRB;RTW Rettungswagen;Mercedes-Benz Sprinter 419/519 CDI, Delfis S;2.02;2.35;2.90;6.97;5.0;3.67;1.00;2.30;13.6;Fahrzeuguebersicht Gruppe 5 (ca., Laenge ANNAHME);ANNAHME Sprinter mittlerer Radstand;Hoehe oberer Wert 2.9 m
+ITW;B;Rettungsdienst SRB;ITW Intensivtransportwagen;Mercedes-Benz Sprinter Koffer;2.20;2.55;2.95;7.40;5.5;4.33;1.00;2.07;15.0;Breite Fahrzeuguebersicht, Spiegel/Hoehe/Laenge/Gewicht ANNAHME;ANNAHME Sprinter langer Radstand;bei SRB bestaetigen
+KLAW;B;Berufsfeuerwehr;Kleinalarmwagen;Mercedes-Benz Sprinter 519 CDI;2.10;2.45;2.80;6.24;5.5;3.67;1.00;1.57;13.6;Fahrzeuguebersicht Gruppe 5;ANNAHME;
+GRUKW;B;Kantonspolizei;Gruppenkraftwagen;MAN TGE 3.140;2.04;2.43;2.60;6.00;3.5;3.64;0.95;1.41;13.4;Fahrzeuguebersicht Gruppe 5 (ca.);ANNAHME;
+CTLF;C;Berufsfeuerwehr;City TLF 12/13;Volvo FL 280 4x2R (2023);2.40;2.90;3.00;7.30;12.0;3.80;1.25;2.25;14.5;Fahrzeuguebersicht Gruppe 5;ANNAHME;Spiegel je Seite 0.25 m ANNAHME
+ADL;C;Berufsfeuerwehr;ADL 17/18 Autodrehleiter;Mercedes-Benz Econic 1835 L (2019);2.40;2.90;3.20;10.50;17.0;4.50;1.60;4.40;18.5;Fahrzeuguebersicht Gruppe 5;ANNAHME (Leiterueberhang hinten);Heckausschwenk relevant
+ADL_OST;C;FW Ostermundigen;ADL Nina Autodrehleiter;Mercedes-Benz Econic 1833, Metz L32 A;2.50;3.00;3.09;10.30;16.0;4.50;1.60;4.20;18.5;Fahrzeuguebersicht Gruppe 5;ANNAHME;
+TLF14;D;Berufsfeuerwehr;TLF 14;Scania P 410 CB 4x4 (2018);2.55;3.05;3.20;7.66;18.0;3.90;1.45;2.31;16.0;Fahrzeuguebersicht Gruppe 5;ANNAHME;Allrad: groesserer Wendekreis
+TLF15;D;Berufsfeuerwehr;TLF 15;Scania P410 B4x4 (2023);2.55;3.05;3.20;7.66;16.5;3.90;1.45;2.31;16.0;Fahrzeuguebersicht Gruppe 5 (Vorgaenger);ANNAHME;
+GTLF16;D;Berufsfeuerwehr;G-TLF 16 Gross-Tanklöschfahrzeug;Scania G 480 CB 6x4*4 (2013);2.56;3.06;3.40;10.00;26.0;4.90;1.50;3.60;19.0;Fahrzeuguebersicht Gruppe 5;ANNAHME (Tandem: wirksamer Radstand);
+TLF94;D;Brandcorps (Miliz);TLF 94;Scania P124 CB 4x4 (1999);2.50;3.00;3.23;8.00;18.0;4.00;1.45;2.55;16.5;Fahrzeuguebersicht Gruppe 5;ANNAHME;
+WAWE;D;Kantonspolizei;Wasserwerfer WaWe 9000;MAN TGA 33.390 6x6, Ziegler (2006);2.47;2.97;3.66;9.24;28.44;4.60;1.45;3.19;20.0;Fahrzeuguebersicht Gruppe 5;ANNAHME (6x6: wirksamer Radstand);Kein Feuerwehrfahrzeug - eigenes Fahrzeug waehlen
