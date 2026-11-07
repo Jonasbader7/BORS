@@ -432,7 +432,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
         <li>Gewichtsgrenzen Stadt Bern: Plan «Höchstgewicht» von Tiefbau Stadt Bern (Stand 4.5.2026, erhalten 4.11.2026), den Strassen zugeordnet. Laut Tiefbau gelten die Grenzen auch für Einsatzfahrzeuge. Ohne Höhensignal gilt auf öffentlichen Strassen eine lichte Höhe von mindestens 4.00 m (Verkehrsregelnverordnung, bestätigt vom Tiefbau). Lehnenviadukt / Kleine Westtangente: 3.20 m laut Tiefbau.</li>
         <li>Geprüfte Befunde: 10 Engstellen am Luftbild (SWISSIMAGE) nachgemessen, 1.11.2026, nicht vor Ort</li>
         <li>Parkfelder: Stadt Bern, in den Nachbargemeinden OpenStreetMap (Strassenrand); Bäume: Stadt Bern</li>
-        <li>Baustellen: Stadt Bern (Geoportal map.bern.ch) und ASTRA Verkehrsinfo (Abruf 27.10.2026), <span id="bau-stand">Stand 5.11.2026</span>. Nur Baustellen, die an diesem Tag gelten.</li>
+        <li>Baustellen: Stadt Bern (Geoportal map.bern.ch, Baustellen und Installationsplätze) und ASTRA Verkehrsinfo (Abruf 27.10.2026). <span id="bau-stand">Stand 5.11.2026 aus der App</span>. Nur Baustellen, die jetzt gelten.</li>
         <li>Fahrzeuge: Hülle der realen Fahrzeuge von Schutz und Rettung Bern je Klasse</li>
       </ul>
       <h3>Was der Prototyp noch nicht kann</h3>
@@ -440,7 +440,7 @@ ol.steps li::marker{font-weight:700;color:var(--accent)}
         <li>Schilder und Poller aus OpenStreetMap sind nicht vor Ort bestätigt.</li>
         <li>Kirchenfeldbrücke: Laut Tiefbau gibt es eine Nutzungsvereinbarung für Notfalldienste. Ihr Inhalt ist offen, BORS sperrt die Brücke deshalb weiter für C und D.</li>
         <li>Durchfahrten unter Gebäuden auf Hof- und Garagenzufahrten: Höhe meist unbekannt, bleibt ungeklärt.</li>
-        <li>Baustellen verlängern die Fahrzeit, sperren aber nie. Die Sperrung der Aarstrasse ist so nicht abgebildet. Der Stand ist fest in der App und wird nicht live nachgeführt.</li>
+        <li>Baustellen verlängern die Fahrzeit (×1.5, bei bekannter enger Restbreite ×2), sperren aber nie. Die Sperrung der Aarstrasse ist so nicht abgebildet. Die Baustellen der Stadt Bern holt die App beim Start und danach alle 10 Minuten live (die Stadt gibt keine Restbreite an); der ASTRA-Teil braucht einen Zugangsschlüssel und bleibt auf dem Stand vom 27.10.2026. QGIS rechnet mit derselben Regel, aber mit der zuletzt abgerufenen Datei, nicht live.</li>
         <li>Demo-Sperrungen (Tab «Strasse») gelten nur in diesem Fenster. Sie sind nicht in QGIS und werden nicht an andere Fenster oder Fahrzeuge übertragen.</li>
         <li>Signale, Kandelaber, falsch parkierte Autos und Schnee fehlen in den Daten.</li>
         <li>Kurven und Abbiegen sind ein Modell (Schleppkurven), keine Fahrversuche.</li>
@@ -572,6 +572,83 @@ function uiDemo(){const el=$('#demo');if(!el)return;if(!DEMO.size){el.hidden=tru
 // V12: Tab «Strasse» nach jeder Änderung der Demo-Sperren neu zeichnen (vorher blieb «gesperrt» stehen und der Knopf sperrte erneut)
 let segAkt=null;
 function segNeu(){if(segAkt!=null&&$('#seg-body').querySelector('#b-demo'))zeigeSeg(segAkt,true);}
+
+// ------------------------------------------------ V14: Baustellen Stadt Bern live
+// BAU-LIVE-KERN START – reine Funktionen (auch im Worker und in node geprüft).
+// Zuordnung wie 16_Stadt_Bern_Live_V3_BORS (Abschnitt betroffen, wenn >= 5 m oder >= halbe Länge in der Fläche, 1 m Rand,
+// Stichprobe alle 2 m), Wirkung wie 31_Web_Baustellen_BORS / Router _profil_kosten (Restbreite unbekannt x1.5,
+// Restbreite < Profilbreite + 2 x 0.25 m x2.0, REF ohne Faktor, nie eine Sperre).
+const BAU_K={BREITE:{A:2.20,B:2.45,C:2.90,D:3.00},RES:0.25,F_BAU:1.5,F_ENG:2.0,MIN_M:5.0,G:50};
+function bauFaktor(rb,c){return rb==null?BAU_K.F_BAU:(rb<BAU_K.BREITE[c]+2*BAU_K.RES?BAU_K.F_ENG:BAU_K.F_BAU);}
+function bauMinRb(eintraege){const m=new Map();for(const b of eintraege){const f=b[0];if(!m.has(f)||(b[1]!=null&&(m.get(f)==null||b[1]<m.get(f))))m.set(f,b[1]);}return m;}
+function bauAnwenden(D,alt,neu,O){
+  for(const f of new Set([...alt.keys(),...neu.keys()]))for(const c of ['A','B','C','D']){
+    const fa=alt.has(f)?bauFaktor(alt.get(f),c):1,fn=neu.has(f)?bauFaktor(neu.get(f),c):1;if(fa===fn)continue;const r=fn/fa;
+    for(const m of ['V','E']){const k=D.kosten[m][c][f];if(k)D.kosten[m][c][f]=k*r;}
+    if(O&&O.has(f)){const s=JSON.parse(O.get(f));s.forEach(l=>l.forEach(e=>{if(e[0]===c&&e[1])e[1]=e[1]*r;}));O.set(f,JSON.stringify(s));}}}
+function bauGitter(D){const G=BAU_K.G,g=new Map(),N=D.nodes;
+  D.segs.forEach((s,f)=>s[0].forEach(ids=>{for(let k=0;k<ids.length-1;k++){const x1=N[2*ids[k]]/100,y1=N[2*ids[k]+1]/100,x2=N[2*ids[k+1]]/100,y2=N[2*ids[k+1]+1]/100;
+    for(const t of [0,0.5,1]){const key=Math.floor((x1+t*(x2-x1))/G)+','+Math.floor((y1+t*(y2-y1))/G);let z=g.get(key);if(!z)g.set(key,z=new Set());z.add(f);}}}));return g;}
+function bauInPoly(x,y,polys){for(const rings of polys){let ins=false;for(const r of rings)for(let i=0;i<r.length-1;i++){const [x1,y1]=r[i],[x2,y2]=r[i+1];
+    if((y1>y)!==(y2>y)&&x<(x2-x1)*(y-y1)/(y2-y1)+x1)ins=!ins;}if(ins)return true;}return false;}
+function bauRand(x,y,polys){let b=1e9;for(const rings of polys)for(const r of rings)for(let i=0;i<r.length-1;i++){const [ax,ay]=r[i],[bx,by]=r[i+1],dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy;
+    const t=l2?Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/l2)):0;b=Math.min(b,Math.hypot(x-ax-t*dx,y-ay-t*dy));}return b;}
+function bauBetroffen(D,grid,polys){const G=BAU_K.G,N=D.nodes;let x0=1e18,y0=1e18,x1=-1e18,y1=-1e18;
+  for(const rings of polys)for(const r of rings)for(const [x,y] of r){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+  const kand=new Set();for(let i=Math.floor(x0/G)-1;i<=Math.floor(x1/G)+1;i++)for(let j=Math.floor(y0/G)-1;j<=Math.floor(y1/G)+1;j++)(grid.get(i+','+j)||[]).forEach(f=>kand.add(f));
+  const out=[];for(const f of kand){let L=0,ges=0;for(const ids of D.segs[f][0])for(let k=0;k<ids.length-1;k++){
+      const ax=N[2*ids[k]]/100,ay=N[2*ids[k]+1]/100,bx=N[2*ids[k+1]]/100,by=N[2*ids[k+1]+1]/100,d=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.floor(d/2));ges+=d;
+      for(let q=0;q<n;q++){const t=(q+0.5)/n,x=ax+t*(bx-ax),y=ay+t*(by-ay);if(bauInPoly(x,y,polys)||bauRand(x,y,polys)<=1)L+=d/n;}}
+    if(L>=BAU_K.MIN_M||(L>0&&L>=0.5*ges))out.push(f);}
+  return out;}
+const bauIso=ms=>{if(!ms)return '';const d=new Date(ms),z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`;};
+// feats: GeoJSON-Features (EPSG:2056) aus Baustellen_2/MapServer/2 und /1; jetzt: 'JJJJ-MM-TTTHH:MM'
+function bauStadt(D,grid,feats,jetzt){const neu=new Map(),st={aktiv:0,beendet:0,spaeter:0,mitAbschnitt:0};
+  for(const ft of feats){const p=ft.properties||{},von=bauIso(p.Startdate),bis=bauIso(p.Enddate),g=ft.geometry;
+    if(bis&&bis<jetzt){st.beendet++;continue;}if(von&&von>jetzt){st.spaeter++;continue;}
+    const roh=!g?[]:g.type==='Polygon'?[g.coordinates]:g.type==='MultiPolygon'?g.coordinates:[];if(!roh.length)continue;st.aktiv++;
+    const polys=roh.map(rings=>rings.map(r=>r.map(c=>[c[0]-D.x0,c[1]-D.y0])));const fs=bauBetroffen(D,grid,polys);if(fs.length)st.mitAbschnitt++;
+    for(const f of fs)if(!neu.has(f))neu.set(f,[f,null,'Stadt Bern Baustellen','Polygon Stadt Bern (live)',bis.slice(0,10),'']);}
+  return {eintraege:[...neu.values()],st};}
+// BAU-LIVE-KERN ENDE
+
+const BAU_MIN=10,BAU_KEY='bors-baustellen-live',BAU_URL='https://map.bern.ch/arcgis/rest/services/Geoportal/Baustellen_2/MapServer/';
+let BAU_STATISCH=null,BAU_ASTRA=[],BAU_AKT=null,BAU_LIVE=null,bauGrid=null,bauLaeuft=false;
+const bauJetzt=()=>bauIso(Date.now());
+function bauInit(){if(BAU_STATISCH)return;BAU_STATISCH=D.bau.slice();BAU_AKT=bauMinRb(D.bau);
+  BAU_ASTRA=D.bau.filter(b=>!/^Stadt Bern/.test(b[2]||''));}
+// Live-Stand übernehmen: Kosten (Hauptthread + Worker + Demo-Speicher), D.bau, Karte, Anzeige
+function bauUebernehmen(s,quelle){bauInit();const heute=bauJetzt().slice(0,10);
+  const astra=BAU_ASTRA.filter(b=>!b[4]||b[4]>=heute);const alle=astra.concat(s.e);const neu=bauMinRb(alle);
+  const vorher=new Set(BAU_AKT.keys());let neuN=0,wegN=0;neu.forEach((rb,f)=>{if(!vorher.has(f))neuN++;});vorher.forEach(f=>{if(!neu.has(f))wegN++;});
+  const geaendert=neuN||wegN||[...neu].some(([f,rb])=>BAU_AKT.get(f)!==rb);
+  if(geaendert){bauAnwenden(D,BAU_AKT,neu,DEMO_ORIG);if(worker&&worker.ok)worker.postMessage({typ:'bau',alt:[...BAU_AKT],neu:[...neu]});}
+  BAU_AKT=neu;D.bau=alle;BAU_LIVE=s;
+  if(map&&map.getSource('bau'))map.getSource('bau').setData(bauGeo());
+  bauAnzeige();if(segAkt!=null&&$('#p-seg')&&!$('#p-seg').hidden)zeigeSeg(segAkt,true);
+  if(geaendert&&quelle!=='start'){toast(`Baustellen aktualisiert (Stadt Bern, ${s.stand}): ${neuN} Abschnitt${neuN===1?'':'e'} neu, ${wegN} nicht mehr betroffen.`,4000);if(P1&&P2&&!rechnet)rechne();}
+  else if(geaendert&&P1&&P2&&!rechnet)rechne();}
+function bauAnzeige(){const el=$('#bau-stand'),l=$('#bau-live');let t;
+  if(BAU_LIVE)t=`Stadt Bern live, abgerufen ${BAU_LIVE.stand} Uhr (${BAU_LIVE.n} gültige Baustellen/Installationsplätze, ${BAU_LIVE.e.length} Abschnitte), alle ${BAU_MIN} min neu; ASTRA Stand 27.10.2026`;
+  else if(BAU_LIVE===false)t='Live-Abruf der Stadt Bern nicht möglich, deshalb Stand 5.11.2026 aus der App';
+  else t='Stand 5.11.2026 aus der App, Live-Abruf läuft …';
+  if(el)el.textContent=t;if(l)l.textContent='Baustellen: '+t+'.';}
+async function bauHolen(){if(bauLaeuft||!D)return;bauLaeuft=true;
+  try{bauInit();if(!bauGrid)bauGrid=bauGitter(D);
+    const q='/query?where=1%3D1&outFields=Locality,Project,Startdate,Enddate,Displaynumber,Statustxt&outSR=2056&geometryPrecision=1&f=geojson';
+    const [a,b]=await Promise.all(['2','1'].map(async l=>{const r=await fetch(BAU_URL+l+q,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();if(!Array.isArray(j.features))throw new Error('keine Features');return j.features;}));
+    const jetzt=bauJetzt(),r=bauStadt(D,bauGrid,a.concat(b),jetzt);
+    const s={t:Date.now(),stand:jetzt.slice(11,16),n:r.st.aktiv,e:r.eintraege};
+    try{localStorage.setItem(BAU_KEY,JSON.stringify(s));}catch(_){}
+    bauUebernehmen(s,BAU_LIVE?'update':'start');}
+  catch(e){if(!BAU_LIVE){BAU_LIVE=false;bauAnzeige();}}
+  finally{bauLaeuft=false;}}
+function bauGespeichert(){try{const s=JSON.parse(localStorage.getItem(BAU_KEY)||'null');return s&&typeof s.t==='number'&&Array.isArray(s.e)&&s.e.every(x=>Array.isArray(x)&&Number.isInteger(x[0])&&x[0]>=0&&x[0]<D.segs.length)?s:null;}catch(_){return null;}}
+// Start: frischen Stand eines anderen Fensters übernehmen, sonst selbst holen; danach jede Minute prüfen, ob er älter als BAU_MIN ist
+function bauStart(){bauInit();bauAnzeige();const s=bauGespeichert();
+  if(s&&Date.now()-s.t<BAU_MIN*60000)bauUebernehmen(s,'start');else bauHolen();
+  setInterval(()=>{const g=bauGespeichert(),t=g?g.t:(BAU_LIVE&&BAU_LIVE.t)||0;if(Date.now()-t>=BAU_MIN*60000)bauHolen();else if(g&&(!BAU_LIVE||g.t>BAU_LIVE.t))bauUebernehmen(g,'update');},60000);
+  addEventListener('storage',e=>{if(e.key!==BAU_KEY)return;const g=bauGespeichert();if(g&&(!BAU_LIVE||g.t>BAU_LIVE.t))bauUebernehmen(g,'update');});}
 // Normales Navi (V10): Auto-Route REF und die Abschnitte darauf, die fuer Klasse c gesperrt sind (Darstellung, Router unveraendert)
 function refKonflikte(c){const r=BEIDE&&BEIDE.V.REF;if(!r||!r.ok)return null;const ni=D.attr_cols.indexOf('name'),g=new Map();let unv=0;
   r.rows.forEach(x=>{const k=D.kat[c][x.f];if(k===1)unv+=x.L;if(k!==2)return;const e=g.get(x.f);
@@ -594,13 +671,17 @@ async function startWorker(txt){
   try{
     const rs=document.getElementById('router-src');
     const src=rs?rs.textContent:await (await fetch('bors_router.js')).text();
-    const glue=`let R=null,DW=null;const ORIG=new Map(),SP=${demoSP.toString()};onmessage=e=>{const m=e.data;if(m.typ==='init'){DW=JSON.parse(m.txt);R=new BORS.Router(new BORS.Netz(DW));postMessage({typ:'bereit'});}
+    const glue=`let R=null,DW=null;const ORIG=new Map(),SP=${demoSP.toString()};const BAU_K=${JSON.stringify(BAU_K)};${bauFaktor.toString()};${bauAnwenden.toString()};
+      onmessage=e=>{const m=e.data;if(m.typ==='init'){DW=JSON.parse(m.txt);R=new BORS.Router(new BORS.Netz(DW));postMessage({typ:'bereit'});}
       else if(m.typ==='sperre'){SP(DW,m.f,m.an,ORIG);}
+      else if(m.typ==='bau'){bauAnwenden(DW,new Map(m.alt),new Map(m.neu),ORIG);}
       else if(m.typ==='snap'){postMessage({typ:'snap',id:m.id,p:R.snap(m.p,m.d)});}
       else if(m.typ==='route'){try{const r={V:R.berechne(m.p1,m.p2,'VALIDIERT'),E:R.berechne(m.p1,m.p2,'EXPERIMENTELL')};postMessage({typ:'res',id:m.id,res:r});}catch(err){postMessage({typ:'err',id:m.id,msg:String(err)});}}};`;
     worker=new Worker(URL.createObjectURL(new Blob([src+'\n'+glue],{type:'text/javascript'})));
     worker.onmessage=e=>{const m=e.data;if(m.typ==='snap'){const f=snapWarte.get(m.id);snapWarte.delete(m.id);if(f)f(m.p);return;}
-      if(m.typ==='res'&&routeWarte.has(m.id)){const f=routeWarte.get(m.id);routeWarte.delete(m.id);f(m.res);return;}if(m.typ==='bereit'){worker.ok=true;}else if(m.typ==='res'&&m.id===rid)fertig(m.res);else if(m.typ==='err'){rechnet=false;toast('Fehler im Router: '+m.msg);}};
+      if(m.typ==='res'&&routeWarte.has(m.id)){const f=routeWarte.get(m.id);routeWarte.delete(m.id);f(m.res);return;}if(m.typ==='bereit'){worker.ok=true;
+        // V14: Baustellen-Stand, der vor dem Start des Workers übernommen wurde, nachreichen (Worker startet mit dem Stand aus netz.json)
+        if(BAU_STATISCH&&BAU_AKT){const st=bauMinRb(BAU_STATISCH);if(st.size!==BAU_AKT.size||[...BAU_AKT].some(([f,rb])=>!st.has(f)||st.get(f)!==rb))worker.postMessage({typ:'bau',alt:[...st],neu:[...BAU_AKT]});}}else if(m.typ==='res'&&m.id===rid)fertig(m.res);else if(m.typ==='err'){rechnet=false;toast('Fehler im Router: '+m.msg);}};
     worker.onerror=()=>{worker=null;};
     worker.postMessage({typ:'init',txt});
   }catch(e){worker=null;}
@@ -737,7 +818,7 @@ async function setBasis(k){
 const PARK_FARBE=['#1f5fd1','#6b7280','#8e44ad','#d6336c'];   // blaue Zone, weiss/gebührenpflichtig, Spezialfelder, OSM
 const EBENEN=[['netz','Strassennetz nach Befahrbarkeit',true,'var(--ok)'],['breite','Gemessene Fahrbahnbreite (untere Schranke)',false,'#67a9cf'],
   ['park','Parkfelder (von der Breite abgezogen)',false,PARK_FARBE[0]],
-  ['limit','Höhen- und Gewichtsbeschränkungen',false,'var(--accent)'],['bau','Baustellen (aktiv)',false,'#f08c00'],['punkte','Poller und Tore (rot = fest)',false,'var(--warn)'],['wachen','Wachen',true,'var(--accent)']];
+  ['limit','Höhen- und Gewichtsbeschränkungen',false,'var(--accent)'],['bau','Baustellen (aktiv, Stadt Bern live)',false,'#f08c00'],['punkte','Poller und Tore (rot = fest)',false,'var(--warn)'],['wachen','Wachen',true,'var(--accent)']];
 let parkKat=null;
 async function parkLaden(){
   if(map.getSource('park')._loaded)return;map.getSource('park')._loaded=true;toast('Parkfelder werden geladen …',2000);
@@ -751,13 +832,14 @@ async function parkLaden(){
 }
 function ebenenUI(){
   $('#lay').innerHTML=EBENEN.map(([id,t,on,c])=>`<label><input type="checkbox" id="ly-${id}" ${on?'checked':''}><i style="border-color:${c}"></i>${t}</label>`).join('')+
-    `<p class="small muted" id="breite-leg" hidden>Breite (untere Schranke): rot unter 3 m · orange 3–4 m · hell 4–6.5 m · blau über 6.5 m</p><p class="small muted" id="park-leg" hidden></p>`;
+    `<p class="small muted" id="bau-live"></p><p class="small muted" id="breite-leg" hidden>Breite (untere Schranke): rot unter 3 m · orange 3–4 m · hell 4–6.5 m · blau über 6.5 m</p><p class="small muted" id="park-leg" hidden></p>`;
   EBENEN.forEach(([id])=>$('#ly-'+id).onchange=async e=>{const on=e.target.checked;
     if(id==='breite'&&on&&!map.getSource('breite')._loaded){map.getSource('breite').setData(breiteGeo());map.getSource('breite')._loaded=true;}
     if(id==='breite')$('#breite-leg').hidden=!on;
     if(id==='park'){$('#park-leg').hidden=!on;if(on)await parkLaden();}
     (id==='netz'?['netz','netz-casing']:id==='park'?['park','park-rand']:[id]).forEach(l=>map.setLayoutProperty(l,'visibility',on?'visible':'none'));});
   $('#sel-basis').onchange=e=>setBasis(e.target.value);
+  bauAnzeige();   // V14: Statuszeile Baustellen (wird erst hier erzeugt)
 }
 function netzStat(){
   const kV=D.kosten.V,kX=D.kosten.E,ai=D.attr_cols.indexOf('ausserhalb');const L=D.segs.map(s=>0);
@@ -1424,7 +1506,7 @@ let splitStart=false;
   else if(a!=='einsatz'&&a!=='gis'&&a!=='beides'){try{a=localStorage.getItem('bors-ansicht');}catch(_){}}
   if(a==='beides'){a='gis';splitStart=true;}
   if(a==='einsatz'){ansicht='einsatz';$('.app').dataset.ansicht='einsatz';}})();
-start().then(()=>{if(D){if(D.baustellen_stand){const t=D.baustellen_stand.slice(0,10).split('-');$('#bau-stand').textContent='Stand '+(+t[2])+'.'+(+t[1])+'.'+t[0];}wachenUI();profTab();laden();setAnsicht(ansicht);if(splitStart)setSplit(true);hinweis();}});
+start().then(()=>{if(D){wachenUI();profTab();laden();setAnsicht(ansicht);if(splitStart)setSplit(true);hinweis();bauStart();}});
 })();
 </script>
 
