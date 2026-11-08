@@ -200,7 +200,7 @@ ol.eng li::marker{font-weight:700;color:var(--warn)}
 .szk h3{margin:0}
 .szk .ort{font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.03em}
 .szk .mass{font-weight:600}
-.szk .mass .ja{color:var(--ok)}.szk .mass .nein{color:var(--bad)}
+.szk .mass .ja{color:var(--ok)}.szk .mass .nein{color:var(--bad)}.szk .mass .offen{color:var(--warn)}
 .szk table{border-collapse:collapse;width:100%;font-size:13px}
 .szk td{padding:4px 6px 4px 0;border-top:1px solid var(--line);vertical-align:top}
 .szk td.z{white-space:nowrap;font-weight:700;text-align:right}
@@ -501,19 +501,26 @@ const km=m=>(m/1000).toLocaleString('de-CH',{minimumFractionDigits:2,maximumFrac
 const PN={A:'Personenwagen / NEF',B:'Rettungswagen',C:'Feuerwehr mittel',D:'Feuerwehr gross',REF:'Normales Auto'};
 const ST=[['ok','validiert'],['warn','unvalidiert'],['bad','gesperrt']];
 const MOD={VALIDIERT:['ok','validiert'],VALIDIERT_BIS_ZUFAHRT:['warn','validiert bis Zufahrt'],EXPERIMENTELL:['bad','experimentell']};
-// V15: Beispiele, bei denen eine schwere Klasse wegen eines belegten Hindernisses anders fährt als A (Suche im Code,
-// 05_Berichte/Beispiele_Fahrzeugvergleich_20261108). c = gezeigte Klasse, m = Mass (h Höhe, t Gewicht), g = Grenze am Hindernis.
+// V15: je ein Beispiel für Höhe, Gewicht, Breite und Kurve, bei dem eine schwere Klasse anders fährt als A
+// (Suche im Code und Google-Gegencheck 9.11.2026: 05_Berichte/Beispiele_Fahrzeugvergleich_20261108).
+// c = gezeigte Klasse; art = sperre | breite | kurve; m = Mass je Klasse (h Höhe, t Gewicht, b Breite, k keins); lbl = Text vor den Massen.
 const SZEN=[
-  {id:'S1',t:'Unterführung Liebewil',k:'Höhe 3.50 m · D',c:'D',m:'h',g:3.5,s:[2597906,1197274],z:[2594450,1194684],
-   ort:'Tulpenweg, Köniz → Schöneggstrasse, Köniz',hind:'Unterführung',quelle:'Hinderniskartei SVSA Nr. 106b und OSM',
-   txt:'A fährt über die Liebewilstrasse. Kurz vor dem Ziel führt sie durch eine Unterführung mit 3.50 m Durchfahrtshöhe. Der Wasserwerfer (D) ist 3.66 m hoch und passt nicht durch. BORS schickt D deshalb schon früh auf eine andere Route.'},
-  {id:'S2',t:'Brücke Reichenbachstrasse',k:'Gewicht 15 t · C und D',c:'C',m:'t',g:15,s:[2602092,1203136],z:[2600060,1201156],
+  {id:'S1',t:'Unterführung Liebewil',k:'Höhe 3.50 m · D',c:'D',art:'sperre',m:'h',lbl:'Unterführung 3.50 m, Fahrzeughöhe',s:[2597177,1194109],z:[2593852,1194776],
+   ort:'Mengestorfstrasse, Köniz → Liebewilstrasse, Köniz',hind:'Unterführung',quelle:'Hinderniskartei SVSA Nr. 106b und OSM',
+   txt:'A fährt über die Mengestorfstrasse und die Liebewilstrasse. Diese führt durch eine Unterführung mit 3.50 m Durchfahrtshöhe. Der Wasserwerfer (D) ist 3.66 m hoch und passt nicht durch. BORS schickt D auf einen Umweg: länger, aber deutlich kürzer als bis zur Unterführung fahren und umkehren.',
+   google:'Google Maps schlägt nur eine Route vor: über Mengestorfstrasse und Liebewilstrasse, 6 min, 3.7 km. Also durch die Unterführung, wie A.'},
+  {id:'S2',t:'Brücke Reichenbachstrasse',k:'Gewicht 15 t · C und D',c:'C',art:'sperre',m:'t',lbl:'Brücke 15 t, Fahrzeuggewicht',s:[2602092,1203136],z:[2600060,1201156],
    ort:'Fischrainweg, Ittigen → Engestrasse, Bern',hind:'Brücke',quelle:'Hinderniskartei SVSA Nr. 307b',
-   txt:'A und B fahren über die Reichenbachstrasse. Ihre Brücke über die Felsenaustrasse trägt höchstens 15 t. C (17 t) und D (28.44 t) sind zu schwer. BORS schickt beide schon vorher auf eine andere Route.'},
-  {id:'S3',t:'Brücke Fährstrasse',k:'Gewicht 28 t · nur D',c:'D',m:'t',g:28,s:[2602685,1202460],z:[2599729,1202486],
-   ort:'Mittelweg, Ittigen → Freudenreichstrasse, Bremgarten',hind:'Brücke',quelle:'Hinderniskartei SVSA Nr. 294',
-   txt:'A und B fahren über die Fährstrasse. Ihre Brücke über die Aare ist mit 28 t signalisiert. Der Wasserwerfer (D, 28.44 t) ist knapp zu schwer. Seine Route ist ein langer Umweg, aber immer noch kürzer als bis zur Brücke fahren und umkehren.',
-   zusatz:'Gilt nur mit dem Wasserwerfer in Klasse D. Mit einem Fahrzeug unter 28 t fällt das Beispiel weg.'}];
+   txt:'A und B fahren über die Reichenbachstrasse. Ihre Brücke über die Felsenaustrasse trägt höchstens 15 t. C (17 t) und D (28.44 t) sind zu schwer. BORS schickt beide schon vorher auf eine andere Route.',
+   google:'Google Maps wählt als schnellste Route (7 min) die Reichenbachstrasse über diese Brücke, wie A. Die zweite Google-Route (8 min, 5.4 km) ist etwa so lang wie die von C und D.'},
+  {id:'S3',t:'Mittelstrasse Kirchlindach',k:'Breite 2.9 m · D',c:'D',art:'breite',m:'b',lbl:'Fahrbahn höchstens 2.96 m, Bedarf mit Spiegeln und Reserve',s:[2601199,1205630],z:[2598652,1204099],
+   ort:'Kirchlindachstrasse, Zollikofen → Riedernstrasse, Kirchlindach',hind:'Engstelle',quelle:'Breitenmessung BORS aus der amtlichen Vermessung (Fahrbahn im Mittel 2.92 m, beidseitig Gärten)',
+   txt:'Die Mittelstrasse ist für Autos gesperrt, Blaulichtfahrzeuge dürfen sie als Abkürzung nehmen. Auf 68 m ist die Fahrbahn aber nur etwa 2.9 m breit. Das NEF (A) passt durch. Der Wasserwerfer (D) passt nur, wenn seine Spiegel über die Gärten ragen. BORS schickt D aussen herum.',
+   google:'Google Maps fährt nicht durch die Mittelstrasse, weil sie für Autos gesperrt ist (schnellste Google-Route über die Riedernstrasse, 7 min; eine Alternative über die Lindachstrasse wie D). Für Blaulicht zählt nur, ob das Fahrzeug durchpasst.'},
+  {id:'S4',t:'Kurve Aarestrasse Zollikofen',k:'Kurve 105° · C und D',c:'D',art:'kurve',m:'k',lbl:'Abbiegen 105° in die Aarestrasse',s:[2601184,1205344],z:[2601161,1204367],
+   ort:'Parkstrasse, Zollikofen → Aarestrasse, Zollikofen',hind:'Abbiegung',quelle:'Schleppkurvenmodell BORS (Winkel und Strassenbreiten); im Router ein Zuschlag von 2 min, keine Sperre',
+   txt:'A und B biegen von der Reichenbachstrasse spitz (105°) in die Aarestrasse ab. Nach dem Schleppkurvenmodell kommen C und D dort nicht um die Ecke. BORS schickt sie über die Bernstrasse.',
+   google:'Google Maps wählt als schnellste Route (4 min, 1.8 km) die Route über die Wahlackerstrasse, gleich lang wie A, also mit dieser Abbiegung (nach Länge und Strassennamen). Die zweite Google-Route (5 min, 3.0 km) über Bernstrasse und Aarestrasse entspricht der Route von C und D.'}];
 const SZ_WENDEN_S=60;   // Annahme: Hindernis erkennen und wenden
 let SZ_AKT=null,SZ_ERG=null;
 
@@ -689,12 +696,12 @@ async function startWorker(txt){
   try{
     const rs=document.getElementById('router-src');
     const src=rs?rs.textContent:await (await fetch('bors_router.js')).text();
-    const glue=`let R=null,DW=null;const ORIG=new Map(),SP=${demoSP.toString()};const BAU_K=${JSON.stringify(BAU_K)};${bauFaktor.toString()};${bauAnwenden.toString()};
+    const glue=`let R=null,DW=null;const VB=${VERBIETEN.toString()};const ORIG=new Map(),SP=${demoSP.toString()};const BAU_K=${JSON.stringify(BAU_K)};${bauFaktor.toString()};${bauAnwenden.toString()};
       onmessage=e=>{const m=e.data;if(m.typ==='init'){DW=JSON.parse(m.txt);R=new BORS.Router(new BORS.Netz(DW));postMessage({typ:'bereit'});}
       else if(m.typ==='sperre'){SP(DW,m.f,m.an,ORIG);}
       else if(m.typ==='bau'){bauAnwenden(DW,new Map(m.alt),new Map(m.neu),ORIG);}
       else if(m.typ==='snap'){postMessage({typ:'snap',id:m.id,p:R.snap(m.p,m.d)});}
-      else if(m.typ==='route'){try{const r={V:R.berechne(m.p1,m.p2,'VALIDIERT'),E:R.berechne(m.p1,m.p2,'EXPERIMENTELL')};postMessage({typ:'res',id:m.id,res:r});}catch(err){postMessage({typ:'err',id:m.id,msg:String(err)});}}};`;
+      else if(m.typ==='route'){const zu=m.verbot?VB(R,m.verbot):null;try{const r={V:R.berechne(m.p1,m.p2,'VALIDIERT'),E:R.berechne(m.p1,m.p2,'EXPERIMENTELL')};postMessage({typ:'res',id:m.id,res:r});}catch(err){postMessage({typ:'err',id:m.id,msg:String(err)});}finally{if(zu)zu();}}};`;
     worker=new Worker(URL.createObjectURL(new Blob([src+'\n'+glue],{type:'text/javascript'})));
     worker.onmessage=e=>{const m=e.data;if(m.typ==='snap'){const f=snapWarte.get(m.id);snapWarte.delete(m.id);if(f)f(m.p);return;}
       if(m.typ==='res'&&routeWarte.has(m.id)){const f=routeWarte.get(m.id);routeWarte.delete(m.id);f(m.res);return;}if(m.typ==='bereit'){worker.ok=true;
@@ -706,11 +713,14 @@ async function startWorker(txt){
 }
 const snapWarte=new Map(),routeWarte=new Map();let snapId=0;
 // Route für einen Auftrag rechnen, ohne Start/Ziel/Ergebnis der Zentrale anzutasten (gleicher Router, gleiche Modi)
-async function routeFuer(s,z){const p1=[s[0]-X0,s[1]-Y0],p2=[z[0]-X0,z[1]-Y0];
+// V15: eine Abbiegung (Klasse c, von a nach b am Ende von a bei pi/pos) für eine Rechnung verbieten; gibt eine Rückstell-Funktion zurück
+const VERBIETEN=(R,v)=>{const N=R.N,F=N.feat[v.a],cum=F.cum[v.pi];let u=-1;for(let i=0;i<cum.length;i++)if(Math.abs(cum[i]-v.pos)<1e-6){u=F.ids[v.pi][i];break;}
+  if(u<0||!N.abb[v.c])return null;const t=N.abb[v.c].turn,k=(u*32768+v.a)*32768+v.b,alt=t.get(k);t.set(k,1e7);return ()=>{if(alt===undefined)t.delete(k);else t.set(k,alt);};};
+async function routeFuer(s,z,verbot){const p1=[s[0]-X0,s[1]-Y0],p2=[z[0]-X0,z[1]-Y0];
   // beim Seitenstart auf den Worker warten, statt einen zweiten Router im Hauptthread aufzubauen
   for(let k=0;k<300&&worker&&!worker.ok;k++)await new Promise(r=>setTimeout(r,100));
-  if(worker&&worker.ok)return new Promise(res=>{const id='a'+(++snapId);routeWarte.set(id,res);worker.postMessage({typ:'route',id,p1,p2});});
-  const R=await routerLokal();return {V:R.berechne(p1,p2,'VALIDIERT'),E:R.berechne(p1,p2,'EXPERIMENTELL')};}
+  if(worker&&worker.ok)return new Promise(res=>{const id='a'+(++snapId);routeWarte.set(id,res);worker.postMessage({typ:'route',id,p1,p2,verbot:verbot||null});});
+  const R=await routerLokal(),zu=verbot?VERBIETEN(R,verbot):null;try{return {V:R.berechne(p1,p2,'VALIDIERT'),E:R.berechne(p1,p2,'EXPERIMENTELL')};}finally{if(zu)zu();}}
 async function snap(E,N){const p=[E-X0,N-Y0];let r;
   if(worker&&worker.ok)r=await new Promise(res=>{const id=++snapId;snapWarte.set(id,res);worker.postMessage({typ:'snap',id,p,d:150});});
   else r=(await routerLokal()).snap(p,150);
@@ -982,7 +992,7 @@ function einpassen(){
   // Fahrzeug mit Auftrag: nur die zugewiesene Route; sonst wie bisher
   if(fz){if(fz.r)for(const k of fzWaehlt(fz)?['val','exp']:[fz.wahl])if(fz.r[k])add(fz.r[k]);b.extend(lv2wgs(...fz.a.s));b.extend(lv2wgs(...fz.a.z));n++;}
   else{if(!BEIDE||(ansicht==='einsatz'&&!vglAktiv()))return;
-    if(vglAktiv()){const v=vgl(profil);if(v.val)add(v.val);if(v.zeigeE)add(v.exp);if(refZeig&&ansicht!=='einsatz'&&BEIDE.V.REF.ok)add(BEIDE.V.REF);if(ansicht!=='einsatz'&&szAktiv()&&profil===SZ_AKT.c&&BEIDE.V.A.ok)add(BEIDE.V.A);}
+    if(vglAktiv()){const v=vgl(profil),szK=ansicht!=='einsatz'&&szAktiv()&&profil===SZ_AKT.c;if(v.val)add(v.val);if(v.zeigeE&&!szK)add(v.exp);if(refZeig&&ansicht!=='einsatz'&&BEIDE.V.REF.ok)add(BEIDE.V.REF);if(ansicht!=='einsatz'&&szAktiv()&&profil===SZ_AKT.c&&BEIDE.V.A.ok)add(BEIDE.V.A);}
     else for(const c of ['A','B','C','D'])if(show[c]&&RES[c].ok)add(RES[c]);
     if(P1)b.extend(lv2wgs(...P1));if(P2)b.extend(lv2wgs(...P2));}
   const unten=istMobil()?Math.round(innerHeight*(ansicht==='einsatz'?0.56:0.44))+16:50;
@@ -1006,9 +1016,10 @@ function zeichneRoute(){
   }
   else if(BEIDE&&vglAktiv()){
     // nur die gewählte Klasse: validiert links, Vergleichsroute rechts versetzt (bei nur einer Route ohne Versatz)
-    const v=vgl(profil),gross=ansicht==='einsatz',o=v.val&&v.zeigeE?(gross?4:3):0;
+    // V15: im Beispiel nur A, die validierte Route der Klasse und das Hindernis zeigen (Vergleichsroute bleibt in der Liste)
+    const v=vgl(profil),gross=ansicht==='einsatz',szK=!gross&&szAktiv()&&profil===SZ_AKT.c,zeigeE=v.zeigeE&&!szK,o=v.val&&zeigeE?(gross?4:3):0;
     if(v.val){v.val.rows.forEach(x=>VV.push(linie(x,{w:gross?7:5.5,o:-o})));zuf(v.val);}
-    if(v.zeigeE){v.exp.rows.forEach(x=>{VE.push(linie(x,{w:gross?5:4,o}));if(x.kat!==0)VU.push(linie(x,{w:gross?5:4,o}));});zuf(v.exp);engMarken(v.eng);}
+    if(zeigeE){v.exp.rows.forEach(x=>{VE.push(linie(x,{w:gross?5:4,o}));if(x.kat!==0)VU.push(linie(x,{w:gross?5:4,o}));});zuf(v.exp);engMarken(v.eng);}
     if(refZeig&&!gross){const k=refKonflikte(profil);if(k){const col=css('--rREF');k.r.rows.forEach(x=>F.push(linie(x,{col,w:4.5})));
       k.sperr.forEach(s=>{const el=document.createElement('div');el.className='sperrmk';el.textContent='✕';el.title=s.name+': '+s.gr;
         el.onclick=ev=>{ev.stopPropagation();toast(s.name+' – für '+profil+' gesperrt: '+s.gr,6000);};engMk.push(new maplibregl.Marker({element:el}).setLngLat(rel2wgs(...s.mitte)).addTo(map));});}}
@@ -1441,36 +1452,52 @@ $('#cb-exp').onchange=()=>{if(BEIDE){RES=waehleRES();zeichneRoute();uiRoute();}e
 // V15: Beispiel aktiv, solange Start und Ziel die des Beispiels sind (neuer Klick = neue Arrays)
 const szAktiv=()=>!!(SZ_AKT&&P1===SZ_AKT.s&&P2===SZ_AKT.z&&BEIDE);
 // Erstes Stück der A-Route, das für die Klasse nicht validiert ist; nur ein gesperrtes zählt als Hindernis
-function szBlock(){if(!szAktiv())return null;const a=BEIDE.V.A,c=SZ_AKT.c;if(!a||!a.ok)return null;
-  const i=a.rows.findIndex(x=>D.kat[c][x.f]!==0);if(i<0||D.kat[c][a.rows[i].f]!==2)return null;
-  const si=D.attr_cols.indexOf('speed'),ni=D.attr_cols.indexOf('name'),vor=a.rows.slice(0,i),f=a.rows[i].f;
+// Abbiegetext einer Klasse für den Übergang fa -> fb (Schleppkurvenmodell aus netz.json)
+function abbTxt(c,fa,fb){const e=((D.abb[c]||{}).turn||[]).find(x=>x[1]===fa&&x[2]===fb);return e?String(D.texte[e[4]]||''):'';}
+const vorPunkt=(pts,d)=>{for(let k=pts.length-1;k>0;k--){const [x1,y1]=pts[k],[x0,y0]=pts[k-1],l=Math.hypot(x1-x0,y1-y0);if(l>=d)return [x1+(x0-x1)*d/l,y1+(y0-y1)*d/l];d-=l;}return pts[0];};
+// V15: erstes Hindernis der Klasse auf der A-Route. art 'sperre': gesperrter Abschnitt; 'breite': für die Klasse wegen der Breite
+// nicht gesichert; 'kurve': Abbiegen nach Schleppkurvenmodell UNMOEGLICH. Davor muss alles validiert sein, sonst kein sauberes Beispiel.
+function szBlock(){if(!szAktiv())return null;const a=BEIDE.V.A,s=SZ_AKT,c=s.c;if(!a||!a.ok)return null;
+  const rr=a.rows;let i=-1,kt='';
+  if(s.art==='kurve'){for(let j=1;j<rr.length;j++){if(D.kat[c][rr[j-1].f]!==0)return null;
+      if(rr[j-1].f!==rr[j].f){const t=abbTxt(c,rr[j-1].f,rr[j].f);if(/UNMOEGLICH/.test(t)){i=j;kt=t;break;}}}
+    if(i<0)return null;}
+  else{i=rr.findIndex(x=>D.kat[c][x.f]!==0);if(i<0)return null;const k=D.kat[c][rr[i].f];
+    if(!(k===2||(s.art==='breite'&&k===1&&/Breite/.test(String(D.texte[D.grund[c][rr[i].f]]||'')))))return null;}
+  const si=D.attr_cols.indexOf('speed'),ni=D.attr_cols.indexOf('name'),vor=rr.slice(0,i),f=rr[i].f;
   // Wendepunkt 5 m vor dem Hindernis auf der Zufahrtsstrasse (nicht genau auf der Kreuzung, sonst hängt der Anschluss vom Zufall ab)
-  const zur=(pts,d)=>{for(let k=pts.length-1;k>0;k--){const [x1,y1]=pts[k],[x0,y0]=pts[k-1],l=Math.hypot(x1-x0,y1-y0);if(l>=d)return [x1+(x0-x1)*d/l,y1+(y0-y1)*d/l];d-=l;}return pts[0];};
-  const lz=vor[vor.length-1],bp=lz?zur(lz.pts,Math.min(5,lz.L/2)):a.rows[i].pts[0];
-  return {i,f,name:D.attr[f][ni]||'Strasse ohne Namen',gr:sperrGrund(c,f),mitte:mitte(a.rows[i].pts),bp,
+  const lz=vor[vor.length-1],bp=lz?vorPunkt(lz.pts,Math.min(5,lz.L/2)):rr[i].pts[0];
+  return {i,f,art:s.art,name:kt?de(kt.replace(/:.*$/,'')).replace(' -> ',' → '):(D.attr[f][ni]||'Strasse ohne Namen'),
+    gr:kt?de(kt):s.art==='breite'?grundTxt(c,f):sperrGrund(c,f),mitte:kt?rr[i].pts[0]:mitte(rr[i].pts),bp,
+    verbot:kt?{c,a:lz.f,b:f,pi:lz.pi,pos:lz.b}:null,
     vorS:vor.reduce((t,x)=>t+x.L/(D.attr[x.f][si]/3.6),0),vorM:vor.reduce((t,x)=>t+x.L,0)};}
 // «wie A»: bis vor das Hindernis wie A, wenden, dann die beste Route der Klasse ab dort (gleicher Router, live gerechnet)
 async function szWieA(){const b=szBlock(),s=SZ_AKT,id=rid;SZ_ERG=null;if(!b){SZ_ERG={kein:true};uiRoute();return;}
-  try{const r=await routeFuer([b.bp[0]+X0,b.bp[1]+Y0],s.z);if(id!==rid||SZ_AKT!==s||!szAktiv())return;
+  try{const r=await routeFuer([b.bp[0]+X0,b.bp[1]+Y0],s.z,b.verbot);if(id!==rid||SZ_AKT!==s||!szAktiv())return;
     const rc=r.V[s.c];SZ_ERG=rc&&rc.ok?{restS:rc.fahrzeit_min*60,restM:rc.laenge_m}:{kein:true};}
   catch(e){SZ_ERG={kein:true};}
   uiRoute();}
 const f1=x=>x.toFixed(1)+' min';
 function szKarte(){if(!szAktiv())return '';const s=SZ_AKT,c=s.c,P=D.profile,a=BEIDE.V.A,r=BEIDE.V[c],ref=BEIDE.V.REF,b=szBlock();
-  const wert=k=>s.m==='h'?P[k].h.toFixed(2)+' m':String(P[k].t)+' t';
-  const grenze=s.m==='h'?s.g.toFixed(2)+' m':s.g+' t';
-  const mass=b?['A','B','C','D'].map(k=>{const zu=D.kat[k][b.f]===2;return `<span class="${zu?'nein':'ja'}">${k} ${wert(k)} ${zu?'✕':'✓'}</span>`;}).join(' · '):'';
+  const gk=k=>String(D.texte[D.grund[k][b.f]]||'');
+  const wert=k=>{if(s.m==='h')return P[k].h.toFixed(2)+' m';if(s.m==='t')return String(P[k].t)+' t';
+    if(s.m==='b'){const m=gk(k).match(/Bedarf ([\d.]+) m/);return m?m[1]+' m':'';}return '';};
+  // Urteil je Klasse: 0 passt, 1 ungeklärt, 2 passt nicht
+  const urteil=k=>{if(b.art==='kurve')return /UNMOEGLICH/.test(abbTxt(k,b.verbot.a,b.verbot.b))?2:0;
+    if(b.art==='breite')return D.kat[k][b.f]===0?0:(D.kat[k][b.f]===2||/hoechstens [\d.]+ m </.test(gk(k)))?2:1;return D.kat[k][b.f]===2?2:0;};
+  const mass=b?['A','B','C','D'].map(k=>{const u=urteil(k),w=wert(k);return `<span class="${u===2?'nein':u===1?'offen':'ja'}">${k}${w?' '+w:''} ${u===2?'✕':u===1?'? ungeklärt':'✓'}</span>`;}).join(' · '):'';
   const gleichNavi=ref&&ref.ok&&a.ok&&ref.rows.length===a.rows.length&&ref.rows.every((x,i)=>x.f===a.rows[i].f);
   let h=`<div class="szk"><h3>${s.id} · ${esc(s.t)}</h3><span class="ort">${esc(s.ort)}</span><p style="margin:0">${esc(s.txt)}</p>`;
   if(!b||!r.ok||!a.ok)return h+`<p class="small" style="margin:0"><b>Mit dem aktuellen Stand (z. B. Live-Baustellen) zeigt dieses Beispiel den Effekt gerade nicht.</b> Die Routen unten gelten trotzdem.</p></div>`;
-  h+=`<span class="mass">${s.hind} ${grenze}: ${mass}</span>`;
+  h+=`<span class="mass">${esc(s.lbl)}: ${mass}</span>`;
   const wa=SZ_ERG&&!SZ_ERG.kein?b.vorS+SZ_WENDEN_S+SZ_ERG.restS:null;
-  h+=`<table><tr><td>A${gleichNavi?' (gleich wie ein normales Navi)':''} über ${esc(b.name)}</td><td class="z">${f1(a.fahrzeit_min)}</td></tr>
+  h+=`<table><tr><td>A${gleichNavi?' (gleich wie ein normales Navi)':''} ${b.art==='kurve'?'biegt ab':'über'} ${esc(b.name)}</td><td class="z">${f1(a.fahrzeit_min)}</td></tr>
     <tr><td>${c} mit BORS: eigene Route</td><td class="z">${f1(r.fahrzeit_min)}</td></tr>
     <tr><td>${c} wie A: ${km(b.vorM)} bis vor die ${s.hind} (${f1(b.vorS/60)}), wenden (${f1(SZ_WENDEN_S/60)}), dann zurück und herum (${SZ_ERG?(SZ_ERG.kein?'keine Route':f1(SZ_ERG.restS/60)):'wird gerechnet …'})</td><td class="z">${wa?f1(wa/60):'…'}</td></tr></table>`;
   if(wa){const d=wa/60-r.fahrzeit_min;
     h+=d>=0.5?`<p class="spar" style="margin:0">BORS spart ${c} hier rund ${Math.round(d)} min gegenüber «wie A fahren und an der ${s.hind} umkehren».</p>`
       :`<p class="small" style="margin:0"><b>Gerade kein Zeitgewinn gegenüber «wie A fahren und umkehren».</b></p>`;}
+  if(s.google)h+=`<p class="small" style="margin:0"><b>Gegencheck:</b> ${esc(s.google)} <span class="muted">(Auto, Start und Ziel als Koordinaten, geprüft am 9.11.2026; Google kennt die Grenzen für Einsatzfahrzeuge nicht)</span></p>`;
   if(s.zusatz)h+=`<p class="small" style="margin:0"><b>${esc(s.zusatz)}</b></p>`;
   h+=`<div class="vleg"><span><i style="border-color:var(--rA)"></i>A</span><span><i style="border-color:var(--ok)"></i>${c} mit BORS</span><span><b style="color:var(--bad)">✕</b> ${s.hind}</span></div>
     <p class="small muted" style="margin:0">Modellfahrzeiten ohne Verkehr, live mit demselben Router gerechnet. «${c} wie A» ist der günstigste Fall: Die Crew erkennt die ${s.hind} rechtzeitig, wendet in einer Minute und kennt sofort die beste Umfahrung. Hindernis laut ${esc(s.quelle)}, nicht vor Ort geprüft.</p></div>`;
