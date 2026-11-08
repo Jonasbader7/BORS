@@ -23,7 +23,7 @@
 3. **Routen:** Der Router fährt zuerst nur über validierte Strassen. Gibt es so keinen Weg, zeigt er eine gekennzeichnete Ausweichroute; ungeklärte Abschnitte zählen dabei mit doppelter Zeit. Gesperrte Abschnitte bietet er nie an.
 4. **Einsatzablauf:** Die Web-App simuliert Notruf, Disposition, Route senden und die Wahl der Route durch die Crew (Zentrale und Fahrzeug, auch auf dem Handy).
 
-Beispiel: An der Felsenaubrücke fahren Notarzt und Rettungswagen direkt, die grosse Feuerwehr braucht 6,8 km Umweg (Stand 29.10.2026).
+Beispiel S1 in der App: Von Köniz nach Liebewil fährt der Notarzt (A) wie ein normales Navi über die Liebewilstrasse, 11,9 min. Kurz vor dem Ziel liegt dort eine Unterführung mit 3,50 m. Die grosse Feuerwehr (D, 3,66 m hoch) passt nicht durch. BORS schickt sie früh auf eine andere Route, 12,5 min. Würde sie wie A fahren und vor der Unterführung umkehren, bräuchte sie rund 33 min (Modellfahrzeiten ohne Verkehr, Stand 8.11.2026).
 
 ## Was geprüft ist und was nicht
 
@@ -45,6 +45,23 @@ Dieses Repository enthält die Web-App und im Ordner [`pipeline/`](pipeline/) di
 ## Versionsgeschichte
 
 Was sich von Version zu Version geändert hat, neuste zuerst.
+
+### Neu in Version 15 (8.11.2026): Beispiele, die zeigen, warum ein Fahrzeug anders fährt
+
+Die fünf alten Beispiele zeigten den Kern von BORS schlecht: Bei zwei gab es gar keinen Fahrzeugunterschied, bei den anderen sah man nicht, was die andere Route bringt. Neu gibt es drei Beispiele, gefunden mit einer Suche über rund 3500 Start/Ziel-Paare (nur im Code gerechnet, Skripte und Treffer in der Projektablage):
+
+| Beispiel | Start → Ziel | Hindernis auf der Route von A | A | Klasse mit BORS | Klasse «wie A» |
+|---|---|---|---|---|---|
+| S1 | Tulpenweg, Köniz → Schöneggstrasse, Köniz | Unterführung 3,50 m (Hinderniskartei 106b), D ist 3,66 m hoch | 11,9 min | D 12,5 min | D 33,1 min |
+| S2 | Fischrainweg, Ittigen → Engestrasse, Bern | Brücke Reichenbachstrasse 15 t (Hinderniskartei 307b), C 17 t, D 28,44 t | 6,6 min | C 8,1 min | C 11,0 min |
+| S3 | Mittelweg, Ittigen → Freudenreichstrasse, Bremgarten | Brücke Fährstrasse 28 t (Hinderniskartei 294), nur der Wasserwerfer (28,44 t) ist zu schwer | 10,1 min | D 22,6 min | D 31,8 min |
+
+- **Beispielkarte:** Ein Klick auf ein Beispiel stellt die betroffene Klasse ein und zeigt oben eine Karte: worum es geht, das Mass am Hindernis für alle Klassen (z. B. «A 1.64 m ✓ · D 3.66 m ✕»), die Zeit von A, die Zeit der Klasse mit BORS und «wie A»: Die Klasse fährt die Route von A bis 5 m vor das Hindernis, wendet (Annahme 1 min) und nimmt dann die beste Route. Das ist der günstigste Fall für «wie A». Die Seite rechnet diese Zahlen live mit demselben Router, also auch mit den Live-Baustellen.
+- **Karte:** A-Route (türkis), Route der Klasse mit BORS (grün) und ein rotes ✕ am Hindernis.
+- **Zusammenfassung:** «ungefähr die Route eines normalen Autos» nur noch, wenn eine Klasse mindestens 60 % ihrer Länge auf denselben Abschnitten fährt wie das Auto. Sonst heisst es «fährt eine andere, ähnlich lange Route».
+- Router und `netz.json` unverändert. Nur `index.html` und dieses README.
+
+Geprüft am 8.11.2026 lokal im Browser (ohne Analytics): S1–S3 mit denselben Zahlen wie die Rechnung in node (auch mit den Live-Baustellen vom 8.11.); Beamer 1440 × 900 «Beides» Notruf → A → quittiert → vor Ort → abgeschlossen; Handy 375 × 812 Notruf → B → abgeschlossen; Beispiel S1 auf dem Handy. Keine Konsolenfehler ausser der absichtlich fehlenden Analytics-Konfiguration. Nicht vor Ort und nicht gegen Google geprüft.
 
 ### Neu in Version 14 (6./7.11.2026): Brücken nachgemessen, Baustellen der Stadt Bern live
 

@@ -196,6 +196,15 @@ ol.eng li::marker{font-weight:700;color:var(--warn)}
 .vleg span{display:inline-flex;align-items:center;gap:5px}
 .vleg i{display:inline-block;width:22px;height:0;border-top:5px solid}
 .sperrmk{width:24px;height:24px;border-radius:50%;background:var(--bad);color:#fff;font:700 13px var(--f-body);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:pointer}
+.szk{border:1.5px solid var(--line);border-left:5px solid var(--bad);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:7px;margin-bottom:8px;font-size:13px}
+.szk h3{margin:0}
+.szk .ort{font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.03em}
+.szk .mass{font-weight:600}
+.szk .mass .ja{color:var(--ok)}.szk .mass .nein{color:var(--bad)}
+.szk table{border-collapse:collapse;width:100%;font-size:13px}
+.szk td{padding:4px 6px 4px 0;border-top:1px solid var(--line);vertical-align:top}
+.szk td.z{white-space:nowrap;font-weight:700;text-align:right}
+.szk .spar{font-family:var(--f-display);font-size:17px;line-height:1.25}
 .demomk{font-size:22px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
 .demo{border:2px dashed var(--bad);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--bad-bg)}
 ol.sperr li{cursor:pointer}
@@ -492,12 +501,21 @@ const km=m=>(m/1000).toLocaleString('de-CH',{minimumFractionDigits:2,maximumFrac
 const PN={A:'Personenwagen / NEF',B:'Rettungswagen',C:'Feuerwehr mittel',D:'Feuerwehr gross',REF:'Normales Auto'};
 const ST=[['ok','validiert'],['warn','unvalidiert'],['bad','gesperrt']];
 const MOD={VALIDIERT:['ok','validiert'],VALIDIERT_BIS_ZUFAHRT:['warn','validiert bis Zufahrt'],EXPERIMENTELL:['bad','experimentell']};
+// V15: Beispiele, bei denen eine schwere Klasse wegen eines belegten Hindernisses anders fährt als A (Suche im Code,
+// 05_Berichte/Beispiele_Fahrzeugvergleich_20261108). c = gezeigte Klasse, m = Mass (h Höhe, t Gewicht), g = Grenze am Hindernis.
 const SZEN=[
-  {id:'S1',t:'Felsenaubrücke',k:'Gewicht 28 t',s:[2600929.2,1202822.9],z:[2599121.8,1202870.4]},
-  {id:'S2',t:'Liebewilstrasse',k:'Höhe 3.50 m',s:[2594756.2,1194610.7],z:[2594124.6,1196109.9]},
-  {id:'S3',t:'Wehrbrücke',k:'Gewicht 15 t',s:[2590088.4,1200197.5],z:[2588553.3,1202405.6]},
-  {id:'S4',t:'Aarhaldenstrasse',k:'Poller',s:[2600714.6,1197848.4],z:[2604328.1,1201006.8]},
-  {id:'S5',t:'Bahnhof → Helvetiaplatz',k:'Breite knapp',s:[2600030,1199650],z:[2600960,1199060]}];
+  {id:'S1',t:'Unterführung Liebewil',k:'Höhe 3.50 m · D',c:'D',m:'h',g:3.5,s:[2597906,1197274],z:[2594450,1194684],
+   ort:'Tulpenweg, Köniz → Schöneggstrasse, Köniz',hind:'Unterführung',quelle:'Hinderniskartei SVSA Nr. 106b und OSM',
+   txt:'A fährt über die Liebewilstrasse. Kurz vor dem Ziel führt sie durch eine Unterführung mit 3.50 m Durchfahrtshöhe. Der Wasserwerfer (D) ist 3.66 m hoch und passt nicht durch. BORS schickt D deshalb schon früh auf eine andere Route.'},
+  {id:'S2',t:'Brücke Reichenbachstrasse',k:'Gewicht 15 t · C und D',c:'C',m:'t',g:15,s:[2602092,1203136],z:[2600060,1201156],
+   ort:'Fischrainweg, Ittigen → Engestrasse, Bern',hind:'Brücke',quelle:'Hinderniskartei SVSA Nr. 307b',
+   txt:'A und B fahren über die Reichenbachstrasse. Ihre Brücke über die Felsenaustrasse trägt höchstens 15 t. C (17 t) und D (28.44 t) sind zu schwer. BORS schickt beide schon vorher auf eine andere Route.'},
+  {id:'S3',t:'Brücke Fährstrasse',k:'Gewicht 28 t · nur D',c:'D',m:'t',g:28,s:[2602685,1202460],z:[2599729,1202486],
+   ort:'Mittelweg, Ittigen → Freudenreichstrasse, Bremgarten',hind:'Brücke',quelle:'Hinderniskartei SVSA Nr. 294',
+   txt:'A und B fahren über die Fährstrasse. Ihre Brücke über die Aare ist mit 28 t signalisiert. Der Wasserwerfer (D, 28.44 t) ist knapp zu schwer. Seine Route ist ein langer Umweg, aber immer noch kürzer als bis zur Brücke fahren und umkehren.',
+   zusatz:'Gilt nur mit dem Wasserwerfer in Klasse D. Mit einem Fahrzeug unter 28 t fällt das Beispiel weg.'}];
+const SZ_WENDEN_S=60;   // Annahme: Hindernis erkennen und wenden
+let SZ_AKT=null,SZ_ERG=null;
 
 // LV95 <-> WGS84 (swisstopo Näherungsformeln, ca. 1 m)
 function lv2wgs(E,N){const y=(E-2600000)/1e6,x=(N-1200000)/1e6;
@@ -950,7 +968,7 @@ async function rechne(){
 // V12: Im Modus «experimentell» bleibt eine Route ohne ungeklärte Meter «validiert» (sie ist dann dieselbe wie im Modus validiert)
 function waehleRES(){if(!BEIDE)return null;if(!$('#cb-exp').checked)return BEIDE.V;const o=Object.assign({},BEIDE.E);
   ['A','B','C','D'].forEach(c=>{const e=BEIDE.E[c],v=BEIDE.V[c];if(e&&e.ok&&e.modus==='EXPERIMENTELL'&&!((e.unvalidiert_m||0)>0.5)&&v&&v.ok)o[c]=v;});return o;}
-function fertig(res){rechnet=false;BEIDE=res;RES=waehleRES();zeichneRoute();uiRoute();hinweis();
+function fertig(res){rechnet=false;BEIDE=res;RES=waehleRES();zeichneRoute();uiRoute();hinweis();if(szAktiv())szWieA();
   if(istMobil())setSheet('mitte');
   // Einsatz-Tab: nicht scrollen, Notruf und Disposition stehen oben
   const rs=zenOffen()?null:$(ansicht==='einsatz'?'#e-res':'#res'),pb=$(ansicht==='einsatz'?'#p-einsatz':'#p-route');
@@ -964,7 +982,7 @@ function einpassen(){
   // Fahrzeug mit Auftrag: nur die zugewiesene Route; sonst wie bisher
   if(fz){if(fz.r)for(const k of fzWaehlt(fz)?['val','exp']:[fz.wahl])if(fz.r[k])add(fz.r[k]);b.extend(lv2wgs(...fz.a.s));b.extend(lv2wgs(...fz.a.z));n++;}
   else{if(!BEIDE||(ansicht==='einsatz'&&!vglAktiv()))return;
-    if(vglAktiv()){const v=vgl(profil);if(v.val)add(v.val);if(v.zeigeE)add(v.exp);if(refZeig&&ansicht!=='einsatz'&&BEIDE.V.REF.ok)add(BEIDE.V.REF);}
+    if(vglAktiv()){const v=vgl(profil);if(v.val)add(v.val);if(v.zeigeE)add(v.exp);if(refZeig&&ansicht!=='einsatz'&&BEIDE.V.REF.ok)add(BEIDE.V.REF);if(ansicht!=='einsatz'&&szAktiv()&&profil===SZ_AKT.c&&BEIDE.V.A.ok)add(BEIDE.V.A);}
     else for(const c of ['A','B','C','D'])if(show[c]&&RES[c].ok)add(RES[c]);
     if(P1)b.extend(lv2wgs(...P1));if(P2)b.extend(lv2wgs(...P2));}
   const unten=istMobil()?Math.round(innerHeight*(ansicht==='einsatz'?0.56:0.44))+16:50;
@@ -994,6 +1012,10 @@ function zeichneRoute(){
     if(refZeig&&!gross){const k=refKonflikte(profil);if(k){const col=css('--rREF');k.r.rows.forEach(x=>F.push(linie(x,{col,w:4.5})));
       k.sperr.forEach(s=>{const el=document.createElement('div');el.className='sperrmk';el.textContent='✕';el.title=s.name+': '+s.gr;
         el.onclick=ev=>{ev.stopPropagation();toast(s.name+' – für '+profil+' gesperrt: '+s.gr,6000);};engMk.push(new maplibregl.Marker({element:el}).setLngLat(rel2wgs(...s.mitte)).addTo(map));});}}
+    // V15: Beispiel – A-Route und das Hindernis, an dem die Klasse scheitern würde
+    if(!gross&&szAktiv()&&profil===SZ_AKT.c){const a=BEIDE.V.A,b=szBlock();if(a&&a.ok){const col=css('--rA');a.rows.forEach(x=>F.push(linie(x,{col,w:4.5})));}
+      if(b){const el=document.createElement('div');el.className='sperrmk';el.textContent='✕';el.title=b.name+': '+b.gr;
+        el.onclick=ev=>{ev.stopPropagation();toast(b.name+' – für '+profil+' gesperrt: '+b.gr,6000);};engMk.push(new maplibregl.Marker({element:el}).setLngLat(rel2wgs(...b.mitte)).addTo(map));}}
   }
   else if(RES&&ansicht!=='einsatz')for(const c of ['D','C','B','A','REF']){const r=RES[c];if(!show[c]||!r||!r.ok)continue;
     const col=css('--r'+c);
@@ -1381,8 +1403,12 @@ function zusammenfassung(){
   // V13: auch kürzere Routen als das Auto benennen (das Auto hält sich an Fahrverbote und Einbahnen)
   const kk=df.filter(x=>x[1]<-200).map(x=>x[0]).sort();
   const kurz=kz&&kz[1]<-200?`${kk.join(', ')} ${kk.length>1?'fahren':'fährt'} bis ${km(-kz[1])} kürzer als ein normales Auto, das sich an Fahrverbote halten muss.`:'';
+  // V15: «ungefähr die Route» nur, wenn die Klasse mindestens 60 % ihrer Länge auf denselben Abschnitten fährt wie das Auto
+  const refF=ref.ok?new Set(ref.rows.map(x=>x.f)):null,anders=refF?mitRoute.filter(c=>RES[c].rows.filter(x=>refF.has(x.f)).reduce((s,x)=>s+x.L,0)<0.6*RES[c].laenge_m):[],
+    gleich=mitRoute.filter(c=>!anders.includes(c)),
+    andersTxt=anders.length?` ${anders.join(', ')} ${anders.length>1?'fahren':'fährt'} eine andere, ähnlich lange Route.`:'';
   txt=um&&um[1]>200?`Grösster Umweg: ${um[0]} fährt ${km(um[1])} weiter als ein normales Auto.`+(kurz?' '+kurz:'')
-    :kurz?kurz:ref.ok?(mitRoute.length===4?'Alle Klassen fahren ungefähr die Route eines normalen Autos.':`${mitRoute.join(', ')} fahren ungefähr die Route eines normalen Autos.`):'';
+    :kurz?kurz:ref.ok?((gleich.length===4?'Alle Klassen fahren ungefähr die Route eines normalen Autos.':gleich.length?`${gleich.join(', ')} ${gleich.length>1?'fahren':'fährt'} ungefähr die Route eines normalen Autos.`:'')+andersTxt).trim():'';
   if($('#cb-exp').checked)txt+=' Modus experimentell: Wo eine Route mit ungeklärten Stellen günstiger ist, wird sie angezeigt.';
   return `<div class="sum"><b>${titel}</b>${txt}</div>`;
 }
@@ -1393,7 +1419,7 @@ function uiRoute(){
   if(rechnet){$('#res').innerHTML='<div class="hint">BORS berechnet die Routen für A–D …</div>';return;}
   if(!RES){$('#res').innerHTML=P1?'':'<div class="hint">Setze Start und Ziel mit zwei Tipps auf die Karte oder wähle unten ein Beispiel. BORS rechnet dann die Routen für alle vier Fahrzeugklassen.</div>';return;}
   const ref=RES.REF;
-  $('#res').innerHTML=zusammenfassung()+['A','B','C','D','REF'].map(c=>{const r=RES[c];let m=r.ok?(c==='REF'?['n','Referenz']:MOD[r.modus]):['bad','keine Route'];
+  $('#res').innerHTML=szKarte()+zusammenfassung()+['A','B','C','D','REF'].map(c=>{const r=RES[c];let m=r.ok?(c==='REF'?['n','Referenz']:MOD[r.modus]):['bad','keine Route'];
     if(r.ok&&c!=='REF'&&r.modus!=='EXPERIMENTELL'&&kurvenHart(r).length)m=['warn',m[1]+' · Kurve prüfen'];
     // V13: «bis Zufahrt» nur für die ersten/letzten Meter; bei mehr als 150 m ungeklärt ehrlich als «teilweise validiert»
     if(r.ok&&r.modus==='VALIDIERT_BIS_ZUFAHRT'&&!r.zufahrt_luftlinie&&(r.zufahrt_m||0)>150)m=['warn','teilweise validiert'];
@@ -1412,7 +1438,45 @@ $('#b-reset').onclick=()=>{P1=P2=null;P1txt=P2txt='';RES=BEIDE=null;EINSATZ=null
   try{const u=new URL(location.href);u.searchParams.delete('start');u.searchParams.delete('ziel');history.replaceState(null,'',u.pathname+u.search);}catch(_){}};
 // beide Modi liegen schon vor: Umschalten ohne Neuberechnung
 $('#cb-exp').onchange=()=>{if(BEIDE){RES=waehleRES();zeichneRoute();uiRoute();}else if(P1&&P2)rechne();};
-function szenario(s){P1=s.s;P2=s.z;P1txt=`Start: Beispiel ${s.id}`;P2txt=`Ziel: ${s.t} (${s.k})`;zeichnePunkte();tab('route');setModus('ziel');rechne();try{history.replaceState(null,'','#'+s.id.toLowerCase());}catch(e){}}
+// V15: Beispiel aktiv, solange Start und Ziel die des Beispiels sind (neuer Klick = neue Arrays)
+const szAktiv=()=>!!(SZ_AKT&&P1===SZ_AKT.s&&P2===SZ_AKT.z&&BEIDE);
+// Erstes Stück der A-Route, das für die Klasse nicht validiert ist; nur ein gesperrtes zählt als Hindernis
+function szBlock(){if(!szAktiv())return null;const a=BEIDE.V.A,c=SZ_AKT.c;if(!a||!a.ok)return null;
+  const i=a.rows.findIndex(x=>D.kat[c][x.f]!==0);if(i<0||D.kat[c][a.rows[i].f]!==2)return null;
+  const si=D.attr_cols.indexOf('speed'),ni=D.attr_cols.indexOf('name'),vor=a.rows.slice(0,i),f=a.rows[i].f;
+  // Wendepunkt 5 m vor dem Hindernis auf der Zufahrtsstrasse (nicht genau auf der Kreuzung, sonst hängt der Anschluss vom Zufall ab)
+  const zur=(pts,d)=>{for(let k=pts.length-1;k>0;k--){const [x1,y1]=pts[k],[x0,y0]=pts[k-1],l=Math.hypot(x1-x0,y1-y0);if(l>=d)return [x1+(x0-x1)*d/l,y1+(y0-y1)*d/l];d-=l;}return pts[0];};
+  const lz=vor[vor.length-1],bp=lz?zur(lz.pts,Math.min(5,lz.L/2)):a.rows[i].pts[0];
+  return {i,f,name:D.attr[f][ni]||'Strasse ohne Namen',gr:sperrGrund(c,f),mitte:mitte(a.rows[i].pts),bp,
+    vorS:vor.reduce((t,x)=>t+x.L/(D.attr[x.f][si]/3.6),0),vorM:vor.reduce((t,x)=>t+x.L,0)};}
+// «wie A»: bis vor das Hindernis wie A, wenden, dann die beste Route der Klasse ab dort (gleicher Router, live gerechnet)
+async function szWieA(){const b=szBlock(),s=SZ_AKT,id=rid;SZ_ERG=null;if(!b){SZ_ERG={kein:true};uiRoute();return;}
+  try{const r=await routeFuer([b.bp[0]+X0,b.bp[1]+Y0],s.z);if(id!==rid||SZ_AKT!==s||!szAktiv())return;
+    const rc=r.V[s.c];SZ_ERG=rc&&rc.ok?{restS:rc.fahrzeit_min*60,restM:rc.laenge_m}:{kein:true};}
+  catch(e){SZ_ERG={kein:true};}
+  uiRoute();}
+const f1=x=>x.toFixed(1)+' min';
+function szKarte(){if(!szAktiv())return '';const s=SZ_AKT,c=s.c,P=D.profile,a=BEIDE.V.A,r=BEIDE.V[c],ref=BEIDE.V.REF,b=szBlock();
+  const wert=k=>s.m==='h'?P[k].h.toFixed(2)+' m':String(P[k].t)+' t';
+  const grenze=s.m==='h'?s.g.toFixed(2)+' m':s.g+' t';
+  const mass=b?['A','B','C','D'].map(k=>{const zu=D.kat[k][b.f]===2;return `<span class="${zu?'nein':'ja'}">${k} ${wert(k)} ${zu?'✕':'✓'}</span>`;}).join(' · '):'';
+  const gleichNavi=ref&&ref.ok&&a.ok&&ref.rows.length===a.rows.length&&ref.rows.every((x,i)=>x.f===a.rows[i].f);
+  let h=`<div class="szk"><h3>${s.id} · ${esc(s.t)}</h3><span class="ort">${esc(s.ort)}</span><p style="margin:0">${esc(s.txt)}</p>`;
+  if(!b||!r.ok||!a.ok)return h+`<p class="small" style="margin:0"><b>Mit dem aktuellen Stand (z. B. Live-Baustellen) zeigt dieses Beispiel den Effekt gerade nicht.</b> Die Routen unten gelten trotzdem.</p></div>`;
+  h+=`<span class="mass">${s.hind} ${grenze}: ${mass}</span>`;
+  const wa=SZ_ERG&&!SZ_ERG.kein?b.vorS+SZ_WENDEN_S+SZ_ERG.restS:null;
+  h+=`<table><tr><td>A${gleichNavi?' (gleich wie ein normales Navi)':''} über ${esc(b.name)}</td><td class="z">${f1(a.fahrzeit_min)}</td></tr>
+    <tr><td>${c} mit BORS: eigene Route</td><td class="z">${f1(r.fahrzeit_min)}</td></tr>
+    <tr><td>${c} wie A: ${km(b.vorM)} bis vor die ${s.hind} (${f1(b.vorS/60)}), wenden (${f1(SZ_WENDEN_S/60)}), dann zurück und herum (${SZ_ERG?(SZ_ERG.kein?'keine Route':f1(SZ_ERG.restS/60)):'wird gerechnet …'})</td><td class="z">${wa?f1(wa/60):'…'}</td></tr></table>`;
+  if(wa){const d=wa/60-r.fahrzeit_min;
+    h+=d>=0.5?`<p class="spar" style="margin:0">BORS spart ${c} hier rund ${Math.round(d)} min gegenüber «wie A fahren und an der ${s.hind} umkehren».</p>`
+      :`<p class="small" style="margin:0"><b>Gerade kein Zeitgewinn gegenüber «wie A fahren und umkehren».</b></p>`;}
+  if(s.zusatz)h+=`<p class="small" style="margin:0"><b>${esc(s.zusatz)}</b></p>`;
+  h+=`<div class="vleg"><span><i style="border-color:var(--rA)"></i>A</span><span><i style="border-color:var(--ok)"></i>${c} mit BORS</span><span><b style="color:var(--bad)">✕</b> ${s.hind}</span></div>
+    <p class="small muted" style="margin:0">Modellfahrzeiten ohne Verkehr, live mit demselben Router gerechnet. «${c} wie A» ist der günstigste Fall: Die Crew erkennt die ${s.hind} rechtzeitig, wendet in einer Minute und kennt sofort die beste Umfahrung. Hindernis laut ${esc(s.quelle)}, nicht vor Ort geprüft.</p></div>`;
+  return h;}
+function szenario(s){SZ_AKT=s;SZ_ERG=null;refZeig=false;kVgl=true;P1=s.s;P2=s.z;P1txt=`Start: Beispiel ${s.id} · ${s.ort.split(' → ')[0]}`;P2txt=`Ziel: ${s.ort.split(' → ')[1]} (${s.k})`;
+  zeichnePunkte();tab('route');setModus('ziel');setProfil(s.c);rechne();try{history.replaceState(null,'','#'+s.id.toLowerCase());}catch(e){}}
 $('#scen').innerHTML=SZEN.map((s,i)=>`<button class="btn" data-i="${i}"><small>${s.id} · ${s.k}</small>${s.t}</button>`).join('');
 $('#scen').onclick=e=>{const b=e.target.closest('button');if(b&&D)szenario(SZEN[+b.dataset.i]);};
 
