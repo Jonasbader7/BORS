@@ -2,7 +2,7 @@
 
 *English: Vehicle-specific emergency routing for Bern. For each street and each vehicle class, GreenRoute decides whether width, height and weight allow passage, and routes only over streets the vehicle fits. Research prototype, not approved for operational use.*
 
-**[Web-App öffnen](https://jonasbader7.github.io/BORS/)** · [Portfolio](https://jonasbader7.github.io/Portfoliopage/)
+**[Web-App öffnen](https://jonasbader7.github.io/GreenRoute/)** · [Portfolio](https://jonasbader7.github.io/Portfoliopage/)
 
 ![GreenRoute-Web-App: Karte von Bern, Strassen nach Befahrbarkeit eingefärbt](https://jonasbader7.github.io/Portfoliopage/img/bors-app.jpg)
 
@@ -47,6 +47,26 @@ Dieses Repository enthält die Web-App und im Ordner [`pipeline/`](pipeline/) di
 ## Versionsgeschichte
 
 Was sich von Version zu Version geändert hat, neuste zuerst.
+
+### Neu in Version 17 (10.11.2026): Weniger Text, Wachen an der Murtenstrasse
+
+Router, Strassennetz, Baustellen und Beispiele wie V16. Geändert sind nur `index.html` und dieses README.
+- **Wachen:** Bisher gab es nur einen Startpunkt, die Viktoriastrasse 70. Dort ist laut Stadt Bern seit Dezember 2014 keine Wache mehr. Neu gibt es zwei Startpunkte: die Berufsfeuerwehr Bern an der Murtenstrasse 98 (Stützpunkt Forsthaus West) und den Rettungsdienst Bern an der Murtenstrasse 111, beide Schutz und Rettung Bern. Die Koordinaten sind die amtlichen Adresspunkte aus dem Gebäudeadressverzeichnis (swisstopo-Suche, abgefragt 10.11.2026): 2598307.75 / 1200148.75 und 2598133.0 / 1199905.4. Die Liste steht in `index.html` (`STANDORTE`), `netz.json` bleibt unverändert. Der Router bindet die Punkte wie einen Klick an die nächste Strasse an: Nr. 98 liegt 15 m von der Murtenstrasse entfernt, Nr. 111 4 m.
+- **Auf der Karte:** Die Feuerwehr ist eine dunkle Kachel mit Flamme, der Rettungsdienst eine helle Kachel mit Kreuz, beide nicht in den Netzfarben. Ab Zoomstufe 13.5 erscheinen die Namen. Ein Tipp zeigt Name, Adresse, Quelle und «Als Start wählen». Die Ebene «Wachen» schaltet die Marker ein und aus. Der rote Punkt an der Viktoriastrasse entfällt.
+- **Start wählen:** Im Tab «Route» steht die Wachenauswahl direkt unter Start und Ziel. Im Tab «Einsatz» heisst die Auswahl «Fahrzeuge starten bei»: Berufsfeuerwehr (Standard), Rettungsdienst, Patrouille, Standort auf der Karte. Der Start gilt für alle Klassen gleich. Es gibt keine Zuordnung von Klassen zu Wachen, weil die App keine reale Stationierung behaupten soll.
+- **Weniger Text:** Die Startansicht hat einen Satz und zwei Knöpfe statt einer Schrittliste. Der Prototyp-Hinweis steht noch an drei Stellen: im Badge «Prototyp» (öffnet «Methode»), in einer Zeile im Tab «Einsatz» und im Warnstreifen im Fahrzeug. Die Erklärung unter «Disposition» ist auf eine Zeile gekürzt, die Einleitungen von «Route» und «Strasse» auf einen Satz. «Methode» ist in acht aufklappbare Abschnitte gegliedert: Funktionsweise, Fahrzeugklassen, Routing und Bewertung, Einsatzsimulation und Wachen, Datenquellen, Datenaktualität, Einschränkungen, Forschungsprojekt und Technik.
+- **Datenaktualität korrigiert:** Netzmaster vom 6.11.2026 (bisher «5.11.»), 17 geprüfte Befunde (bisher «10»). Baustellen der Stadt Bern live, ASTRA Stand 27.10.2026. Sonst wird nichts laufend aktualisiert.
+- **Unverändert:** Die Warnungen bei den Routen (ungeklärt, gesperrt, «validiert bis Zufahrt», Ersatzpunkt, Kurve, Modellzeit), die Routing-Logik, die Kartenfarben und das QGIS-Projekt. Der QGIS-Test (`27_QGIS_Test`) und die Regel «Wachenareal» rechnen weiter ab der Viktoriastrasse 70.
+
+Geprüft am 10.11.2026. In node: 128 Routen A–D ab beiden Wachen ohne gesperrten Abschnitt. Router-Invarianten an 300 Zufallspaaren: 0 gesperrte Abschnitte (Kategorie 2) in Routen; die übrigen Meldungen des älteren Skripts sind bekannte Fehlalarme, `invarianten2.js` bestätigt das. Router und Netz sind byte-gleich mit V15. Im Browser (lokal, ohne Analytics):
+- S1–S4 mit denselben Zahlen,
+- Wache als Start über Marker und Menü, Ziel per Adresssuche (Kramgasse 49) und per Kartenklick, Tauschen, «experimentell»,
+- Einsatz mit allen vier Startoptionen, Marker als Start im Einsatz, Senden und Zurückziehen,
+- Beamer «Beides»: D mit Alternative bis abgeschlossen,
+- Handy 375 × 812: B ab Rettungsdienst bis abgeschlossen, ohne seitliches Scrollen,
+- Tablet 768 × 1024, Dark und Light Mode.
+
+Nicht vor Ort und nicht in QGIS geprüft.
 
 ### Neu in Version 16 (10.11.2026): Name GreenRoute, klarere Knöpfe und Kartenwerkzeuge
 

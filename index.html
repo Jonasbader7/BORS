@@ -120,6 +120,21 @@ table.pr td:first-child{font-weight:700;width:22px}
 .seg b.lbl{font:600 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);align-self:center;padding:0 4px 0 6px;white-space:nowrap}
 .seg.p button{padding:4px 10px}
 .seg .pnm{font-size:12px;color:var(--muted);align-self:center;padding:0 6px 0 2px;white-space:nowrap}
+/* V17: Wachen-Marker (Feuerwehr dunkle Kachel, Rettungsdienst helle Kachel; bewusst nicht in den Netzfarben) */
+.so{display:flex;flex-direction:column;align-items:center}
+.so-b{width:30px;height:30px;border-radius:8px;border:2px solid #fff;background:#10201b;color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.45)}
+.so-rettung .so-b{background:#fff;color:#10201b;border-color:#10201b}
+.so-b svg{width:17px;height:17px}
+.so-b:focus-visible{outline:2.5px solid var(--brand-strong);outline-offset:2px}
+.so-n{display:none;position:absolute;top:calc(100% + 2px);font:700 11px var(--f-body);color:#10201b;background:#fff;border-radius:4px;padding:1px 5px;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.3);pointer-events:none}
+#map.so-nah .so-n{display:block}
+.so-info{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);width:232px;max-width:calc(100vw - 40px);background:var(--panel);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:5px;font-size:13px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:default;z-index:3;text-align:left}
+.so-info small{color:var(--muted);font-size:11.5px;line-height:1.3}
+@media (pointer:coarse){.so-b{width:36px;height:36px}}
+/* V17: Methode in aufklappbaren Abschnitten */
+#p-info details.more>:not(summary){margin-top:8px}
+#p-info details.more{display:block}
+button.badge{background:none;cursor:pointer;font:500 11px var(--f-mono)}
 /* V16: Kartenwerkzeug abhängig vom Tab: im Tab «Einsatz» setzt ein Kartenklick den Einsatzort, sonst Start/Ziel der Route */
 #modebar .m-zen{display:none}
 .app[data-tab="zen"] #modebar .m-zen{display:flex}
@@ -358,7 +373,7 @@ ol.steps li.jetzt{font-weight:600}
     <div class="logo" role="img" aria-label="GreenRoute"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="16" fill="#173b31"/><path d="M17 47C27 44 27 36 33 33S41 24 46 18" fill="none" stroke="#3ee08a" stroke-opacity=".35" stroke-width="7" stroke-linecap="round"/><circle cx="17" cy="47" r="5" fill="#6f8c80"/><circle cx="33" cy="33" r="5" fill="#22b06a"/><circle cx="46" cy="18" r="10" fill="#3ee08a" fill-opacity=".22"/><circle cx="46" cy="18" r="6.5" fill="#3ee08a"/></svg><div aria-hidden="true">GREEN<span>ROUTE</span></div></div>
     <div class="sub">Fahrzeugabhängiges Einsatzrouting Bern · BFH BCS HS26 Gruppe 5</div>
     <div class="seg vsw" id="vsw" role="group" aria-label="Ansicht umstellen"><button data-a="gis" data-analytics-event="view:zentrale" aria-pressed="true" title="Einsatzzentrale: volle Karte, Notruf, Routen A–D, Zuweisung">Zentrale</button><button data-a="einsatz" data-analytics-event="view:fahrzeug" aria-pressed="false" title="Einsatzfahrzeug: nur die zugewiesene Route">Fahrzeug<span class="vsw-n" id="vsw-n" hidden></span></button><button data-a="beides" data-analytics-event="view:beides" aria-pressed="false" class="nurbreit" title="Präsentation: Zentrale und Fahrzeug nebeneinander">Beides</button></div>
-    <div class="badge">Prototyp</div>
+    <button class="badge" id="b-proto" title="Forschungsprototyp zur Simulation – nicht für reale Einsätze geeignet. Details im Tab «Methode».">Prototyp</button>
   </header>
 
   <aside class="pult">
@@ -380,7 +395,7 @@ ol.steps li.jetzt{font-weight:600}
         <h2>Route berechnen</h2>
         <button class="btn" id="b-reset">Neu</button>
       </div>
-      <p class="intro">Unabhängig vom Einsatz: zwei Punkte setzen und die Routen aller vier Fahrzeugklassen vergleichen. A = Personenwagen / NEF, B = Rettungswagen, C = Feuerwehr mittel, D = Feuerwehr gross.</p>
+      <p class="intro">Unabhängig vom Einsatz: Start und Ziel setzen, GreenRoute vergleicht die Routen für A–D.</p>
       <div class="ptrow">
         <div class="ptbtns">
           <button class="ptb" id="pb-start" data-m="start" aria-pressed="true"><span class="dot"></span><span id="txt-start">Start: auf die Karte tippen</span></button>
@@ -388,14 +403,11 @@ ol.steps li.jetzt{font-weight:600}
         </div>
         <button class="btn swap" id="b-swap" aria-label="Start und Ziel tauschen" title="Start und Ziel tauschen">⇅</button>
       </div>
-      <p class="small muted">Die Markierungen lassen sich auf der Karte verschieben.</p>
+      <select id="sel-wache" aria-label="Start an einer Wache"><option value="">Start an einer Wache …</option></select>
+      <p class="small muted">Start und Ziel lassen sich auf der Karte verschieben.</p>
       <details class="more" id="more">
-      <summary>Wache als Start, Adresse als Ziel</summary>
+      <summary>Ziel per Adresse suchen</summary>
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
-      <div>
-        <label for="sel-wache" class="small muted">Start an einer Wache</label>
-        <select id="sel-wache"><option value="">Wache wählen …</option></select>
-      </div>
       <div id="suche-box">
         <label for="in-suche" class="small muted">Adresse als Ziel</label>
         <div class="row" style="flex-wrap:nowrap">
@@ -417,7 +429,7 @@ ol.steps li.jetzt{font-weight:600}
     </section>
 
     <section class="tabbody" id="p-einsatz" hidden aria-label="Einsatzansicht">
-      <div class="e-warn">Forschungsprototyp – keine Einsatznavigation. Gelb = ungeklärt, nie als sicher behandeln.</div>
+      <div class="e-warn">Simulation – nicht für reale Einsätze. Gelb = ungeklärt, nie als sicher behandeln.</div>
       <div class="e-kl" id="e-kl" role="group" aria-label="Dieses Fahrzeug"></div>
       <div id="f-auftrag"></div>
       <details class="more" id="e-selbst"><summary>Ohne Auftrag: Route selbst planen</summary>
@@ -437,7 +449,7 @@ ol.steps li.jetzt{font-weight:600}
     </section>
 
     <section class="tabbody" id="p-seg" role="tabpanel" aria-labelledby="t-seg" hidden>
-      <div id="seg-body"><h2>Strasse prüfen</h2><p class="muted" style="margin-top:6px">Für eine einzelne Strasse: Warum ist sie für eine Fahrzeugklasse validiert, ungeklärt oder gesperrt? Knopf drücken (oder oben auf der Karte «ⓘ Strasse» wählen) und auf eine Strasse tippen. Hier erscheinen dann die Messwerte und der Befund für alle vier Fahrzeugklassen.</p><button class="btn prim" id="b-segwahl" style="margin-top:10px">Strasse auf der Karte wählen</button></div>
+      <div id="seg-body"><h2>Strasse prüfen</h2><p class="muted" style="margin-top:6px">Warum ist eine Strasse für A–D validiert, ungeklärt oder gesperrt? Strasse auf der Karte antippen: Hier erscheinen Messwerte und Befund.</p><button class="btn prim" id="b-segwahl" style="margin-top:10px">Strasse auf der Karte wählen</button></div>
     </section>
 
     <section class="tabbody" id="p-lay" role="tabpanel" aria-labelledby="t-lay" hidden>
@@ -463,40 +475,66 @@ ol.steps li.jetzt{font-weight:600}
 
     <section class="tabbody" id="p-info" role="tabpanel" aria-labelledby="t-info" hidden>
       <h2>So entscheidet GreenRoute</h2>
-      <p class="small"><a href="https://jonasbader7.github.io/Portfoliopage/analytics/datenschutz.html" target="_blank" rel="noopener noreferrer">Datenschutz &amp; Analytics</a></p>
+      <p class="e-warn" style="font-size:13.5px">Forschungsprototyp zur Simulation – nicht für reale Einsätze geeignet. Befahrbarkeit nach Daten, nicht vor Ort bestätigt.</p>
+      <details class="more" open><summary>Funktionsweise</summary>
       <p>Jede Strasse erhält für jede Fahrzeugklasse einen von drei Zuständen. <span class="pill ok">validiert</span> heisst: Nach den Daten passt das Fahrzeug (nicht vor Ort geprüft). Die Fahrbahnbreite ist aus der amtlichen Vermessung nachgewiesen und es gibt keinen Hinweis auf Höhe, Gewicht oder Hindernis. <span class="pill warn">unvalidiert</span> heisst: Die Daten reichen für keinen Entscheid. <span class="pill bad">gesperrt</span> heisst: nachweislich zu eng, zu tief oder zu schwer.</p>
+      <p>Die Route nutzt nur validierte Strassen. Fehlt eine validierte Verbindung, zeigt GreenRoute eine experimentelle Route mit doppelter Fahrzeit auf unvalidierten Abschnitten und kennzeichnet sie. Liegen nur die ersten oder letzten Meter auf unvalidierten Strassen, heisst das Ergebnis «validiert bis Zufahrt».</p>
+      </details>
+      <details class="more"><summary>Fahrzeugklassen</summary>
       <div style="overflow-x:auto">
         <table class="pr" id="tab-prof"></table>
       </div>
       <p class="small">Breitenbedarf = max(Karosserie + 2 × Reserve, Spiegelbreite + 2 × 10 cm − Überhang über Trottoir). Messtoleranz nach den Erfassungsgrundsätzen der amtlichen Vermessung (σ je Rand 0.10–0.35 m, Faktor 1.645).</p>
-      <p>Die Route nutzt nur validierte Strassen. Fehlt eine validierte Verbindung, zeigt GreenRoute eine experimentelle Route mit doppelter Fahrzeit auf unvalidierten Abschnitten und kennzeichnet sie. Liegen nur die ersten oder letzten Meter auf unvalidierten Strassen, heisst das Ergebnis «validiert bis Zufahrt».</p>
+      </details>
+      <details class="more"><summary>Routing und Bewertung</summary>
       <p><b>Routenvergleich:</b> Für eine Fahrzeugklasse stellt GreenRoute die beste Route nur über validierte Strassen (grün) neben die Vergleichsroute (blau). Die Vergleichsroute ist die Route des Modus «experimentell»: Ungeklärte Abschnitte dürfen mitbenutzt werden, zählen bei der Wahl aber mit doppelter Zeit und sind gelb markiert und nummeriert. «Beste» heisst: geringste Routingkosten. Darin stecken Zuschläge, u. a. ungeklärt ×2, Abbiegen und Kurven, Baustellen, Sonderrecht und Durchfahrt von Zufahrten. Angezeigt wird dagegen die Modellfahrzeit ohne Zuschläge. Deshalb ist keine der beiden Routen zwingend die zeitlich schnellste. Nachweislich gesperrte Abschnitte und feste Poller sind in beiden Routen ausgeschlossen. Ob eine gelbe Stelle passierbar ist, weiss GreenRoute nicht.</p>
       <p><b>Normales Navi:</b> Unter dem Routenvergleich zeigt GreenRoute die Auto-Route (Profil REF: Personenwagen nach Verkehrsregeln, ohne Höhe, Breite und Gewicht) und listet die Abschnitte, die für die gewählte Klasse gesperrt sind. So wird sichtbar, wo ein Navi ohne Fahrzeugdaten ein grosses Fahrzeug hinführen könnte. Die Auto-Route ist ein Modell und nicht Google Maps.</p>
-      <p><b>Einsatzablauf (Simulation):</b> Oben lässt sich zwischen «Zentrale» und «Fahrzeug» umstellen. Die Zentrale nimmt im Tab «Einsatz» einen simulierten Notruf entgegen oder setzt den Einsatzort selbst, sieht die Routen für A–D und sendet einem Fahrzeug den Auftrag: die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Gibt es keine validierte Route, sendet die Zentrale nach einer Rückfrage bewusst nur die Vergleichsroute. Vor dem Quittieren wählt der Fahrer eine davon (validiert ist vorgewählt), danach sieht er nur noch diese Route, das Ziel und einen Knopf für den nächsten Status (quittiert, vor Ort, abgeschlossen). Die Zentrale sieht Wahl und Status. «Senden» heisst im Prototyp: im Browser speichern. Ein zweites Fenster im selben Browser erhält den Auftrag sofort, ein anderes Gerät nicht. Auf breiten Bildschirmen zeigt «Beides» Zentrale und Fahrzeug nebeneinander, etwa für eine Präsentation mit dem Beamer. Notrufe, Stichworte und Einsatznummern sind erfunden.</p>
-      <p class="small muted">GreenRoute ist der Produktname des Teams. Im Projekt und in den Dateien (QGIS-Skripte, Router, Netzmaster) heisst der technische Prototyp weiterhin BORS.</p>
-      <p class="small muted">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2g vom 5.11.2026, Baustellen Stand 5.11.2026). Der QGIS-Router 9.2f behebt nur eine Fehlermeldung, die Routen sind gleich. Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
-      <h3>Datenquellen</h3>
+      </details>
+      <details class="more"><summary>Einsatzsimulation und Wachen</summary>
+      <p>Oben lässt sich zwischen «Zentrale» und «Fahrzeug» umstellen. Die Zentrale nimmt im Tab «Einsatz» einen simulierten Notruf entgegen oder setzt den Einsatzort selbst, sieht die Routen für A–D und sendet einem Fahrzeug den Auftrag: die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Gibt es keine validierte Route, sendet die Zentrale nach einer Rückfrage bewusst nur die Vergleichsroute. Vor dem Quittieren wählt der Fahrer eine davon (validiert ist vorgewählt), danach sieht er nur noch diese Route, das Ziel und einen Knopf für den nächsten Status (quittiert, vor Ort, abgeschlossen). Die Zentrale sieht Wahl und Status.</p>
+      <p>«Senden» heisst im Prototyp: im Browser speichern. Ein zweites Fenster im selben Browser erhält den Auftrag sofort, ein anderes Gerät nicht. Auf breiten Bildschirmen zeigt «Beides» Zentrale und Fahrzeug nebeneinander, etwa für eine Präsentation mit dem Beamer. Alles ist simuliert: Notrufe, Stichworte und Einsatznummern sind erfunden, es gibt keine Personendaten und keine echte Leitstelle.</p>
+      <p><b>Wachen:</b> Berufsfeuerwehr Bern, Murtenstrasse 98 (Stützpunkt Forsthaus West, seit Dezember 2014), und Rettungsdienst Bern, Murtenstrasse 111 (beide Schutz und Rettung Bern, Adressen laut Stadt Bern). Koordinaten: amtlicher Adresspunkt (Gebäudeadressverzeichnis, abgefragt 10.11.2026); die Route beginnt an der nächsten Strasse. Der Start gilt in der Simulation für alle Fahrzeuge gleich und ist frei wählbar. Er sagt nichts darüber, wo welche Fahrzeuge tatsächlich stationiert sind. Die frühere Hauptwache Viktoriastrasse 70 ist kein Startpunkt mehr; die QGIS-Prüfung rechnet weiter ab dort.</p>
+      </details>
+      <details class="more"><summary>Datenquellen</summary>
       <ul class="lim">
         <li>Fahrbahnbreite: amtliche Vermessung Kanton Bern (MOPUBE), 1.5 Mio. Querprofile</li>
         <li>Strassennetz, Schilder, Poller: OpenStreetMap (nicht vor Ort bestätigt)</li>
-        <li>Höhen- und Gewichtsbeschränkungen: kantonales Verzeichnis KSVB, Hinderniskartei Kanton Bern (signalisierte Höhen und Gewichte an Brücken und Unterführungen, Stand 24.8.2026) und OpenStreetMap</li>
-        <li>Gewichtsgrenzen Stadt Bern: Plan «Höchstgewicht» von Tiefbau Stadt Bern (Stand 4.5.2026, erhalten 4.11.2026), den Strassen zugeordnet. Laut Tiefbau gelten die Grenzen auch für Einsatzfahrzeuge. Ohne Höhensignal gilt auf öffentlichen Strassen eine lichte Höhe von mindestens 4.00 m (Verkehrsregelnverordnung, bestätigt vom Tiefbau). Lehnenviadukt / Kleine Westtangente: 3.20 m laut Tiefbau.</li>
-        <li>Geprüfte Befunde: 10 Engstellen am Luftbild (SWISSIMAGE) nachgemessen, 1.11.2026, nicht vor Ort</li>
+        <li>Höhen- und Gewichtsbeschränkungen: kantonales Verzeichnis KSVB, Hinderniskartei Kanton Bern (signalisierte Höhen und Gewichte an Brücken und Unterführungen) und OpenStreetMap</li>
+        <li>Gewichtsgrenzen Stadt Bern: Plan «Höchstgewicht» von Tiefbau Stadt Bern, den Strassen zugeordnet. Laut Tiefbau gelten die Grenzen auch für Einsatzfahrzeuge. Ohne Höhensignal gilt auf öffentlichen Strassen eine lichte Höhe von mindestens 4.00 m (Verkehrsregelnverordnung, bestätigt vom Tiefbau). Lehnenviadukt / Kleine Westtangente: 3.20 m laut Tiefbau.</li>
+        <li>Geprüfte Befunde: 17 Engstellen und Brücken am Luftbild (SWISSIMAGE) nachgemessen, nicht vor Ort</li>
         <li>Parkfelder: Stadt Bern, in den Nachbargemeinden OpenStreetMap (Strassenrand); Bäume: Stadt Bern</li>
-        <li>Baustellen: Stadt Bern (Geoportal map.bern.ch, Baustellen und Installationsplätze) und ASTRA Verkehrsinfo (Abruf 27.10.2026). <span id="bau-stand">Stand 5.11.2026 aus der App</span>. Nur Baustellen, die jetzt gelten.</li>
+        <li>Baustellen: Stadt Bern (Geoportal map.bern.ch, Baustellen und Installationsplätze) und ASTRA Verkehrsinfo. Nur Baustellen, die jetzt gelten.</li>
         <li>Fahrzeuge: Hülle der realen Fahrzeuge von Schutz und Rettung Bern je Klasse</li>
+        <li>Wachen: Schutz und Rettung Bern (Stadt Bern), Koordinaten aus dem Gebäudeadressverzeichnis (swisstopo)</li>
       </ul>
-      <h3>Was der Prototyp noch nicht kann</h3>
+      </details>
+      <details class="more"><summary>Datenaktualität</summary>
+      <ul class="lim">
+        <li>Baustellen Stadt Bern: live, beim Start und alle 10 Minuten. <span id="bau-stand">Stand 5.11.2026 aus der App</span>.</li>
+        <li>Baustellen ASTRA: Stand 27.10.2026 (der Abruf braucht einen Zugangsschlüssel).</li>
+        <li>Strassennetz und Bewertung: Netzmaster vom 6.11.2026 (Befunde vom 1. und 6.11.2026).</li>
+        <li>Hinderniskartei Kanton Bern: Stand 24.8.2026. Plan «Höchstgewicht» Stadt Bern: Stand 4.5.2026, erhalten 4.11.2026.</li>
+        <li>Wachen-Adressen: geprüft 10.11.2026.</li>
+        <li>Ausser den Baustellen der Stadt wird nichts laufend aktualisiert, und nichts davon ist vor Ort bestätigt.</li>
+      </ul>
+      </details>
+      <details class="more"><summary>Einschränkungen</summary>
       <ul class="lim">
         <li>Schilder und Poller aus OpenStreetMap sind nicht vor Ort bestätigt.</li>
         <li>Kirchenfeldbrücke: Laut Tiefbau gibt es eine Nutzungsvereinbarung für Notfalldienste. Ihr Inhalt ist offen, GreenRoute sperrt die Brücke deshalb weiter für C und D.</li>
         <li>Durchfahrten unter Gebäuden auf Hof- und Garagenzufahrten: Höhe meist unbekannt, bleibt ungeklärt.</li>
-        <li>Baustellen verlängern die Fahrzeit (×1.5, bei bekannter enger Restbreite ×2), sperren aber nie. Die Sperrung der Aarstrasse ist so nicht abgebildet. Die Baustellen der Stadt Bern holt die App beim Start und danach alle 10 Minuten live (die Stadt gibt keine Restbreite an); der ASTRA-Teil braucht einen Zugangsschlüssel und bleibt auf dem Stand vom 27.10.2026. QGIS rechnet mit derselben Regel, aber mit der zuletzt abgerufenen Datei, nicht live.</li>
+        <li>Baustellen verlängern die Fahrzeit (×1.5, bei bekannter enger Restbreite ×2), sperren aber nie. Die Sperrung der Aarstrasse ist so nicht abgebildet. Die Stadt gibt keine Restbreite an. QGIS rechnet mit derselben Regel, aber mit der zuletzt abgerufenen Datei, nicht live.</li>
         <li>Demo-Sperrungen (Tab «Strasse») gelten nur in diesem Fenster. Sie sind nicht in QGIS und werden nicht an andere Fenster oder Fahrzeuge übertragen.</li>
         <li>Signale, Kandelaber, falsch parkierte Autos und Schnee fehlen in den Daten.</li>
         <li>Kurven und Abbiegen sind ein Modell (Schleppkurven), keine Fahrversuche.</li>
         <li>Fahrzeiten sind Modellzeiten ohne Verkehr.</li>
       </ul>
+      </details>
+      <details class="more"><summary>Forschungsprojekt und Technik</summary>
+      <p class="small">BFH, BSc Wirtschaftsinformatik, Modul BCS HS26, Gruppe 5. GreenRoute ist der Produktname des Teams. Im Projekt und in den Dateien (QGIS-Skripte, Router, Netzmaster) heisst der technische Prototyp weiterhin BORS.</p>
+      <p class="small">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2g, Netzmaster vom 6.11.2026). Der QGIS-Router 9.2f behebt nur eine Fehlermeldung, die Routen sind gleich. Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
+      <p class="small"><a href="https://jonasbader7.github.io/Portfoliopage/analytics/datenschutz.html" target="_blank" rel="noopener noreferrer">Datenschutz &amp; Analytics</a></p>
+      </details>
     </section>
   </aside>
 
@@ -849,10 +887,8 @@ function baueKarte(){
     map.addLayer({id:'vgl-u',type:'line',source:'vgl-u',paint:{'line-color':css('--warn'),'line-width':['+',['get','w'],3],'line-offset':['get','o'],'line-dasharray':[1.4,0.8]}});
     map.addSource('zufahrt',{type:'geojson',data:leer});
     map.addLayer({id:'zufahrt',type:'line',source:'zufahrt',paint:{'line-color':css('--muted'),'line-width':2.5,'line-dasharray':[2,2]}});
-    map.addSource('wachen',{type:'geojson',data:{type:'FeatureCollection',features:D.wachen.map(w=>({type:'Feature',properties:{n:w[0]},geometry:{type:'Point',coordinates:rel2wgs(w[1]/100,w[2]/100)}}))}});
-    map.addLayer({id:'wachen',type:'circle',source:'wachen',paint:{'circle-radius':7,'circle-color':css('--accent'),'circle-stroke-color':css('--halo'),'circle-stroke-width':2}});
     setBasis('grau');
-    ebenenUI();netzStat();if(istMobil())gebiet();
+    ebenenUI();netzStat();standortMarker();   // V17: Wachen als Marker statt Kreis aus D.wachenif(istMobil())gebiet();
     $('#load').hidden=true;
     // Ergebnisse, die vor der Karte fertig waren (z.B. Notruf während des Ladens), jetzt zeichnen
     zeichnePunkte();zeichneRoute();einpassen();
@@ -891,7 +927,7 @@ async function setBasis(k){
 const PARK_FARBE=['#1f5fd1','#6b7280','#8e44ad','#d6336c'];   // blaue Zone, weiss/gebührenpflichtig, Spezialfelder, OSM
 const EBENEN=[['netz','Strassennetz nach Befahrbarkeit',true,'var(--ok)'],['breite','Gemessene Fahrbahnbreite (untere Schranke)',false,'#67a9cf'],
   ['park','Parkfelder (von der Breite abgezogen)',false,PARK_FARBE[0]],
-  ['limit','Höhen- und Gewichtsbeschränkungen',false,'var(--accent)'],['bau','Baustellen (aktiv, Stadt Bern live)',false,'#f08c00'],['punkte','Poller und Tore (rot = fest)',false,'var(--warn)'],['wachen','Wachen',true,'var(--accent)']];
+  ['limit','Höhen- und Gewichtsbeschränkungen',false,'var(--accent)'],['bau','Baustellen (aktiv, Stadt Bern live)',false,'#f08c00'],['punkte','Poller und Tore (rot = fest)',false,'var(--warn)'],['wachen','Wachen (Berufsfeuerwehr, Rettungsdienst)',true,'var(--ink)']];
 let parkKat=null;
 async function parkLaden(){
   if(map.getSource('park')._loaded)return;map.getSource('park')._loaded=true;toast('Parkfelder werden geladen …',2000);
@@ -910,6 +946,7 @@ function ebenenUI(){
     if(id==='breite'&&on&&!map.getSource('breite')._loaded){map.getSource('breite').setData(breiteGeo());map.getSource('breite')._loaded=true;}
     if(id==='breite')$('#breite-leg').hidden=!on;
     if(id==='park'){$('#park-leg').hidden=!on;if(on)await parkLaden();}
+    if(id==='wachen'){soSicht();return;}
     (id==='netz'?['netz','netz-casing']:id==='park'?['park','park-rand']:[id]).forEach(l=>map.setLayoutProperty(l,'visibility',on?'visible':'none'));});
   $('#sel-basis').onchange=e=>setBasis(e.target.value);
   bauAnzeige();   // V14: Statuszeile Baustellen (wird erst hier erzeugt)
@@ -957,7 +994,7 @@ function setModus(m){klickModus=m;if(m==='start'||m==='ziel')letzterPt=m;
 const zenOffen=()=>ansicht==='gis'&&!$('#p-zen').hidden;
 function hinweis(){const h=$('#maphint');
   if(ansicht==='einsatz'&&!vglAktiv()){h.hidden=true;return;}
-  if(klickModus!=='seg'&&(ortWahl||zenOffen())){h.textContent=ortWahl==='start'?'Tippe auf den Standort des Fahrzeugs':EINSATZ?'Tippe in die Karte, um den Einsatzort zu verschieben':'Notruf simulieren oder auf den Einsatzort tippen';
+  if(klickModus!=='seg'&&(ortWahl||zenOffen())){h.textContent=ortWahl==='start'?'Tippe auf den Standort des Fahrzeugs':ortWahl==='ort'&&!EINSATZ?'Tippe in die Karte auf den Einsatzort':EINSATZ?'Tippe in die Karte, um den Einsatzort zu verschieben':'Notruf simulieren oder auf den Einsatzort tippen';
     h.hidden=!!rechnet||(!ortWahl&&!!EINSATZ&&!!BEIDE);return;}
   const t=klickModus==='seg'?'Tippe auf eine Strasse, um ihre Messwerte zu sehen':klickModus==='start'?(P1?'Tippe in die Karte, um den Start zu verschieben':'Tippe in die Karte, um den Start zu setzen'):(P2?'Tippe in die Karte, um das Ziel zu verschieben':'Tippe in die Karte, um das Ziel zu setzen');
   h.textContent=t;h.hidden=!!(rechnet)||(klickModus!=='seg'&&P1&&P2&&RES);}
@@ -966,9 +1003,10 @@ document.querySelectorAll('#modebar button').forEach(b=>b.onclick=()=>{ortWahl=n
   if(b.dataset.m==='ort'){setModus(klickModus==='seg'?letzterPt:klickModus);return;}
   if(b.dataset.m!=='seg'&&zenOffen())tab('route');setModus(b.dataset.m);});
 // V16: Knopf im leeren Tab «Strasse» schaltet das Kartenwerkzeug auf «Strasse»
+$('#b-proto').onclick=()=>{if(ansicht==='gis'){tab('info');if(istMobil()&&$('.app').dataset.sheet==='klein')setSheet('mitte');}toast('Forschungsprototyp zur Simulation – nicht für reale Einsätze geeignet.',3500);};
 $('#b-segwahl').onclick=()=>{ortWahl=null;setModus('seg');if(istMobil())setSheet('klein');};
 $('#pb-start').onclick=()=>setModus('start');$('#pb-ziel').onclick=()=>setModus('ziel');
-$('#b-swap').onclick=()=>{if(!P1&&!P2)return;[P1,P2]=[P2,P1];[P1txt,P2txt]=[P2txt.replace(/^Ziel/,'Start'),P1txt.replace(/^Start/,'Ziel')];zeichnePunkte();if(P1&&P2)rechne();else uiRoute();};
+$('#b-swap').onclick=()=>{if(!P1&&!P2)return;[P1,P2]=[P2,P1];wahlSync(null);[P1txt,P2txt]=[P2txt.replace(/^Ziel/,'Start'),P1txt.replace(/^Start/,'Ziel')];zeichnePunkte();if(P1&&P2)rechne();else uiRoute();};
 $('#z-in').onclick=()=>map.zoomIn();$('#z-out').onclick=()=>map.zoomOut();$('#z-fit').onclick=()=>gebiet();
 function gebiet(){const unten=istMobil()?($('.app').dataset.sheet==='klein'?140:Math.round(innerHeight*0.44)):10;map.fitBounds([[7.32,46.88],[7.56,47.02]],{padding:{top:60,left:10,right:10,bottom:unten},duration:0});}
 
@@ -978,12 +1016,12 @@ function ortName(E,N){const p=[E-X0,N-Y0];let best=null;const G=100,cx=Math.floo
   for(let i=0;i<D.segs.length;i++){const ids=D.segs[i][0][0];const j=ids[Math.floor(ids.length/2)];const dx=D.nodes[2*j]/100-p[0],dy=D.nodes[2*j+1]/100-p[1];const d=dx*dx+dy*dy;if(d<bd&&D.attr[i][ni]){bd=d;best=D.attr[i][ni];}}
   return best&&bd<250*250?'bei '+best:Math.round(E)+' / '+Math.round(N);}
 function setzePunkt(w,E,N){
-  if(w==='start'){P1=[E,N];P1txt='Start: '+ortName(E,N);}else{P2=[E,N];P2txt='Ziel: '+ortName(E,N);}
+  if(w==='start'){P1=[E,N];P1txt='Start: '+ortName(E,N);wahlSync(null);}else{P2=[E,N];P2txt='Ziel: '+ortName(E,N);}
   zeichnePunkte();
   if(P1&&P2)rechne();else{RES=BEIDE=null;zeichneRoute();uiRoute();}
 }
 async function klick(e){
-  if(!D)return;
+  if(!D)return;soZu();
   if(klickModus==='seg'){const f=map.queryRenderedFeatures([[e.point.x-8,e.point.y-8],[e.point.x+8,e.point.y+8]],{layers:['netz']});
     if(f.length)zeigeSeg(f[0].properties.i);else toast('Hier ist keine Strasse. Tippe genauer auf eine Linie.',2200);return;}
   // Fahrzeug: Karte nur zum Anschauen, Punkte setzt nur «selbst planen»
@@ -1196,24 +1234,38 @@ const ENDE=new Set(['abgeschlossen','zurückgezogen']);
 const aktiv=z=>!!z&&!ENDE.has(z.status);
 // Kennung der Route (Abschnittsfolge + Länge): Rechnet ein anderes Fenster neu, prüft es damit, dass es dieselbe Route ist
 const routeSig=r=>{let h=5381;for(const x of r.rows)h=(Math.imul(h,33)^(x.f*4+x.kat))>>>0;return h.toString(36)+'-'+Math.round(r.laenge_m);};
-function wacheStart(){const w=D.wachen[0];P1=[w[1]/100+X0,w[2]/100+Y0];P1txt='Start: '+w[0];}
+// V17: Einsatzstandorte Schutz und Rettung Bern als Startpunkte. Koordinaten = amtlicher Adresspunkt (swisstopo-Suche,
+// Gebäudeadressverzeichnis, abgefragt 10.11.2026); Adressen laut Stadt Bern. Nur Startpunkte: netz.json (D.wachen =
+// Viktoriastrasse 70, bis 2014 Hauptwache; Wachenareal-Regel; QGIS-Test) bleibt unverändert. Der Router bindet den Punkt
+// wie jeden Klick an die nächste Strasse an (Nr. 98: 15 m Murtenstrasse, Nr. 111: 4 m; in node geprüft).
+const STANDORTE=[
+  {id:'bf',art:'feuerwehr',n:'Berufsfeuerwehr Bern',kurz:'Feuerwehr',adr:'Murtenstrasse 98, 3008 Bern',p:[2598307.75,1200148.75],
+   q:'Stadt Bern, Schutz und Rettung (Merkblatt Partnerorganisationen 2024); Stützpunkt Forsthaus West seit Dezember 2014'},
+  {id:'rd',art:'rettung',n:'Rettungsdienst Bern',kurz:'Rettungsdienst',adr:'Murtenstrasse 111, 3008 Bern',p:[2598133.0,1199905.375],
+   q:'Stadt Bern, Schutz und Rettung (Factsheet Sanitätsnotrufzentrale 144)'}];
+const soIdx=id=>STANDORTE.findIndex(s=>s.id===id);
+const soTxt=s=>s.n+' ('+s.adr.replace(/, \d{4} .*$/,'')+')';
+// Wachen-Menüs (Route, Fahrzeug) zeigen, ob der Start eine Wache ist
+function wahlSync(i){for(const id of ['#sel-wache','#e-wache']){const e=$(id);if(e)e.value=i==null?'':String(i);}}
+function standortStart(i){const s=STANDORTE[i]||STANDORTE[0];P1=s.p.slice();P1txt='Start: '+soTxt(s);wahlSync(STANDORTE.indexOf(s));}
+function wacheStart(id){standortStart(Math.max(0,soIdx(id)));}
 // zufälliger Punkt auf einer benannten Strasse im Untersuchungsgebiet (Netzknoten, liegt damit auf dem Netz)
 function zufallsPunkt(){const ai=D.attr_cols.indexOf('ausserhalb'),hi=D.attr_cols.indexOf('highway_type'),ni=D.attr_cols.indexOf('name');
   const ok=new Set(['residential','living_street','tertiary','secondary','unclassified','primary']);
   for(let k=0;k<2000;k++){const i=Math.floor(Math.random()*D.segs.length),a=D.attr[i];if(a[ai]||!a[ni]||!ok.has(a[hi]))continue;
     const ids=D.segs[i][0][0],j=ids[Math.floor(ids.length/2)];return [D.nodes[2*j]/100+X0,D.nodes[2*j+1]/100+Y0];}
   return null;}
-function patrouille(){const q=zufallsPunkt();if(q){P1=q;P1txt='Start: Patrouille '+ortName(...q);}else wacheStart();}
-function fzStart(p,txt){P1=rd(p);P1txt='Start: '+txt;if(EINSATZ)EINSATZ.start='karte';zeichnePunkte();if(P2)rechne();else uiRoute();}
+function patrouille(){const q=zufallsPunkt();if(q){P1=q;P1txt='Start: Patrouille '+ortName(...q);wahlSync(null);}else wacheStart();}
+function fzStart(p,txt){P1=rd(p);P1txt='Start: '+txt;wahlSync(null);if(EINSATZ)EINSATZ.start='karte';zeichnePunkte();if(P2)rechne();else uiRoute();}
 function einsatzOrt(p,art){
   const d=new Date();
   // V13: Nummer eindeutig, auch bei zwei Notrufen in derselben Sekunde (sonst greift die Rückfrage «ersetzen?» nicht)
   let nr=`E-${zwei(d.getHours())}${zwei(d.getMinutes())}${zwei(d.getSeconds())}`;
   if(art||!EINSATZ){const belegt=new Set(Object.values(ZUW).map(z=>z.a.nr).concat(EINSATZ?[EINSATZ.nr]:[]));let k=2;const b0=nr;while(belegt.has(nr))nr=b0+'-'+(k++);}
   if(art||!EINSATZ)EINSATZ={nr,zeit:`${zwei(d.getHours())}:${zwei(d.getMinutes())}`,
-    art:art||ARTEN[ARTEN.length-1],start:EINSATZ?EINSATZ.start:'wache'};
+    art:art||ARTEN[ARTEN.length-1],start:EINSATZ?EINSATZ.start:'bf'};
   P2=rd(p);P2txt='Einsatzort: '+ortName(...P2);
-  if(EINSATZ.start==='zufall'&&(art||!P1))patrouille();else if(EINSATZ.start==='wache'||!P1)wacheStart();
+  if(EINSATZ.start==='zufall'&&(art||!P1))patrouille();else if(soIdx(EINSATZ.start)>=0||!P1)wacheStart(EINSATZ.start);
   kVgl=false;zeichnePunkte();tab('zen');rechne();}
 function notruf(){const art=ARTEN[Math.floor(Math.random()*(ARTEN.length-1))],p=zufallsPunkt();if(!p)return;
   einsatzOrt(p,art);toast('Notruf eingegangen: '+art.t,3000);}
@@ -1257,11 +1309,10 @@ function zurueck(c){const z=ZUW[c];if(!aktiv(z))return;
 function uiZentrale(){
   const el=$('#zen');if(!el||!D)return;
   let h='';
-  if(!EINSATZ)h=`<h2>Einsatz simulieren</h2><ol class="steps"><li class="jetzt"><b>Notruf simulieren:</b> Ein Einsatzort erscheint auf der Karte.</li><li><b>Routen ansehen:</b> GreenRoute berechnet die Routen für die Fahrzeugklassen A–D (A Personenwagen / NEF, B Rettungswagen, C Feuerwehr mittel, D Feuerwehr gross).</li><li><b>Auftrag senden:</b> Du wählst ein Fahrzeug und sendest ihm die Route.</li><li><b>Fahrzeug:</b> oben auf «Fahrzeug» wechseln. Die Crew wählt zwischen validierter Route und Alternative, quittiert und meldet vor Ort und abgeschlossen zurück.</li></ol>
-    <div class="row"><button class="btn prim zbig" id="z-notruf">Notruf simulieren</button><button class="btn zbig" id="z-ort">Einsatzort auf der Karte wählen</button></div>
-    <p class="small muted">Am einfachsten: «Notruf simulieren». Oder Einsatzort selbst wählen und in die Karte tippen.</p>
+  if(!EINSATZ)h=`<h2>Einsatz simulieren</h2><p class="intro" style="margin-top:-8px">Simuliere einen Notruf und finde geeignete Routen für unterschiedliche Einsatzfahrzeuge.</p>
+    <div class="row"><button class="btn prim zbig" id="z-notruf">Notruf simulieren</button><button class="btn zbig" id="z-ort">Einsatzort selbst wählen</button></div>
     ${breit.matches&&!splitAn()&&!EINGEBETTET?'<button class="btn" id="z-split">Präsentation: Zentrale und Fahrzeug nebeneinander</button>':''}
-    <p class="small muted">Alles ist simuliert: erfundene Notrufe, keine Personendaten, keine echte Leitstelle. GreenRoute ist ein Forschungsprototyp, keine Einsatznavigation.</p>`;
+    <p class="small muted">Forschungsprototyp zur Simulation – nicht für reale Einsätze geeignet.</p>`;
   else{const E=EINSATZ;
     // V16: empfohlener nächster Schritt (nur Anzeige, Ablauf unverändert)
     const KL=['A','B','C','D'],hierL=KL.filter(c=>aktiv(ZUW[c])&&ZUW[c].a.nr===E.nr).sort((x,y)=>ZUW[y].a.t-ZUW[x].a.t);
@@ -1270,13 +1321,14 @@ function uiZentrale(){
     if(hierL.length){const c=hierL[0],z=ZUW[c],w=WEITER[z.status];
       nx=`<div class="next" aria-live="polite"><b class="k">Nächster Schritt</b><span>Auftrag an ${c} · ${PN[c]}: Status «${esc(z.status)}». ${w?`Weiter in der Fahrzeugansicht${splitAn()?' rechts im Tablet':''}: «${w[0]}».`:''}</span>${splitAn()?'':`<button class="btn prim" data-f="${c}">Zur Fahrzeugansicht ${c} wechseln</button>`}</div>`;}
     else if(fertig)nx='<div class="next" aria-live="polite"><b class="k">Erledigt</b><span>Einsatz abgeschlossen. «Neuer Notruf» startet den nächsten.</span></div>';
-    else if(BEIDE&&!rechnet)nx='<div class="next"><b class="k">Nächster Schritt</b><span>Ein Fahrzeug wählen und «Senden» drücken. Den Buchstaben antippen zeigt die Routen dieser Klasse auf der Karte: <span class="pill ok">validiert</span> passt nach Daten, <span class="pill warn">Vergleich</span> nutzt ungeklärte Stellen.</span></div>';
+    else if(BEIDE&&!rechnet)nx='<div class="next"><b class="k">Nächster Schritt</b><span>Startstandort oben prüfen, dann ein Fahrzeug wählen und «Senden». Buchstabe antippen = Routen dieser Klasse auf der Karte: <span class="pill ok">validiert</span> passt nach Daten, <span class="pill warn">Vergleich</span> nutzt ungeklärte Stellen.</span></div>';
     h=`<div class="ez"><div class="ez-k"><span>Notruf ${esc(E.nr)} · ${esc(E.zeit)} Uhr</span><span class="pill ${E.art.p===1?'bad':'warn'}">Prio ${E.art.p}</span></div>
       <select id="z-art" aria-label="Stichwort">${ARTEN.map((x,i)=>`<option value="${i}" ${x===E.art?'selected':''}>${esc(x.t)}</option>`).join('')}</select>
       <div class="ez-ort">${esc((P2txt||'Einsatzort fehlt').replace(/^(Ziel|Einsatzort):\s*/,''))}</div>
-      <select id="z-start" aria-label="Start der Fahrzeuge"><option value="wache" ${E.start==='wache'?'selected':''}>Start: ${esc(D.wachen[0][0])}</option><option value="zufall" ${E.start==='zufall'?'selected':''}>Start: Patrouille unterwegs (zufälliger Standort)</option><option value="karte" ${E.start==='karte'?'selected':''}>Start: Standort auf der Karte wählen …</option></select>
-      ${E.start!=='wache'&&P1txt?`<p class="small muted">${esc(P1txt)}</p>`:''}
-      <p class="small muted">Vorschlag laut Stichwort (Simulation): ${esc(E.art.v)}. Entscheiden muss die Zentrale.</p>
+      <label class="small muted" for="z-start" style="margin-bottom:-4px">Fahrzeuge starten bei</label>
+      <select id="z-start">${STANDORTE.map(s=>`<option value="${s.id}" ${E.start===s.id?'selected':''}>${esc(soTxt(s))}</option>`).join('')}<option value="zufall" ${E.start==='zufall'?'selected':''}>Patrouille unterwegs (zufälliger Standort)</option><option value="karte" ${E.start==='karte'?'selected':''}>Standort auf der Karte wählen …</option></select>
+      ${soIdx(E.start)<0&&P1txt?`<p class="small muted">${esc(P1txt)}</p>`:''}
+      <p class="small muted">Vorschlag (Simulation): ${esc(E.art.v)}</p>
       <div class="row"><button class="btn${fertig?' prim':''}" id="z-notruf">Neuer Notruf</button><button class="btn" id="z-neu">Einsatz schliessen</button></div></div>
       ${nx}<div id="zen-dispo" style="display:flex;flex-direction:column;gap:8px">`;
     if(rechnet)h+='<div class="hint">GreenRoute berechnet die Routen für A–D …</div>';
@@ -1296,7 +1348,7 @@ function uiZentrale(){
           <div class="dz-r"><div class="l"><span class="pill ok">validiert</span>${vt}</div>${dn(v.val)}</div>
           <div class="dz-r"><div class="l"><span class="pill warn">Vergleich</span>${et}</div>${v.zeigeE?dn(v.exp):''}</div>
           <div class="dz-b">${b}</div></div>`;}
-      h+='<p class="small muted">Senden schickt dem Fahrzeug die validierte Route und, falls es eine gibt, die Alternative mit ungeklärten Stellen. Der Fahrer wählt vor dem Quittieren. Klasse antippen: validierte Route (grün) und Vergleichsroute (blau, ungeklärte Stellen gelb) auf der Karte. Zeiten = Modellfahrzeit ohne Verkehr. Gesperrte Abschnitte sind nie Teil einer Route. Details je Klasse im Tab «Route».</p>';}
+      h+='<p class="small muted">«Beide Routen»: Die Crew wählt vor dem Quittieren. Zeiten = Modellfahrzeit ohne Verkehr. Gesperrte Abschnitte sind nie Teil einer Route. Details im Tab «Route».</p>';}
     h+='</div>';}
   h+=`<div><h3 style="margin-bottom:6px">Fahrzeuge</h3><div class="fzl">${['A','B','C','D'].map(c=>{const z=ZUW[c];
     return `<div><b style="color:var(--r${c})">${c}</b><span>${PN[c]}</span>${aktiv(z)?`<span class="st on">${esc(z.status)}</span><span class="muted">${esc(z.a.nr)} · ${esc(z.a.art)} · ${esc(wahlTxt(z))}</span><button class="btn" data-x="${c}">Zurückziehen</button>`:`<span class="st">frei</span>${z?`<span class="muted small">${esc(z.a.nr)} ${esc(z.status)}</span>`:''}`}</div>`;}).join('')}</div></div>`;
@@ -1311,7 +1363,7 @@ function uiZentrale(){
   const za=el.querySelector('#z-art');if(za)za.onchange=()=>{EINSATZ.art=ARTEN[+za.value];uiRoute();};
   const zs=el.querySelector('#z-start');if(zs)zs.onchange=()=>{const s=zs.value;
     if(s==='karte'){ortWahl='start';hinweis();if(istMobil())setSheet('klein');return;}
-    EINSATZ.start=s;if(s==='wache')wacheStart();else patrouille();zeichnePunkte();rechne();};
+    EINSATZ.start=s;if(soIdx(s)>=0)wacheStart(s);else patrouille();zeichnePunkte();rechne();};
   el.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>zuweisen(b.dataset.z));
   el.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>zurueck(b.dataset.x));
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const c=b.dataset.k;
@@ -1333,7 +1385,7 @@ function uiFahrzeug(){
   $('#e-selbst').hidden=!!z;
   if(ansicht!=='einsatz')return;
   if(!z){const l=ZUW[c];
-    el.innerHTML=`<div class="e-card"><div class="e-lbl">Kein Auftrag</div><div class="e-sub">Fahrzeug ${c} · ${PN[c]} wartet auf eine Route der Zentrale.</div>${l?(l.status==='zurückgezogen'?`<div class="e-note" style="color:var(--ink);font-weight:600">⚠ Auftrag ${esc(l.a.nr)} wurde von der Zentrale zurückgezogen. Nicht mehr anfahren, Rückfrage bei der Zentrale.</div>`:`<div class="e-note">Letzter Auftrag ${esc(l.a.nr)} abgeschlossen.</div>`):''}<div class="e-note">Weist die Zentrale diesem Fahrzeug eine Route zu, erscheint sie hier sofort, auch in einem zweiten Fenster dieses Browsers.</div></div>`;return;}
+    el.innerHTML=`<div class="e-card"><div class="e-lbl">Kein Auftrag</div><div class="e-sub">Fahrzeug ${c} · ${PN[c]} wartet auf eine Route der Zentrale.</div>${l?(l.status==='zurückgezogen'?`<div class="e-note" style="color:var(--ink);font-weight:600">⚠ Auftrag ${esc(l.a.nr)} wurde von der Zentrale zurückgezogen. Nicht mehr anfahren, Rückfrage bei der Zentrale.</div>`:`<div class="e-note">Letzter Auftrag ${esc(l.a.nr)} abgeschlossen.</div>`):''}<div class="e-note">Neue Aufträge erscheinen hier sofort, auch in einem zweiten Fenster dieses Browsers.</div></div>`;return;}
   if(z.status==='gesendet'){z.status='empfangen';speichern();}
   if(z.r===null)auftragRoute(z);
   const a=z.a,R=z.r,r=fzR(z),val=z.wahl==='val',w=WEITER[z.status],zw=fzWaehlt(z),n=z.v?z.v.eng.length:0;
@@ -1570,11 +1622,38 @@ function szenario(s){SZ_AKT=s;SZ_ERG=null;refZeig=false;kVgl=true;P1=s.s;P2=s.z;
 $('#scen').innerHTML=SZEN.map((s,i)=>`<button class="btn" data-i="${i}"><small>${s.id} · ${s.k}</small>${s.t}</button>`).join('');
 $('#scen').onclick=e=>{const b=e.target.closest('button');if(b&&D)szenario(SZEN[+b.dataset.i]);};
 
+// V17: Wachen als Marker; Tippen zeigt Name, Adresse, Quelle und «Als Start wählen»
+const SO_ICON={feuerwehr:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 1.2c.4 2.3 3.9 3.9 3.9 7.6A4.5 4.5 0 0 1 3.5 9c0-1.9 1-3.1 2.1-4 .1 1.6.8 2.6 1.8 2.9-.6-2.4.2-4.7 1.2-6.7z" fill="currentColor"/></svg>',
+  rettung:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.2 2h3.6v4.2H14v3.6H9.8V14H6.2V9.8H2V6.2h4.2z" fill="currentColor"/></svg>'};
+let soMk=[];
+function soZu(){document.querySelectorAll('.so-info').forEach(x=>{x.hidden=true;x.parentElement.querySelector('.so-b').setAttribute('aria-expanded','false');});}
+function standortMarker(){
+  soMk.forEach(m=>m.remove());
+  soMk=STANDORTE.map((s,i)=>{const el=document.createElement('div');el.className='so so-'+s.art;
+    el.innerHTML=`<button class="so-b" aria-label="${esc(s.n)}, ${esc(s.adr)}" aria-expanded="false">${SO_ICON[s.art]}</button><span class="so-n">${esc(s.kurz)}</span>`+
+      `<div class="so-info" hidden><b>${esc(s.n)}</b><span>${esc(s.adr)}</span><button class="btn prim" data-so="${i}">Als Start wählen</button><small>Quelle: ${esc(s.q)}. Simulation, keine Aussage über Fahrzeugstationierung.</small></div>`;
+    ['mousedown','mouseup','click','dblclick','touchstart','touchend','pointerdown','pointerup'].forEach(t=>el.addEventListener(t,e=>e.stopPropagation()));
+    el.querySelector('.so-b').onclick=()=>{const inf=el.querySelector('.so-info'),auf=inf.hidden;soZu();
+      inf.querySelector('[data-so]').hidden=ansicht==='einsatz';inf.hidden=!auf;el.querySelector('.so-b').setAttribute('aria-expanded',String(auf));};
+    el.querySelector('[data-so]').onclick=()=>{soZu();soAlsStart(i);};
+    return new maplibregl.Marker({element:el,anchor:'center'}).setLngLat(lv2wgs(...s.p)).addTo(map);});
+  // Die zwei Standorte liegen 300 m auseinander: in der Übersicht leicht auseinanderschieben, damit beide sichtbar sind
+  const nah=()=>{const z=map.getZoom(),d=z<14?Math.round(Math.min(16,(14-z)*6)):0;$('#map').classList.toggle('so-nah',z>=13.5);
+    soMk.forEach((m,i)=>m.setOffset(i===0?[d,-d]:[-d,d]));};map.on('zoom',nah);nah();
+  soSicht();}
+function soSicht(){const c=$('#ly-wachen'),on=!c||c.checked;soMk.forEach(m=>{m.getElement().hidden=!on;});if(!on)soZu();}
+addEventListener('keydown',e=>{if(e.key==='Escape')soZu();});
+// Im Einsatz-Tab mit offenem Einsatz: Start der Fahrzeuge; sonst Start der Route
+function soAlsStart(i){
+  if(ansicht==='gis'&&aktTab==='zen'&&EINSATZ){EINSATZ.start=STANDORTE[i].id;wacheStart(EINSATZ.start);zeichnePunkte();rechne();toast('Fahrzeuge starten bei '+STANDORTE[i].n,2200);return;}
+  if(ansicht==='gis')tab('route');routeStartWache(i);toast('Start: '+STANDORTE[i].n,2200);}
 // Wachen
-function wachenUI(){const o=D.wachen.map((w,i)=>`<option value="${i}">${esc(w[0])}</option>`).join('');
-  $('#sel-wache').innerHTML='<option value="">Wache wählen …</option>'+o;$('#e-wache').innerHTML='<option value="">… oder Start an einer Wache</option>'+o;}
-const wacheWahl=e=>{if(e.target.value==='')return;const w=D.wachen[+e.target.value];P1=[w[1]/100+X0,w[2]/100+Y0];P1txt='Start: '+w[0];
-  zeichnePunkte();if(P2)rechne();else{RES=BEIDE=null;zeichneRoute();uiRoute();setModus('ziel');}};
+function wachenUI(){const o=STANDORTE.map((s,i)=>`<option value="${i}">${esc(soTxt(s))}</option>`).join('');
+  $('#sel-wache').innerHTML='<option value="">Start an einer Wache …</option>'+o;$('#e-wache').innerHTML='<option value="">… oder Start an einer Wache</option>'+o;}
+// Wache als Start der Route (Tab Route, Fahrzeug «selbst planen», Marker auf der Karte)
+function routeStartWache(i){standortStart(i);$('#sel-wache').value=String(i);$('#e-wache').value=String(i);
+  zeichnePunkte();if(P2)rechne();else{RES=BEIDE=null;zeichneRoute();uiRoute();setModus('ziel');}}
+const wacheWahl=e=>{if(e.target.value==='')return;routeStartWache(+e.target.value);};
 $('#sel-wache').onchange=wacheWahl;$('#e-wache').onchange=wacheWahl;
 
 // Adresssuche (swisstopo SearchServer; in der Vorschau eventuell gesperrt). Für GIS- und Einsatzansicht.
@@ -1595,7 +1674,7 @@ async function suche(inp,out){
     if(!a.length){$(out).textContent='Keine passende Adresse im Gebiet von GreenRoute (Bern und zehn Nachbargemeinden) gefunden.';return;}
     $(out).innerHTML=a.map((x,i)=>`<div><button class="btn" style="margin-top:4px;text-align:left" data-i="${i}">${esc(x.attrs.label.replace(/<[^>]+>/g,''))}</button></div>`).join('');
     $(out).querySelectorAll('button').forEach(b=>b.onclick=()=>{const x=a[+b.dataset.i].attrs;P2=[x.y,x.x];P2txt='Ziel: '+x.label.replace(/<[^>]+>/g,'');$(out).textContent='';
-      if(!P1){P1=[D.wachen[0][1]/100+X0,D.wachen[0][2]/100+Y0];P1txt='Start: '+D.wachen[0][0];}
+      if(!P1)standortStart(0);
       zeichnePunkte();setModus('ziel');rechne();});
   }catch(e){$(out).textContent='Die Adresssuche ist hier nicht erreichbar. Setze das Ziel mit einem Klick in die Karte.';}
 }
