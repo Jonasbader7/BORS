@@ -1,10 +1,10 @@
-# BORS Bern – Einsatzrouting für Blaulichtfahrzeuge
+# GreenRoute – Einsatzrouting für Blaulichtfahrzeuge in Bern
 
-*English: Vehicle-specific emergency routing for Bern. For each street and each vehicle class, BORS decides whether width, height and weight allow passage, and routes only over streets the vehicle fits. Research prototype, not approved for operational use.*
+*English: Vehicle-specific emergency routing for Bern. For each street and each vehicle class, GreenRoute decides whether width, height and weight allow passage, and routes only over streets the vehicle fits. Research prototype, not approved for operational use.*
 
 **[Web-App öffnen](https://jonasbader7.github.io/BORS/)** · [Portfolio](https://jonasbader7.github.io/Portfoliopage/)
 
-![BORS-Web-App: Karte von Bern, Strassen nach Befahrbarkeit eingefärbt](https://jonasbader7.github.io/Portfoliopage/img/bors-app.jpg)
+![GreenRoute-Web-App: Karte von Bern, Strassen nach Befahrbarkeit eingefärbt](https://jonasbader7.github.io/Portfoliopage/img/bors-app.jpg)
 
 | | |
 |---|---|
@@ -18,17 +18,19 @@
 
 ## Wie es funktioniert
 
+*GreenRoute ist der Produktname des Teams. Im Repository, in den Python-Skripten und in den Dateinamen heisst der technische Prototyp weiterhin BORS (z. B. `bors_router.js`, Netzmaster `BORS_Netzmaster_…`); die Versionsgeschichte unten nennt ihn so, wie er damals hiess.*
+
 1. **Breite messen:** Aus der amtlichen Vermessung wird die befahrbare Breite mit Querprofilen gemessen; Parkfelder, Mauern und Pfeiler werden abgezogen, pro Strassenrand gilt eine Messtoleranz.
 2. **Pro Fahrzeug bewerten:** Jeder Abschnitt bekommt pro Fahrzeugklasse einen Zustand: **validiert** (passt nach Daten), **unvalidiert** (ungeklärt) oder **gesperrt**. Gewichtsgrenzen und die Regel «ohne Signal mindestens 4 m Höhe» stammen vom Tiefbauamt der Stadt Bern.
 3. **Routen:** Der Router fährt zuerst nur über validierte Strassen. Gibt es so keinen Weg, zeigt er eine gekennzeichnete Ausweichroute; ungeklärte Abschnitte zählen dabei mit doppelter Zeit. Gesperrte Abschnitte bietet er nie an.
 4. **Einsatzablauf:** Die Web-App simuliert Notruf, Disposition, Route senden und die Wahl der Route durch die Crew (Zentrale und Fahrzeug, auch auf dem Handy).
 
-Beispiel S1 in der App: Von Gasel nach Liebewil fährt der Notarzt (A) wie Google Maps über die Mengestorfstrasse und durch eine Unterführung mit 3,50 m, 6,4 min. Die grosse Feuerwehr (D, 3,66 m hoch) passt nicht durch. BORS schickt sie auf einen Umweg, 14,5 min. Würde sie wie A fahren und vor der Unterführung umkehren, bräuchte sie rund 25 min (Modellfahrzeiten ohne Verkehr, Stand 9.11.2026).
+Beispiel S1 in der App: Von Gasel nach Liebewil fährt der Notarzt (A) wie Google Maps über die Mengestorfstrasse und durch eine Unterführung mit 3,50 m, 6,4 min. Die grosse Feuerwehr (D, 3,66 m hoch) passt nicht durch. GreenRoute schickt sie auf einen Umweg, 14,5 min. Würde sie wie A fahren und vor der Unterführung umkehren, bräuchte sie rund 25 min (Modellfahrzeiten ohne Verkehr, Stand 9.11.2026).
 
 ## Was geprüft ist und was nicht
 
 - **Geprüft:** Die Web-App ist eine Übertragung des QGIS-Routers; beim Abgleich der Version V9.2c waren 325 von 325 Testrouten identisch. Der QGIS-Testlauf meldet 29 bestandene und 0 fehlgeschlagene Prüfungen (5.11.2026).
-- **Nicht geprüft:** BORS wurde nicht im Einsatz und nicht systematisch vor Ort getestet. Höhenangaben und Poller aus OpenStreetMap sind nicht vor Ort bestätigt.
+- **Nicht geprüft:** GreenRoute wurde nicht im Einsatz und nicht systematisch vor Ort getestet. Höhenangaben und Poller aus OpenStreetMap sind nicht vor Ort bestätigt.
 
 Dieses Repository enthält die Web-App und im Ordner [`pipeline/`](pipeline/) die Datenaufbereitung in Python/QGIS (Breitenmessung, Netzmaster, QGIS-Router, Export nach `netz.json`). Die Rohdaten selbst sind nicht enthalten.
 
@@ -45,6 +47,17 @@ Dieses Repository enthält die Web-App und im Ordner [`pipeline/`](pipeline/) di
 ## Versionsgeschichte
 
 Was sich von Version zu Version geändert hat, neuste zuerst.
+
+### Neu in Version 16 (10.11.2026): Name GreenRoute, klarere Knöpfe und Kartenwerkzeuge
+
+Router, Strassennetz, Baustellen, Beispiele und Einsatzablauf wie V15. Geändert sind nur `index.html` und dieses README. Anlass war die Rückmeldung einer Testperson: Vieles wirke schwarz-weiss, man sehe nicht sofort, was anklickbar ist und wo man am besten anfängt.
+- **Name und Logo:** «GreenRoute» statt «BORS Bern» in Kopf (Logo-Kachel und Schriftzug wie in der Markenvorlage, auf dem Handy zweizeilig), Browsertitel, Favicon, Beschreibung, Ladeanzeige, Tab «Methode» und allen Meldungen. Interne Namen bleiben (`BORS.Router`, Speicher-Schlüssel `bors-…`, Dateinamen), damit gespeicherte Aufträge und die Synchronisation zwischen Fenstern weiter funktionieren.
+- **Knöpfe in drei Stufen:** Die empfohlene nächste Aktion ist grün gefüllt (Notruf simulieren, Senden, Zur Fahrzeugansicht, Auftrag quittieren / Vor Ort / Abschliessen). Andere Knöpfe haben einen sichtbaren Rahmen und eine Fläche. Gewählte Zustände sind dunkelgrün mit grünem Rand. Für deaktivierte Knöpfe gibt es einen blassen Stil (die App hat derzeit keine). Dazu deutliche Fokusrahmen für die Tastatur.
+- **Kartenwerkzeuge:** Die Leiste heisst «Kartenklick». Im Tab «Einsatz» zeigt sie «Einsatzort» statt «Start/Ziel», denn dort setzt ein Klick den Einsatzort. Die Netzleiste heisst «Netz für A B C D», zeigt den Namen der Klasse und sagt beim Wechsel: «Nur die Farbe, kein Auftrag». Unter den Leisten steht eine Kurzlegende (validiert / ungeklärt / gesperrt) in den bisherigen Netzfarben.
+- **Ablauf:** Im Tab «Einsatz» stehen vier Schritte bis zur Fahrzeugansicht. Ein Kasten «Nächster Schritt» sagt, was jetzt zu tun ist (Senden → Zur Fahrzeugansicht → «Erledigt»). Nach dem Senden ist der Umschalter «Fahrzeug» grün umrandet. Die Tabs «Route» und «Strasse» erklären in einem Satz, wofür sie da sind; «Strasse» hat einen Knopf «Strasse auf der Karte wählen».
+- **Unverändert:** Kartenfarben und Legende (validiert grün, ungeklärt gelb, gesperrt rot, Routenfarben, Ziel rot), Routing, Netz, Fahrzeugklassen, Auftragsspeicher und Fachtexte.
+
+Geprüft am 10.11.2026 lokal im Browser (ohne Analytics): S1–S4 mit denselben Zahlen wie V15 (6.4/14.5/24.9, 6.6/8.1/11.0, 7.8/8.9/15.6, 3.4/4.7/8.3 min); Beamer 1440 × 900 Notruf → B → quittiert → vor Ort → abgeschlossen und «Beides» Notruf → D (beide Routen, Fahrer wählt Alternative) bis abgeschlossen; Handy 375 × 812 Notruf → B bis abgeschlossen und Notruf → A bis zur Fahrzeugansicht, ohne seitliches Scrollen; Strassenprüfung, Netz A–D, Ebenen, Methode; Dark und Light Mode. Keine Konsolenfehler ausser der absichtlich fehlenden Analytics-Konfiguration. Nicht mit Testpersonen geprüft.
 
 ### Neu in Version 15 (8./9.11.2026): Je ein Beispiel für Höhe, Gewicht, Breite und Kurve
 
