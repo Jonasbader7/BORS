@@ -25,11 +25,11 @@
 3. **Routen:** Der Router fährt zuerst nur über validierte Strassen. Gibt es so keinen Weg, zeigt er eine gekennzeichnete Ausweichroute; ungeklärte Abschnitte zählen dabei mit doppelter Zeit. Gesperrte Abschnitte bietet er nie an.
 4. **Einsatzablauf:** Die Web-App simuliert Notruf, Disposition, Route senden und die Wahl der Route durch die Crew (Zentrale und Fahrzeug, auch auf dem Handy).
 
-Beispiel S1 in der App: Von Gasel nach Liebewil fährt der Notarzt (A) wie Google Maps über die Mengestorfstrasse und durch eine Unterführung mit 3,50 m, 6,4 min. Die grosse Feuerwehr (D, 3,66 m hoch) passt nicht durch. GreenRoute schickt sie auf einen Umweg, 14,5 min. Würde sie wie A fahren und vor der Unterführung umkehren, bräuchte sie rund 25 min (Modellfahrzeiten ohne Verkehr, Stand 9.11.2026).
+Beispiel S1 in der App: Von Gasel nach Liebewil fährt der Notarzt (A) wie Google Maps über die Mengestorfstrasse und durch eine Unterführung mit 3,50 m, 6,4 min. Die grosse Feuerwehr (D, 3,66 m hoch) passt nicht durch. GreenRoute schickt sie auf einen Umweg, 13,8 min. Würde sie wie A fahren und vor der Unterführung umkehren, bräuchte sie rund 24 min (Modellfahrzeiten ohne Verkehr, Stand 11.11.2026).
 
 ## Was geprüft ist und was nicht
 
-- **Geprüft:** Die Web-App ist eine Übertragung des QGIS-Routers; beim Abgleich der Version V9.2c waren 325 von 325 Testrouten identisch. Der QGIS-Testlauf meldet 29 bestandene und 0 fehlgeschlagene Prüfungen (5.11.2026).
+- **Geprüft:** Die Web-App ist eine Übertragung des QGIS-Routers; beim Abgleich der Version V9.2c waren 325 von 325 Testrouten identisch. Der QGIS-Testlauf meldet 29 bestandene und 0 fehlgeschlagene Prüfungen (11.11.2026, mit dem Netz dieser Version).
 - **Nicht geprüft:** GreenRoute wurde nicht im Einsatz und nicht systematisch vor Ort getestet. Höhenangaben und Poller aus OpenStreetMap sind nicht vor Ort bestätigt.
 
 Dieses Repository enthält die Web-App und im Ordner [`pipeline/`](pipeline/) die Datenaufbereitung in Python/QGIS (Breitenmessung, Netzmaster, QGIS-Router, Export nach `netz.json`). Die Rohdaten selbst sind nicht enthalten.
@@ -38,8 +38,8 @@ Dieses Repository enthält die Web-App und im Ordner [`pipeline/`](pipeline/) di
 
 - `index.html` – Web-App (Karte, Routing für die Fahrzeugklassen A–D, Routenvergleich, Einsatzablauf Zentrale/Fahrzeug, Strassenbefund, Ebenen)
 - `bors_router.js` – Routing-Kern, direkte Übertragung des QGIS-Routers V9.2e (Ersatzanschluss nach Gesamtkosten)
-- `netz.json` – Strassennetz V9.2g mit Bewertung je Fahrzeugklasse (Netzmaster `BORS_Netzmaster_V9_20261105_1118`)
-- `netz_aenderungen.csv` – die 129 Statuswechsel gegenüber V8 (Abschnitt × Klasse)
+- `netz.json` – Strassennetz V9.2j mit Bewertung je Fahrzeugklasse (Netzmaster `BORS_Netzmaster_V9_20261111_1709`)
+- `netz_aenderungen.csv` – die 1 265 Statuswechsel gegenüber Version 17 (Abschnitt × Klasse, alle von ungeklärt nach validiert)
 - `basis.json` – Ersatz-Grundkarte aus der amtlichen Vermessung (Gebäude, Wald, Gewässer)
 - `parkfelder.json` – Parkfeld-Flächen für die Ebene «Parkfelder» (dieselben, die von der Fahrbahnbreite abgezogen werden)
 - `pipeline/` – Python-Skripte, die das Netz messen, bewerten und für die Web-App exportieren (Übersicht in `pipeline/README.md`)
@@ -47,6 +47,21 @@ Dieses Repository enthält die Web-App und im Ordner [`pipeline/`](pipeline/) di
 ## Versionsgeschichte
 
 Was sich von Version zu Version geändert hat, neuste zuerst.
+
+### Neu in Version 19 (11.11.2026): Mehr validierte Strassen aus dem Fahrkorridor
+
+Router, Graph, Baustellen, REF, Abbiegen und Sperren wie V17. Neu sind `netz.json` aus dem Netzmaster `BORS_Netzmaster_V9_20261111_1709` (V9.2j, Export `29_Web_Netz_V9_2j_BORS.py`) und die Liste `netz_aenderungen.csv` (1 265 Wechsel, alle von ungeklärt nach validiert). In `index.html` sind nur Texte geändert: Methode, Datenstand und zusätzliche Umlaute.
+- **Fahrkorridor nur als Freigabe:** Die Bewertung von V17 bleibt die Grundlage. War die Breite bisher «nicht entscheidbar», gilt sie jetzt als nachgewiesen, wenn die Breitenmessung V9.4 einen Fahrkorridor über die ganze Fahrzeuglänge findet. Dafür gelten Parkfelder als belegt, es gibt einen Kurvenzuschlag, die Spiegel müssen innerhalb der Fahrbahn bleiben, und die Messunsicherheit über den ganzen Abschnitt ist abgezogen. Nicht freigegeben wird, wenn die feste AV-Fahrbahn schmaler als der Bedarf ist (der Korridor ginge nur über Nebenflächen) oder wenn swissTLM3D einen schmalen Weg zeigt (10 Abschnitte, Liste `BORS_Korridor_Freigabe_Ausschluss.csv`). Der Nachweis stuft nie herab und sperrt nie.
+- **Zwei neue Befunde:** Die Flugbrunnenstrasse ist am Luftbild 5–6 m breit. Sie war nur wegen ungenauer amtlicher Vermessung ungeklärt und machte mehrere Routen ungesichert.
+- **Netz im Zielgebiet, validiert:** A 1351 km (V17: 1326), B 1214 (1183), C 1072 (1045), D 993 (969). Die gesperrten Kilometer sind unverändert.
+
+Geprüft am 11.11.2026 im Code, lokal im Browser und in QGIS (29 PASS / 0 FAIL; 4 Testrouten haben sich durch die Freigaben geändert, in QGIS und Web gleich lang). Nicht vor Ort geprüft:
+- Netzmaster ohne Korridor Feld für Feld gleich wie V17 (2203).
+- Referenzset: keine neue falsche Freigabe.
+- swissTLM3D: keine neuen Konflikte.
+- Web gegen Netzmaster: 0 Fehler.
+- S1–S4 funktionieren weiter (D in S1 13.8 statt 14.5 min).
+- Beamer «Beides» D bis abgeschlossen, Handy B bis abgeschlossen.
 
 ### Neu in Version 17 (10.11.2026): Weniger Text, Wachen an der Murtenstrasse
 

@@ -484,7 +484,7 @@ ol.steps li.jetzt{font-weight:600}
       <div style="overflow-x:auto">
         <table class="pr" id="tab-prof"></table>
       </div>
-      <p class="small">Breitenbedarf = max(Karosserie + 2 × Reserve, Spiegelbreite + 2 × 10 cm − Überhang über Trottoir). Messtoleranz nach den Erfassungsgrundsätzen der amtlichen Vermessung (σ je Rand 0.10–0.35 m, Faktor 1.645).</p>
+      <p class="small">Breitenbedarf = max(Karosserie + 2 × Reserve, Spiegelbreite + 2 × 10 cm − Überhang über Trottoir). Messtoleranz nach den Erfassungsgrundsätzen der amtlichen Vermessung (σ je Rand 0.10–0.35 m, Faktor 1.645). Ist die Breite so nicht entscheidbar, gilt sie trotzdem als nachgewiesen, wenn ein Fahrkorridor über die ganze Fahrzeuglänge Platz hat: Parkfelder belegt, Kurvenzuschlag, Spiegel innerhalb der Fahrbahn, Messunsicherheit über den ganzen Abschnitt abgezogen. Dieser Nachweis gibt nur frei, er stuft nie herab.</p>
       </details>
       <details class="more"><summary>Routing und Bewertung</summary>
       <p><b>Routenvergleich:</b> Für eine Fahrzeugklasse stellt GreenRoute die beste Route nur über validierte Strassen (grün) neben die Vergleichsroute (blau). Die Vergleichsroute ist die Route des Modus «experimentell»: Ungeklärte Abschnitte dürfen mitbenutzt werden, zählen bei der Wahl aber mit doppelter Zeit und sind gelb markiert und nummeriert. «Beste» heisst: geringste Routingkosten. Darin stecken Zuschläge, u. a. ungeklärt ×2, Abbiegen und Kurven, Baustellen, Sonderrecht und Durchfahrt von Zufahrten. Angezeigt wird dagegen die Modellfahrzeit ohne Zuschläge. Deshalb ist keine der beiden Routen zwingend die zeitlich schnellste. Nachweislich gesperrte Abschnitte und feste Poller sind in beiden Routen ausgeschlossen. Ob eine gelbe Stelle passierbar ist, weiss GreenRoute nicht.</p>
@@ -501,7 +501,7 @@ ol.steps li.jetzt{font-weight:600}
         <li>Strassennetz, Schilder, Poller: OpenStreetMap (nicht vor Ort bestätigt)</li>
         <li>Höhen- und Gewichtsbeschränkungen: kantonales Verzeichnis KSVB, Hinderniskartei Kanton Bern (signalisierte Höhen und Gewichte an Brücken und Unterführungen) und OpenStreetMap</li>
         <li>Gewichtsgrenzen Stadt Bern: Plan «Höchstgewicht» von Tiefbau Stadt Bern, den Strassen zugeordnet. Laut Tiefbau gelten die Grenzen auch für Einsatzfahrzeuge. Ohne Höhensignal gilt auf öffentlichen Strassen eine lichte Höhe von mindestens 4.00 m (Verkehrsregelnverordnung, bestätigt vom Tiefbau). Lehnenviadukt / Kleine Westtangente: 3.20 m laut Tiefbau.</li>
-        <li>Geprüfte Befunde: 17 Engstellen und Brücken am Luftbild (SWISSIMAGE) nachgemessen, nicht vor Ort</li>
+        <li>Geprüfte Befunde: 19 Engstellen und Brücken am Luftbild (SWISSIMAGE) nachgemessen, nicht vor Ort</li>
         <li>Parkfelder: Stadt Bern, in den Nachbargemeinden OpenStreetMap (Strassenrand); Bäume: Stadt Bern</li>
         <li>Baustellen: Stadt Bern (Geoportal map.bern.ch, Baustellen und Installationsplätze) und ASTRA Verkehrsinfo. Nur Baustellen, die jetzt gelten.</li>
         <li>Fahrzeuge: Hülle der realen Fahrzeuge von Schutz und Rettung Bern je Klasse</li>
@@ -512,7 +512,7 @@ ol.steps li.jetzt{font-weight:600}
       <ul class="lim">
         <li>Baustellen Stadt Bern: live, beim Start und alle 10 Minuten. <span id="bau-stand">Stand 5.11.2026 aus der App</span>.</li>
         <li>Baustellen ASTRA: Stand 27.10.2026 (der Abruf braucht einen Zugangsschlüssel).</li>
-        <li>Strassennetz und Bewertung: Netzmaster vom 6.11.2026 (Befunde vom 1. und 6.11.2026).</li>
+        <li>Strassennetz und Bewertung: Netzmaster vom 11.11.2026 (Stand 6.11.2026 plus Nachweis Fahrkorridor; Befunde vom 1., 6. und 11.11.2026).</li>
         <li>Hinderniskartei Kanton Bern: Stand 24.8.2026. Plan «Höchstgewicht» Stadt Bern: Stand 4.5.2026, erhalten 4.11.2026.</li>
         <li>Wachen-Adressen: geprüft 10.11.2026.</li>
         <li>Ausser den Baustellen der Stadt wird nichts laufend aktualisiert, und nichts davon ist vor Ort bestätigt.</li>
@@ -532,7 +532,7 @@ ol.steps li.jetzt{font-weight:600}
       </details>
       <details class="more"><summary>Forschungsprojekt und Technik</summary>
       <p class="small">BFH, BSc Wirtschaftsinformatik, Modul BCS HS26, Gruppe 5. GreenRoute ist der Produktname des Teams. Im Projekt und in den Dateien (QGIS-Skripte, Router, Netzmaster) heisst der technische Prototyp weiterhin BORS.</p>
-      <p class="small">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2g, Netzmaster vom 6.11.2026). Der QGIS-Router 9.2f behebt nur eine Fehlermeldung, die Routen sind gleich. Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
+      <p class="small">Der Router in dieser Web-App ist eine direkte Übertragung des QGIS-Routers (Version 9.2e) auf dieselben Netzdaten (Netz V9.2j, Netzmaster vom 11.11.2026). Der QGIS-Router 9.2f behebt nur eine Fehlermeldung, die Routen sind gleich. Der frühere Stand (Router 9.2c, Netz V9.2b) lieferte bei 325 von 325 Testrouten dieselbe Route wie QGIS; der Abgleich für diesen Stand steht noch aus.</p>
       <p class="small"><a href="https://jonasbader7.github.io/Portfoliopage/analytics/datenschutz.html" target="_blank" rel="noopener noreferrer">Datenschutz &amp; Analytics</a></p>
       </details>
     </section>
@@ -574,7 +574,9 @@ ol.steps li.jetzt{font-weight:600}
 'use strict';
 const $=s=>document.querySelector(s);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const UML=[['Ueber','Über'],['ueber','über'],['Hoechst','Höchst'],['hoechst','höchst'],['Hoehe','Höhe'],['hoehe','höhe'],['moeglich','möglich'],['groesser','grösser'],['fuer','für'],['Gebaeude','Gebäude'],['oeffnen','öffnen'],['Oeffnen','Öffnen'],['Tragfaehig','Tragfähig'],['ungeklaert','ungeklärt'],['luecke','lücke'],['Luecke','Lücke'],['zulaessig','zulässig'],['naechst','nächst'],['Naechst','Nächst'],['Gefaelle','Gefälle'],['Baeume','Bäume'],['baeume','bäume'],['schraenk','schränk'],['Schraenk','Schränk'],['gemaess','gemäss'],['Flaeche','Fläche'],['flaeche','fläche'],['waere','wäre']];
+const UML=[['Ueber','Über'],['ueber','über'],['Hoechst','Höchst'],['hoechst','höchst'],['Hoehe','Höhe'],['hoehe','höhe'],['moeglich','möglich'],['groesser','grösser'],['fuer','für'],['Gebaeude','Gebäude'],['oeffnen','öffnen'],['Oeffnen','Öffnen'],['Tragfaehig','Tragfähig'],['ungeklaert','ungeklärt'],['luecke','lücke'],['Luecke','Lücke'],['zulaessig','zulässig'],['naechst','nächst'],['Naechst','Nächst'],['Gefaelle','Gefälle'],['Baeume','Bäume'],['baeume','bäume'],['schraenk','schränk'],['Schraenk','Schränk'],['gemaess','gemäss'],['Flaeche','Fläche'],['flaeche','fläche'],['waere','wäre'],
+  // V19: Wörter aus den Korridorgründen des Netzmasters V9.2j (und ältere ohne Umlaut)
+  ['laenge','länge'],['Laenge','Länge'],['Brueck','Brück'],['brueck','brück'],['pruef','prüf'],['Pruef','Prüf'],['bestaetig','bestätig'],['Gelaender','Geländer'],['faehig','fähig'],['Schaetz','Schätz'],['schaetz','schätz']];
 // V13: Der Netzmaster kürzt Breitengründe auf ~120 Zeichen («… >= K», «… ohne R»). Die zwei bekannten Enden ergänzen
 // (Wortlaut aus bors_breite_v9_1.entscheide bzw. Netzmaster), keine neuen Zahlen erfinden.
 const ganz=s=>s.replace(/>= K(?=\s*$|\s*\|)/g,'>= Karosserie)').replace(/ohne R(?=\s*$|\s*\|)/g,'ohne Reserve zu schmal (Werte im Tab «Strasse»)');
