@@ -28,6 +28,8 @@ Parkfelder ──► 32_Web_Parkfelder ──► parkfelder.json
 |---|---|
 | `24_AV_Export_V9.py` | Objekte der amtlichen Vermessung bis 25 m neben dem Strassennetz exportieren (nur für einen Neuaufbau) |
 | `25_Breite_V9_1.py` + `bors_breite_v9_1.py` | Freie Durchfahrtsbreite je Abschnitt: 1-m-Querprofile unter 5 Winkeln, Abzug von Parkfeldern, Mauern, Pfeilern und Bäumen, Messtoleranz pro Rand (k = 1.645) |
+| `25_Breite_V9_3_BORS.py` + `bors_breite_v9_3.py` | Neue Fassung (10.11.2026, noch nicht im Volllauf): Profile ganz in einer Fahrfläche, Löcher und Mehrfachflächen richtig gemessen; je Profil Reserve gegen den örtlichen Bedarf (Spiegel nur dort über Trottoir/Insel), kurze Engstellen und Seitenwechsel hinter Hindernissen als eigene Felder; Toleranzstufe als Schätzung gekennzeichnet. Tests: `test_breite_v9_3.py` (normales Python) |
+| `26_Netzmaster_V9_2h_BORS.py` | Wie V9.2g, wertet die Felder aus Breite V9.3 aus und stuft dabei nur «ausreichend» zu «nicht entscheidbar» herab (nie Freigabe, nie Sperre). Mit einer älteren Breitendatei gleich wie V9.2g |
 | `22_Abbiegen_Schleppkurven.py` + `bors_schleppkurve.py` | Abbiegen und Kurven je Fahrzeug: Schleppkurven-Simulation auf der befestigten Fläche (OK / ENG / NUR_MIT_NEBENFLAECHE / UNMOEGLICH) |
 | `26_Netzmaster_V9_2g_BORS.py` + `bors_bewertung_v8.py`, `bors_geo.py` | Bewertung je Abschnitt und Fahrzeugklasse A–D: VALIDIERT, UNVALIDIERT oder GESPERRT, mit Grund. Liest geprüfte Befunde und die Angaben des Tiefbauamts (Gewicht, Höhe ≥ 4 m ohne Signal) |
 | `6_Projekt_V9_2f_BORS.py` | QGIS-Projekt mit Ebenen, Legende und Belegen aufbauen |
@@ -43,7 +45,9 @@ Parkfelder ──► 32_Web_Parkfelder ──► parkfelder.json
 
 ## Hinweise
 
-- `22`, `24` und `25` stammen aus dem Aufbau des Netzes und zeigen noch auf die alten Ablageorte. Für einen Neuaufbau müssten sie auf `bors_pfade.py` umgestellt werden.
+- `22`, `24` und `25_Breite_V9_1` stammen aus dem Aufbau des Netzes und zeigen noch auf die alten Ablageorte. `25_Breite_V9_3_BORS` nutzt `bors_pfade.py`.
+- Breite V9.3: Die Korrekturen sind an Testgeometrien und an einer Stichprobe von 198 Abschnitten mit den Originaldaten geprüft (im Kompatibilitätsmodus Feld für Feld gleich wie der bisherige Lauf). `netz.json` ist unverändert; eine netzweite Wirkung zeigt erst ein Volllauf `25` → `26` → QGIS-Test.
+- Bekannte Grenzen der Breite: Schikanen und versetzte Parkfelder (teilweise Überlappung) sind ohne Schleppkurve entlang der Fahrlinie nicht bewertbar; die Toleranzstufe ist aus der Gebäudedichte geschätzt, weil der Toleranzstufenplan nicht in MOPUBE enthalten ist.
 - Frühere Stufen (Netzaufbau aus OSM, Netzmaster V5–V8, QA-Skripte) sind hier nicht enthalten.
 - Die Bewertung beruht auf Daten, nicht auf Prüfungen vor Ort. OSM-Angaben (Höhe, Poller, Signale) sind nicht vor Ort bestätigt.
 - Der Zugangsschlüssel für die ASTRA-Verkehrsmeldungen ist nicht Teil des Repositorys; das zugehörige Abrufskript fehlt deshalb.
