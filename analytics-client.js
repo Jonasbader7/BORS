@@ -1,9 +1,51 @@
-/* Anonymous usage counters: no cookies, local storage, unique IDs or fingerprinting.
+/* Anonymous usage counters: no cookies, unique IDs or fingerprinting.
+   Local storage holds only the opt-out marker, and only after a visitor opens a page with
+   ?analytics=off (undo with ?analytics=on). The marker applies to every page on
+   jonasbader7.github.io whose client checks OPT_OUT_KEY.
    This file does nothing until analytics-config.js contains a deployed HTTPS /collect URL.
    Regional data is resolved at the server. Full IPs (if enabled) stay in separate security logs. */
 (function () {
   "use strict";
   if (location.protocol !== "https:" || location.hostname !== "jonasbader7.github.io") return;
+  var OPT_OUT_KEY = "jb-analytics-optout";
+  function store() { try { return window.localStorage || null; } catch (_) { return null; } }
+  function notice(text) {
+    function show() {
+      try {
+        var box = document.createElement("div");
+        box.setAttribute("role", "status");
+        box.textContent = text;
+        box.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483647;" +
+          "max-width:min(92vw,420px);padding:12px 16px;border-radius:10px;background:#162b2c;color:#fff;" +
+          "font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25)";
+        document.body.appendChild(box);
+        setTimeout(function () { box.remove(); }, 6000);
+      } catch (_) {}
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", show, {once:true});
+    else show();
+  }
+  (function applySwitch() {
+    var value;
+    try { value = new URLSearchParams(location.search).get("analytics"); } catch (_) { return; }
+    if (value !== "off" && value !== "on") return;
+    var s = store(), saved = false;
+    try {
+      if (s) {
+        if (value === "off") s.setItem(OPT_OUT_KEY, "1"); else s.removeItem(OPT_OUT_KEY);
+        saved = true;
+      }
+    } catch (_) {}
+    try { // Drop the switch from the address bar so it is not shared by accident.
+      var clean = new URL(location.href);
+      clean.searchParams.delete("analytics");
+      history.replaceState(history.state, "", clean.pathname + clean.search + clean.hash);
+    } catch (_) {}
+    notice(!saved ? "Einstellung konnte nicht gespeichert werden (Speicher im Browser blockiert)."
+      : value === "off" ? "Besuche aus diesem Browser werden nicht mehr gezählt. Rückgängig: ?analytics=on"
+      : "Besuche aus diesem Browser werden wieder anonym gezählt.");
+  })();
+  try { var marker = store(); if (marker && marker.getItem(OPT_OUT_KEY) === "1") return; } catch (_) {}
   var cfg = window.JB_ANALYTICS_CONFIG || {};
   if (!cfg.endpoint || typeof cfg.endpoint !== "string") return;
   var endpoint;
